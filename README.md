@@ -297,6 +297,9 @@ deno task cloud list
 # cari record dari kode cloud (skrip menghitung SHA-256-nya)
 deno task cloud show ABCD-EFGH-JKLM
 
+# tambah koin ke record tertentu (boleh negatif untuk mengurangi)
+deno task cloud addcoins ABCD-EFGH-JKLM 5000
+
 # backup semua record ke JSON
 deno task cloud export backup-cloud.json
 ```
@@ -317,7 +320,12 @@ Di Docker, `KV_PATH` sudah di-set di dalam image:
 
 ```bash
 docker compose exec mochi deno task cloud list
+docker compose exec mochi deno task cloud addcoins ABCD-EFGH-JKLM 5000
 ```
+
+Setelah `addcoins`, buka game lalu tekan **Muat** dengan kode tersebut.
+Perubahannya baru dipakai setelah dimuat; kalau perangkat lain menekan
+**Simpan** dengan state lama, angka koin hasil edit bisa tertimpa.
 
 Yang perlu dipahami:
 
