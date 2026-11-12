@@ -1,0 +1,16 @@
+# Caddy untuk Mochi di belakang Cloudflare Tunnel.
+#
+# TLS publik ditangani Cloudflare di edge, jadi Caddy cukup melayani HTTP
+# di localhost. Cloudflared menghubungi http://127.0.0.1:8080.
+#
+# Pasang ke /etc/caddy/Caddyfile lalu:
+#   sudo caddy validate --config /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+
+:8080 {
+	bind 127.0.0.1
+
+	# Caddy meneruskan Host asli dan X-Forwarded-For secara default,
+	# sehingga CSP, pemeriksaan Origin, dan rate limit per IP tetap benar.
+	reverse_proxy 127.0.0.1:8000
+}

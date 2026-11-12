@@ -348,20 +348,22 @@ bagikan URL HTTPS-nya.
 
 ```bash
 docker compose up -d --build
+curl http://localhost:8000/api/health
 ```
 
-Buka `http://<ip-server>:8000`. Data cloud tersimpan di volume `mochi-data`.
-Ganti port host di `compose.yaml` bila perlu, misalnya `"80:8000"`.
+Port terikat ke localhost, jadi belum bisa dibuka dari perangkat lain. Untuk
+akses publik gunakan Caddy + Cloudflare Tunnel (bagian 3), atau ubah
+`compose.yaml` menjadi `"8000:8000"` bila memang ingin membuka port langsung.
+Data cloud tersimpan di volume `mochi-data`.
 
-> Folder `assets/` ikut masuk ke image karena berisi lagu latar. File lagu saat
-> ini berukuran sekitar 305 MB, jadi image Docker akan besar. Kalau tidak perlu
-> kualitas aslinya, kompres/transcode MP3 ke bitrate lebih rendah lebih dulu.
+> Folder `assets/` ikut masuk ke image karena berisi lagu latar
+> (`assets/bgm.mp3`, sekitar 9 MB).
 
 Tanpa Compose:
 
 ```bash
 docker build -t mochi .
-docker run -d --name mochi -p 8000:8000 -v mochi-data:/app/data mochi
+docker run -d --name mochi -p 127.0.0.1:8000:8000 -v mochi-data:/app/data mochi
 ```
 
 ### 2. VPS langsung dengan Deno
@@ -398,7 +400,76 @@ mochi.example.com {
 }
 ```
 
-### 3. Deno Deploy
+### 3. Domain sendiri: Cloudflare Tunnel + Caddy
+
+Cocok untuk server di rumah/VM yang tidak punya IP publik atau berada di
+belakang CGNAT. Tidak perlu port forwarding; cloudflared hanya membuka koneksi
+keluar ke Cloudflare.
+
+Alurnya:
+
+```
+pengunjung -> https://mochi.example.com -> Cloudflare (TLS)
+           -> cloudflared -> http://127.0.0.1:8080 (Caddy)
+           -> http://127.0.0.1:8000 (Mochi)
+```
+
+1. Pindahkan nameserver domain ke Cloudflare dan tunggu zona berstatus
+   **Active**.
+2. Jalankan app dengan port terbatas ke localhost (sudah menjadi default di
+   `compose.yaml`):
+
+   ```yaml
+   ports:
+     - "127.0.0.1:8000:8000"
+   ```
+
+3. Pasang Caddy, lalu salin `deploy/Caddyfile`:
+
+   ```bash
+   sudo apt install -y caddy
+   sudo cp deploy/Caddyfile /etc/caddy/Caddyfile
+   sudo caddy validate --config /etc/caddy/Caddyfile
+   sudo systemctl reload caddy
+   curl http://127.0.0.1:8080/api/health
+   ```
+
+4. Login dan buat tunnel (butuh browser untuk memilih zona):
+
+   ```bash
+   cloudflared tunnel login
+   cloudflared tunnel create mochi
+   cloudflared tunnel route dns mochi mochi.example.com
+   ```
+
+5. Salin `deploy/cloudflared-config.example.yml` ke `~/.cloudflared/config.yml`,
+   isi UUID dan path kredensial, lalu validasi:
+
+   ```bash
+   cloudflared tunnel ingress validate
+   cloudflared tunnel run mochi    # tes, Ctrl+C setelah tersambung
+   ```
+
+6. Pasang sebagai service:
+
+   ```bash
+   sudo cloudflared --config "$HOME/.cloudflared/config.yml" service install
+   sudo systemctl enable --now cloudflared
+   sudo systemctl status cloudflared
+   ```
+
+7. Verifikasi:
+
+   ```bash
+   curl https://mochi.example.com/api/health
+   curl -I https://mochi.example.com/
+   ```
+
+Di Cloudflare, atur **SSL/TLS → Overview** ke **Full**. Record root/wildcard
+milik hosting lain sebaiknya **DNS only** (awan abu-abu); record tunnel
+(`mochi`) tetap **Proxied**.
+
+### 4. Deno Deploy
 
 1. Push folder ini ke repositori GitHub.
 2. Buat project di [Deno Deploy](https://deno.com/deploy), pilih repositori,

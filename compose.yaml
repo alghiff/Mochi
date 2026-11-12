@@ -2,8 +2,9 @@ services:
   mochi:
     build: .
     restart: unless-stopped
+    # Hanya localhost; akses publik lewat Caddy/cloudflared di host.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       PORT: "8000"
       HOST: "0.0.0.0"

@@ -1,0 +1,10 @@
+# Simpan sebagai ~/.cloudflared/config.yml setelah `cloudflared tunnel create mochi`.
+# Ganti UUID dan nama user sesuai server.
+
+tunnel: GANTI-DENGAN-UUID-TUNNEL
+credentials-file: /home/GANTI-USER/.cloudflared/GANTI-DENGAN-UUID-TUNNEL.json
+
+ingress:
+  - hostname: mochi.extion.site
+    service: http://127.0.0.1:8080
+  - service: http_status:404
