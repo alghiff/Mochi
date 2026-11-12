@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Mochi — Kucing Virtual</title>
+<meta name="description" content="Mochi, kucing virtual yang bisa kamu rawat: beri makan, mandikan, ajak main di dalam atau di taman, dan ajak teman lewat multiplayer. Progres tersimpan otomatis di browser dan bisa disimpan ke cloud." />
+<meta name="theme-color" content="#1a1120" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta property="og:title" content="Mochi — Kucing Virtual" />
+<meta property="og:description" content="Rawat Mochi: makan, mandi, main, tidur, kustomisasi, misi harian, cuaca musiman, dan main bareng teman lewat multiplayer." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23241731'/%3E%3Ccircle cx='16' cy='19' r='5' fill='%23ffc9a8'/%3E%3Ccircle cx='10' cy='13' r='2.4' fill='%23ffc9a8'/%3E%3Ccircle cx='16' cy='10.5' r='2.4' fill='%23ffc9a8'/%3E%3Ccircle cx='22' cy='13' r='2.4' fill='%23ffc9a8'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles/base.css" />
+<link rel="stylesheet" href="styles/scene.css" />
+<link rel="stylesheet" href="styles/hud.css" />
+<link rel="stylesheet" href="styles/dock.css" />
+<link rel="stylesheet" href="styles/panels.css" />
+<link rel="stylesheet" href="styles/responsive.css" />
+<!--
+  Catatan keamanan:
+  - Tidak ada resource pihak ketiga, eval, innerHTML, cookie, atau pelacak.
+  - Progres game disimpan di localStorage browser pengguna; cloud save opsional.
+  - Multiplayer memakai WebSocket ke server yang sama; hanya nama, level, gaya, dan status publik yang dibagikan.
+  - Mikrofon hanya diproses di perangkat (Web Audio API); tidak ada audio yang direkam atau dikirim.
+  - Server Deno mengirim header keamanan: CSP, nosniff, frame-ancestors none, dan Permissions-Policy.
+-->
+</head>
+<body>
+<a class="skip" href="#dock" data-i18n="skip">Lewati ke kontrol</a>
+
+<main class="game">
+  <div class="room" id="room" data-scene="inside" data-weather="spring">
+    <div class="room-bg" aria-hidden="true">
+      <div class="indoor">
+        <div class="wall"></div>
+
+        <div class="window">
+          <div class="window-sky"></div>
+          <span class="moon"></span>
+          <span class="sun"></span>
+          <span class="window-cloud window-cloud--1"></span>
+          <span class="window-cloud window-cloud--2"></span>
+          <span class="window-hill"></span>
+          <span class="window-tree"></span>
+          <span class="star star--1"></span>
+          <span class="star star--2"></span>
+          <span class="star star--3"></span>
+          <span class="star star--4"></span>
+          <span class="star star--5"></span>
+          <div class="window-fx" id="window-fx"></div>
+          <span class="window-cross"></span>
+          <span class="window-sill"></span>
+        </div>
+
+        <div class="shelf">
+          <span class="book book--1"></span>
+          <span class="book book--2"></span>
+          <span class="book book--3"></span>
+          <span class="shelf-plant"></span>
+          <span class="shelf-leaf shelf-leaf--1"></span>
+          <span class="shelf-leaf shelf-leaf--2"></span>
+        </div>
+
+        <div class="lamp">
+          <span class="lamp-cord"></span>
+          <span class="lamp-shade"></span>
+          <span class="lamp-bulb"></span>
+          <span class="lamp-glow"></span>
+        </div>
+
+        <div class="frame">
+          <span class="frame-heart"></span>
+        </div>
+
+        <div class="floor"></div>
+        <div class="rug"></div>
+        <div class="bowl"></div>
+        <div class="toy-ball"></div>
+      </div>
+
+      <div class="outdoor">
+        <div class="out-sky"></div>
+        <div class="out-sun"></div>
+        <div class="out-moon"></div>
+        <div class="out-cloud out-cloud--1"></div>
+        <div class="out-cloud out-cloud--2"></div>
+        <div class="out-cloud out-cloud--3"></div>
+        <div class="out-hill out-hill--1"></div>
+        <div class="out-hill out-hill--2"></div>
+        <div class="out-grass"></div>
+        <div class="out-tree out-tree--1"><span class="out-trunk"></span><span class="out-crown"></span></div>
+        <div class="out-tree out-tree--2"><span class="out-trunk"></span><span class="out-crown"></span></div>
+        <div class="out-bush out-bush--1"></div>
+        <div class="out-bush out-bush--2"></div>
+        <span class="out-flower out-flower--1"></span>
+        <span class="out-flower out-flower--2"></span>
+        <span class="out-flower out-flower--3"></span>
+        <span class="out-flower out-flower--4"></span>
+        <span class="out-flower out-flower--5"></span>
+        <span class="out-flower out-flower--6"></span>
+        <span class="out-firefly out-firefly--1"></span>
+        <span class="out-firefly out-firefly--2"></span>
+        <span class="out-firefly out-firefly--3"></span>
+        <span class="out-firefly out-firefly--4"></span>
+        <div class="weather-fx" id="weather-fx"></div>
+      </div>
+    </div>
+
+    <div class="night-veil" aria-hidden="true"></div>
+
+    <header class="hud">
+      <div class="pet-chip">
+        <span class="pet-avatar" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="20" r="6" fill="currentColor" />
+            <circle cx="9" cy="13" r="2.6" fill="currentColor" />
+            <circle cx="16" cy="10" r="2.6" fill="currentColor" />
+            <circle cx="23" cy="13" r="2.6" fill="currentColor" />
+          </svg>
+        </span>
+        <div class="pet-info">
+          <p class="pet-name" id="pet-name">Mochi</p>
+          <div class="level-row">
+            <span class="level-badge">Lv <b id="level">1</b></span>
+            <span class="xp-bar" aria-hidden="true"><i id="xp-fill"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hud-actions">
+        <button class="weather-pill" id="weather-pill" type="button" data-weather="spring" aria-label="Cuaca saat ini">
+          <span class="weather-icon" id="weather-icon" aria-hidden="true">🌸</span>
+          <span class="weather-label" id="weather-label">Semi</span>
+        </button>
+
+        <button class="icon-btn quest-btn" id="quest-btn" type="button" aria-label="Misi harian" data-i18n-aria="quest.open">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 4h8l3 3v13H5V4h3Z" />
+            <path d="M9 11h6M9 15h4" />
+          </svg>
+          <span class="quest-badge" id="quest-badge" hidden>0</span>
+        </button>
+
+        <div class="coin-pill" id="coin-pill" aria-label="Koin" data-i18n-aria="coin.aria">
+          <span class="coin-icon" aria-hidden="true"></span>
+          <b id="coins">20</b>
+        </div>
+
+        <button class="icon-btn" id="multiplayer-btn" type="button" aria-label="Multiplayer" data-i18n-aria="hud.mp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="8" r="3.2" />
+            <path d="M3.5 19c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2" />
+            <circle cx="17" cy="9.5" r="2.4" />
+            <path d="M15.5 14.2c2.9-.4 5 1.8 5 4.8" />
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="settings-btn" type="button" aria-label="Pengaturan" data-i18n-aria="hud.settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+            <circle cx="15" cy="7" r="2" />
+            <circle cx="9" cy="17" r="2" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Status Mochi" data-i18n-aria="stats.aria">
+      <div class="stat stat--hunger">
+        <span class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12c4-5 9-5 13-1l5-3v8l-5-3c-4 4-9 4-13-1Z" />
+            <circle cx="8" cy="12" r="1" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <div class="stat-body">
+          <div class="stat-top">
+            <span class="stat-label" data-i18n="stat.hunger">Kenyang</span>
+            <b class="stat-value" id="val-hunger">100</b>
+          </div>
+          <div class="bar" id="bar-hunger-wrap" role="progressbar" aria-label="Kenyang" data-i18n-aria="stat.hunger" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="bar-hunger"></i></div>
+        </div>
+      </div>
+
+      <div class="stat stat--clean">
+        <span class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3s6 6.6 6 10a6 6 0 0 1-12 0c0-3.4 6-10 6-10Z" />
+          </svg>
+        </span>
+        <div class="stat-body">
+          <div class="stat-top">
+            <span class="stat-label" data-i18n="stat.clean">Bersih</span>
+            <b class="stat-value" id="val-clean">100</b>
+          </div>
+          <div class="bar" id="bar-clean-wrap" role="progressbar" aria-label="Bersih" data-i18n-aria="stat.clean" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="bar-clean"></i></div>
+        </div>
+      </div>
+
+      <div class="stat stat--energy">
+        <span class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+          </svg>
+        </span>
+        <div class="stat-body">
+          <div class="stat-top">
+            <span class="stat-label" data-i18n="stat.energy">Energi</span>
+            <b class="stat-value" id="val-energy">100</b>
+          </div>
+          <div class="bar" id="bar-energy-wrap" role="progressbar" aria-label="Energi" data-i18n-aria="stat.energy" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="bar-energy"></i></div>
+        </div>
+      </div>
+
+      <div class="stat stat--happy">
+        <span class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9Z" />
+          </svg>
+        </span>
+        <div class="stat-body">
+          <div class="stat-top">
+            <span class="stat-label" data-i18n="stat.happy">Senang</span>
+            <b class="stat-value" id="val-happy">100</b>
+          </div>
+          <div class="bar" id="bar-happy-wrap" role="progressbar" aria-label="Senang" data-i18n-aria="stat.happy" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="bar-happy"></i></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="stage" id="stage">
+      <div class="cat-wrap" id="cat-wrap" tabindex="0" role="button" aria-label="Elus Mochi">
+        <div class="speech" id="speech" role="status" aria-live="polite"></div>
+
+        <div class="zzz" aria-hidden="true">
+          <span>z</span><span>z</span><span>z</span>
+        </div>
+
+        <div class="cat" id="cat" data-fur="cream" data-acc="" data-acc-slot="" data-mood="idle">
+          <svg viewBox="0 0 240 260" role="presentation" focusable="false">
+            <g class="cat-tail">
+              <path class="fur-stroke" d="M172 205c34 5 52-19 42-45-7-19 4-32 16-24" fill="none" stroke-width="17" stroke-linecap="round" />
+              <path class="fur2-stroke" d="M226 143c2-4 4-7 4-7" fill="none" stroke-width="12" stroke-linecap="round" />
+            </g>
+
+            <g class="cat-body">
+              <ellipse cx="120" cy="182" rx="64" ry="56" class="fur-fill" />
+              <ellipse cx="120" cy="192" rx="38" ry="38" class="belly-fill" />
+              <ellipse cx="88" cy="228" rx="21" ry="11" class="belly-fill" />
+              <ellipse cx="152" cy="228" rx="21" ry="11" class="belly-fill" />
+              <ellipse cx="104" cy="218" rx="13" ry="9" class="belly-fill" />
+              <ellipse cx="136" cy="218" rx="13" ry="9" class="belly-fill" />
+              <path d="M112 236v5M120 238v5M128 236v5" fill="none" stroke="rgba(60,40,50,.25)" stroke-width="2" stroke-linecap="round" />
+            </g>
+
+            <g class="cat-head">
+              <path class="ear ear-l fur-fill" d="M70 82 58 34l50 26Z" stroke="var(--fur-2)" stroke-width="3" stroke-linejoin="round" />
+              <path class="ear-in" d="M74 74 68 48l26 13Z" />
+              <path class="ear ear-r fur-fill" d="M170 82 182 34l-50 26Z" stroke="var(--fur-2)" stroke-width="3" stroke-linejoin="round" />
+              <path class="ear-in" d="M166 74 172 48l-26 13Z" />
+
+              <ellipse cx="120" cy="102" rx="64" ry="57" class="fur-fill" />
+
+              <g class="fur2-stroke" fill="none" stroke-width="5" stroke-linecap="round" opacity=".7">
+                <path d="M106 60q2 12 0 20" />
+                <path d="M120 56v22" />
+                <path d="M134 60q-2 12 0 20" />
+              </g>
+
+              <g class="eyes eyes-open">
+                <ellipse cx="97" cy="100" rx="9.5" ry="12.5" fill="#2b1a24" />
+                <ellipse cx="143" cy="100" rx="9.5" ry="12.5" fill="#2b1a24" />
+                <circle cx="94" cy="95" r="3.2" fill="#fff" opacity=".95" />
+                <circle cx="140" cy="95" r="3.2" fill="#fff" opacity=".95" />
+                <circle cx="100" cy="106" r="1.5" fill="#fff" opacity=".6" />
+                <circle cx="146" cy="106" r="1.5" fill="#fff" opacity=".6" />
+              </g>
+
+              <g class="eyes eyes-happy" fill="none" stroke="#2b1a24" stroke-width="5" stroke-linecap="round">
+                <path d="M87 102q10-13 20 0" />
+                <path d="M133 102q10-13 20 0" />
+              </g>
+
+              <g class="eyes eyes-closed" fill="none" stroke="#2b1a24" stroke-width="5" stroke-linecap="round">
+                <path d="M87 100q10 10 20 0" />
+                <path d="M133 100q10 10 20 0" />
+              </g>
+
+              <g class="eyes eyes-annoyed" fill="none" stroke="#2b1a24" stroke-width="5" stroke-linecap="round">
+                <path d="M86 95l22 9" />
+                <path d="M154 95l-22 9" />
+              </g>
+
+              <ellipse cx="80" cy="116" rx="11" ry="5.5" fill="#ff9d8a" opacity=".45" />
+              <ellipse cx="160" cy="116" rx="11" ry="5.5" fill="#ff9d8a" opacity=".45" />
+
+              <path d="M114 114h12l-6 6Z" fill="#d97b7b" />
+
+              <path class="mouth mouth-neutral" d="M120 120q0 6-7 6M120 120q0 6 7 6" fill="none" stroke="#3a2430" stroke-width="2.6" stroke-linecap="round" />
+              <path class="mouth mouth-happy" d="M110 121q10 12 20 0" fill="none" stroke="#3a2430" stroke-width="2.8" stroke-linecap="round" />
+              <path class="mouth mouth-sad" d="M111 127q9-9 18 0" fill="none" stroke="#3a2430" stroke-width="2.6" stroke-linecap="round" />
+              <path class="mouth mouth-annoyed" d="M111 127q9-5 18 0" fill="none" stroke="#3a2430" stroke-width="2.6" stroke-linecap="round" />
+
+              <g stroke="#fff4e6" stroke-width="2" stroke-linecap="round" opacity=".55">
+                <path d="M58 108H40" />
+                <path d="M60 118l-17 6" />
+                <path d="M182 108h18" />
+                <path d="M180 118l17 6" />
+              </g>
+
+              <g class="acc acc-beanie">
+                <path d="M62 62Q120 14 178 62l0 10Q120 50 62 72Z" fill="#ff8a5c" stroke="#e46f45" stroke-width="3" stroke-linejoin="round" />
+                <path d="M62 66Q120 44 178 66" fill="none" stroke="#ffc9a8" stroke-width="8" stroke-linecap="round" />
+                <circle cx="120" cy="24" r="12" fill="#fff4e6" />
+              </g>
+
+              <g class="acc acc-scarf">
+                <path d="M76 142q44 24 88 0l6 18q-50 26-100 0Z" fill="#9fe3c6" stroke="#6fc9a6" stroke-width="3" stroke-linejoin="round" />
+                <path d="M152 166l16 30-16 6-8-28Z" fill="#8ad8ba" />
+              </g>
+
+              <g class="acc acc-glasses">
+                <circle cx="97" cy="100" r="17" fill="rgba(255,255,255,.08)" stroke="#ffd166" stroke-width="3" />
+                <circle cx="143" cy="100" r="17" fill="rgba(255,255,255,.08)" stroke="#ffd166" stroke-width="3" />
+                <path d="M114 100h12M80 96l-12-6M160 96l12-6" fill="none" stroke="#ffd166" stroke-width="3" stroke-linecap="round" />
+              </g>
+
+              <g class="acc acc-bow">
+                <path d="M166 62q16-14 22-2-8 12-22 2Z" fill="#ff8a5c" />
+                <path d="M166 62q16 14 22 2-8-12-22-2Z" fill="#ff8a5c" />
+                <circle cx="166" cy="62" r="5" fill="#ffd166" />
+              </g>
+            </g>
+
+            <g class="dirt">
+              <ellipse cx="146" cy="74" rx="8" ry="5" fill="#7a5a3a" opacity=".55" transform="rotate(-18 146 74)" />
+              <ellipse cx="90" cy="136" rx="10" ry="6" fill="#7a5a3a" opacity=".45" transform="rotate(12 90 136)" />
+              <ellipse cx="132" cy="150" rx="7" ry="4" fill="#7a5a3a" opacity=".5" />
+              <ellipse cx="152" cy="198" rx="9" ry="5" fill="#7a5a3a" opacity=".4" transform="rotate(-10 152 198)" />
+            </g>
+          </svg>
+
+          <span class="cat-acc-emoji" id="cat-acc-emoji" aria-hidden="true"></span>
+        </div>
+
+        <div class="cat-shadow" aria-hidden="true"></div>
+      </div>
+
+      <div class="remote-cats" id="remote-cats" aria-label="Kucing teman" data-i18n-aria="mp.players"></div>
+      <div class="butterflies" id="butterflies" aria-label="Kupu-kupu" data-i18n-aria="outdoor.layerAria"></div>
+      <div class="fx" id="fx" aria-hidden="true"></div>
+
+      <div class="mic-badge" id="mic-badge" hidden aria-hidden="true">
+        <span class="mic-dot"></span>
+        <span data-i18n="mic.live">Mic</span>
+      </div>
+
+      <p class="stage-hint" id="hint" data-i18n="hint.pet">Tekan dan geser untuk mengelus Mochi</p>
+    </div>
+
+    <nav class="dock" id="dock" aria-label="Aksi" data-i18n-aria="dock.aria">
+      <button class="dock-btn" type="button" data-action="feed">
+        <span class="dock-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c4-5 9-5 13-1l5-3v8l-5-3c-4 4-9 4-13-1Z" /><circle cx="8" cy="12" r="1" fill="currentColor" stroke="none" /></svg>
+        </span>
+        <span class="dock-label" data-i18n="dock.feed">Makan</span>
+      </button>
+
+      <button class="dock-btn" type="button" data-action="bath">
+        <span class="dock-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.6 6 10a6 6 0 0 1-12 0c0-3.4 6-10 6-10Z" /></svg>
+        </span>
+        <span class="dock-label" data-i18n="dock.bath">Mandi</span>
+      </button>
+
+      <button class="dock-btn" type="button" data-action="play">
+        <span class="dock-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.4l6-.8Z" /></svg>
+        </span>
+        <span class="dock-label" data-i18n="dock.play">Main</span>
+      </button>
+
+      <button class="dock-btn" type="button" data-action="sleep" id="sleep-btn" aria-pressed="false">
+        <span class="dock-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" /></svg>
+        </span>
+        <span class="dock-label" id="sleep-label" data-i18n="dock.sleep">Tidur</span>
+      </button>
+
+      <button class="dock-btn" type="button" data-action="style">
+        <span class="dock-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 2-2 0-1.4 1-2 2-2h2a3 3 0 0 0 3-3 9 9 0 0 0-9-9Z" /><circle cx="8" cy="9" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="7" r="1" fill="currentColor" stroke="none" /><circle cx="16" cy="9" r="1" fill="currentColor" stroke="none" /></svg>
+        </span>
+        <span class="dock-label" data-i18n="dock.style">Gaya</span>
+      </button>
+
+      <button class="dock-btn" type="button" data-action="outside" id="outside-btn" aria-pressed="false">
+        <span class="dock-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V11l7-6 7 6v9" /><path d="M9 20v-5h6v5" /></svg>
+        </span>
+        <span class="dock-label" id="outside-label" data-i18n="dock.outside">Keluar</span>
+      </button>
+    </nav>
+  </div>
+</main>
+
+<!-- ============================== Makan ============================== -->
+<div class="overlay" id="feed-overlay" hidden>
+  <div class="overlay-scrim" data-close></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="feed-title">
+    <header class="sheet-head">
+      <div>
+        <h2 class="sheet-title" id="feed-title" data-i18n="feed.title">Kasih Mochi makan</h2>
+        <p class="sheet-sub"><span data-i18n="feed.hungerLabel">Kenyang sekarang:</span> <b id="feed-hunger">85</b>% · <span data-i18n="feed.coinLabel">Koin:</span> <b id="feed-coins">20</b></p>
+      </div>
+      <button class="sheet-close" type="button" data-close aria-label="Tutup" data-i18n-aria="common.close">&times;</button>
+    </header>
+    <div class="sheet-body">
+      <div class="food-list">
+        <button class="food-btn" type="button" data-food="kibble">
+          <span class="food-icon" aria-hidden="true">🥣</span>
+          <span class="food-info">
+            <span class="food-name" data-i18n="food.kibble.name">Kibble</span>
+            <span class="food-desc" data-i18n="food.kibble.desc">Makanan harian · +20 kenyang</span>
+          </span>
+          <span class="food-price" data-price="kibble">Gratis</span>
+        </button>
+
+        <button class="food-btn" type="button" data-food="fish">
+          <span class="food-icon" aria-hidden="true">🐟</span>
+          <span class="food-info">
+            <span class="food-name" data-i18n="food.fish.name">Ikan segar</span>
+            <span class="food-desc" data-i18n="food.fish.desc">Favorit Mochi · +38 kenyang, +6 senang</span>
+          </span>
+          <span class="food-price" data-price="fish">3 koin</span>
+        </button>
+
+        <button class="food-btn" type="button" data-food="milk">
+          <span class="food-icon" aria-hidden="true">🥛</span>
+          <span class="food-info">
+            <span class="food-name" data-i18n="food.milk.name">Susu hangat</span>
+            <span class="food-desc" data-i18n="food.milk.desc">Bikin tenang · +12 kenyang, +10 senang, +4 energi</span>
+          </span>
+          <span class="food-price" data-price="milk">2 koin</span>
+        </button>
+      </div>
+      <p class="sheet-note" data-i18n="feed.note">Mochi menolak makan kalau kenyangnya sudah penuh.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ============================== Gaya / Toko ============================== -->
+<div class="overlay" id="style-overlay" hidden>
+  <div class="overlay-scrim" data-close></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="style-title">
+    <header class="sheet-head">
+      <div>
+        <h2 class="sheet-title" id="style-title" data-i18n="shop.title">Gaya Mochi</h2>
+        <p class="sheet-sub"><span data-i18n="shop.coinLabel">Koinmu:</span> <b id="shop-coins">20</b> · <span id="shop-season-now"></span></p>
+      </div>
+      <button class="sheet-close" type="button" data-close aria-label="Tutup" data-i18n-aria="common.close">&times;</button>
+    </header>
+    <div class="sheet-body">
+      <div class="tabs" role="tablist" aria-label="Kategori gaya" data-i18n-aria="shop.tabsAria">
+        <button class="tab" type="button" role="tab" data-tab="fur" aria-selected="true" data-i18n="shop.tabFur">Warna bulu</button>
+        <button class="tab" type="button" role="tab" data-tab="acc" aria-selected="false" data-i18n="shop.tabAcc">Aksesoris</button>
+        <button class="tab" type="button" role="tab" data-tab="season" aria-selected="false" data-i18n="shop.tabSeason">Musiman</button>
+      </div>
+      <div class="shop-grid" id="shop-grid"></div>
+      <p class="sheet-note" data-i18n="shop.note">Beli sekali, pakai selamanya. Item baru akan meminta konfirmasi sebelum dibeli.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ============================== Misi harian ============================== -->
+<div class="overlay" id="quest-overlay" hidden>
+  <div class="overlay-scrim" data-close></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="quest-title">
+    <header class="sheet-head">
+      <div>
+        <h2 class="sheet-title" id="quest-title" data-i18n="quest.title">Misi harian</h2>
+        <p class="sheet-sub" data-i18n="quest.sub">Selesaikan misi hari ini untuk koin dan XP ekstra.</p>
+      </div>
+      <button class="sheet-close" id="quest-close" type="button" data-close aria-label="Tutup" data-i18n-aria="common.close">&times;</button>
+    </header>
+    <div class="sheet-body">
+      <ul class="quest-list" id="quest-list"></ul>
+      <p class="quest-reset" id="quest-reset"></p>
+    </div>
+  </section>
+</div>
+
+<!-- ============================== Pengaturan ============================== -->
+<div class="overlay" id="settings-overlay" hidden>
+  <div class="overlay-scrim" data-close></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <header class="sheet-head">
+      <div>
+        <h2 class="sheet-title" id="settings-title" data-i18n="settings.title">Pengaturan</h2>
+        <p class="sheet-sub" data-i18n="settings.sub">Atur nama, suara, bahasa, cloud, dan progres.</p>
+      </div>
+      <button class="sheet-close" type="button" data-close aria-label="Tutup" data-i18n-aria="common.close">&times;</button>
+    </header>
+    <div class="sheet-body">
+      <div class="field">
+        <label class="field-label" for="name-input" data-i18n="settings.name">Nama kucing</label>
+        <div class="field-row">
+          <input class="text-input" id="name-input" type="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Mochi" />
+          <button class="gbtn gbtn--primary" id="save-name" type="button" data-i18n="settings.save">Simpan</button>
+        </div>
+        <p class="field-hint" data-i18n="settings.nameHint">Maksimal 14 karakter. Huruf, angka, spasi, dan tanda . ' - _ saja.</p>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-copy">
+          <p class="settings-label" data-i18n="settings.sound">Efek suara</p>
+          <p class="settings-desc" data-i18n="settings.soundDesc">Meong dan bunyi kecil saat berinteraksi.</p>
+        </div>
+        <button class="switch" id="sound-switch" type="button" aria-pressed="true" aria-label="Efek suara" data-i18n-aria="settings.sound"></button>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-copy">
+          <p class="settings-label" data-i18n="settings.music">Musik latar</p>
+          <p class="settings-desc" data-i18n="settings.musicDesc">Melodi tenang; atur volumenya sesukamu.</p>
+        </div>
+        <button class="switch" id="music-switch" type="button" aria-pressed="true" aria-label="Musik latar" data-i18n-aria="settings.music"></button>
+      </div>
+
+      <div class="settings-row settings-row--stack">
+        <div class="settings-copy">
+          <p class="settings-label" data-i18n="settings.volume">Volume musik</p>
+        </div>
+        <input class="range" id="music-vol" type="range" min="0" max="100" step="1" value="55" aria-label="Volume musik" data-i18n-aria="settings.volume" />
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-copy">
+          <p class="settings-label" data-i18n="settings.mic">Mikrofon</p>
+          <p class="settings-desc" id="mic-status" data-i18n="settings.micOff">Mikrofon mati</p>
+        </div>
+        <button class="switch" id="mic-switch" type="button" aria-pressed="false" aria-label="Mikrofon" data-i18n-aria="settings.mic"></button>
+      </div>
+
+      <div class="settings-row settings-row--stack">
+        <div class="settings-copy">
+          <p class="settings-label" data-i18n="settings.lang">Bahasa</p>
+          <p class="settings-desc" data-i18n="settings.langDesc">Bahasa yang dipakai Mochi dan menu.</p>
+        </div>
+        <div class="lang-switch" role="group" aria-label="Bahasa" data-i18n-aria="settings.lang">
+          <button class="lang-btn" type="button" data-lang="id" aria-pressed="true">Indonesia</button>
+          <button class="lang-btn" type="button" data-lang="ja" aria-pressed="false">日本語</button>
+          <button class="lang-btn" type="button" data-lang="ko" aria-pressed="false">한국어</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-copy">
+          <p class="settings-label" data-i18n="settings.multiplayer">Multiplayer</p>
+          <p class="settings-desc" data-i18n="settings.multiplayerDesc">Main bareng teman lewat kode room.</p>
+        </div>
+        <button class="gbtn gbtn--ghost" id="open-mp" type="button" data-i18n="settings.openMultiplayer">Buka</button>
+      </div>
+
+      <div class="cloud-box">
+        <p class="settings-label" data-i18n="cloud.title">Cloud save</p>
+        <p class="settings-desc" data-i18n="cloud.desc">Simpan progres ke server dan buka di perangkat lain.</p>
+        <div class="cloud-row">
+          <input class="text-input cloud-code" id="cloud-code" type="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX" aria-label="Kode cloud" data-i18n-aria="cloud.code" data-i18n-placeholder="cloud.placeholder" />
+          <button class="gbtn gbtn--ghost" id="cloud-copy" type="button" data-i18n="cloud.copy">Salin</button>
+        </div>
+        <div class="cloud-actions">
+          <button class="gbtn" id="cloud-create" type="button" data-i18n="cloud.create">Buat kode</button>
+          <button class="gbtn gbtn--primary" id="cloud-upload" type="button" data-i18n="cloud.upload">Simpan</button>
+          <button class="gbtn" id="cloud-load" type="button" data-i18n="cloud.load">Muat</button>
+        </div>
+        <p class="field-hint" data-i18n="cloud.hint">Buat kode di perangkat ini, lalu masukkan kode yang sama di perangkat lain dan tekan Muat.</p>
+        <p class="cloud-status" id="cloud-status"></p>
+        <p class="sheet-note" data-i18n="cloud.note">Kode cloud adalah kunci rahasia. Jangan bagikan. Data di server hanya dipakai saat kamu menekan Muat.</p>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-copy">
+          <p class="settings-label" data-i18n="settings.reset">Reset progres</p>
+          <p class="settings-desc" data-i18n="settings.resetDesc">Koin, level, dan gaya kembali ke awal.</p>
+        </div>
+        <button class="gbtn gbtn--danger" id="reset-btn" type="button" data-i18n="settings.reset">Reset</button>
+      </div>
+
+      <p class="sheet-note" data-i18n="settings.note">Progres tersimpan otomatis di browser. Cloud save opsional untuk pindah perangkat. Saat multiplayer, hanya nama, level, dan gaya yang dibagikan.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ============================== Multiplayer ============================== -->
+<div class="overlay" id="mp-overlay" hidden>
+  <div class="overlay-scrim" data-close></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="mp-title">
+    <header class="sheet-head">
+      <div>
+        <h2 class="sheet-title" id="mp-title" data-i18n="mp.title">Multiplayer</h2>
+        <p class="sheet-sub" data-i18n="mp.sub">Main bareng teman lewat kode room.</p>
+      </div>
+      <button class="sheet-close" type="button" data-close aria-label="Tutup" data-i18n-aria="common.close">&times;</button>
+    </header>
+    <div class="sheet-body">
+      <div class="mp-lobby" id="mp-lobby">
+        <button class="gbtn gbtn--primary gbtn--wide" id="mp-create" type="button" data-i18n="mp.create">Buat room</button>
+        <div class="mp-join-row">
+          <input class="text-input mp-code-input" id="mp-code" type="text" maxlength="5" autocomplete="off" spellcheck="false" placeholder="KODE" aria-label="Kode room" data-i18n-aria="mp.roomCode" data-i18n-placeholder="mp.codePlaceholder" />
+          <button class="gbtn" id="mp-join" type="button" data-i18n="mp.join">Gabung</button>
+        </div>
+        <p class="field-hint" data-i18n="mp.hint">Masukkan kode 5 huruf dari temanmu.</p>
+        <p class="sheet-note" id="mp-server-note"></p>
+      </div>
+
+      <div class="mp-room" id="mp-room" hidden>
+        <p class="settings-label" data-i18n="mp.roomCode">Kode room</p>
+        <div class="mp-code-row">
+          <b class="mp-code" id="mp-room-code">-----</b>
+          <button class="gbtn gbtn--ghost" id="mp-copy" type="button" data-i18n="mp.copy">Salin</button>
+        </div>
+        <p class="settings-desc" id="mp-room-status"></p>
+        <p class="mp-count" id="mp-count"></p>
+        <p class="field-hint" id="mp-share-hint" data-i18n="mp.shareHint" hidden></p>
+
+        <p class="settings-label mp-players-label" data-i18n="mp.players">Pemain</p>
+        <ul class="mp-players" id="mp-players"></ul>
+
+        <p class="settings-label mp-emote-label" data-i18n="mp.emote">Kirim emoji</p>
+        <div class="mp-emotes" id="mp-emotes">
+          <button type="button" data-emote="😺" aria-label="😺">😺</button>
+          <button type="button" data-emote="👋" aria-label="👋">👋</button>
+          <button type="button" data-emote="❤️" aria-label="❤️">❤️</button>
+          <button type="button" data-emote="✨" aria-label="✨">✨</button>
+          <button type="button" data-emote="🐟" aria-label="🐟">🐟</button>
+          <button type="button" data-emote="🎉" aria-label="🎉">🎉</button>
+          <button type="button" data-emote="😴" aria-label="😴">😴</button>
+          <button type="button" data-emote="🍀" aria-label="🍀">🍀</button>
+        </div>
+
+        <button class="gbtn gbtn--danger gbtn--wide mp-leave" id="mp-leave" type="button" data-i18n="mp.leave">Keluar room</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================== Mini-game ============================== -->
+<div class="overlay overlay--game" id="minigame" hidden>
+  <div class="overlay-scrim" data-close></div>
+  <section class="mg-panel" role="dialog" aria-modal="true" aria-labelledby="mg-title">
+    <header class="mg-head">
+      <div class="mg-title-wrap">
+        <h2 class="mg-title" id="mg-title" data-i18n="mg.title">Tangkap Ikan</h2>
+        <p class="mg-sub" data-i18n="mg.sub">Ketuk ikan sebelum jatuh. Tiap ikan = 1 koin.</p>
+      </div>
+      <div class="mg-stats">
+        <span class="mg-stat"><span data-i18n="mg.score">Skor</span> <b id="mg-score">0</b></span>
+        <span class="mg-stat"><span data-i18n="mg.time">Waktu</span> <b id="mg-time">20</b>s</span>
+      </div>
+      <button class="sheet-close sheet-close--dark" id="mg-close" type="button" aria-label="Tutup" data-i18n-aria="common.close">&times;</button>
+    </header>
+
+    <div class="mg-arena" id="mg-arena">
+      <div class="mg-water" aria-hidden="true"></div>
+
+      <div class="mg-intro" id="mg-intro">
+        <span class="mg-intro-icon" aria-hidden="true">🐟</span>
+        <p class="mg-intro-title" data-i18n="mg.introTitle">Siap menangkap?</p>
+        <p class="mg-intro-text" data-i18n="mg.introText">Kamu punya 20 detik. Ikan yang tertangkap langsung jadi koin.</p>
+        <button class="gbtn gbtn--primary gbtn--wide" id="mg-start" type="button" data-i18n="mg.start">Mulai main</button>
+      </div>
+
+      <div class="mg-result" id="mg-result" hidden>
+        <p class="mg-result-label" data-i18n="mg.resultLabel">Kamu menangkap</p>
+        <p class="mg-final"><b id="mg-final">0</b> <span data-i18n="mg.fishUnit">ikan</span></p>
+        <p class="mg-coins">+<b id="mg-coins">0</b> <span data-i18n="mg.coinUnit">koin</span></p>
+        <div class="mg-result-actions">
+          <button class="gbtn gbtn--primary" id="mg-again" type="button" data-i18n="mg.again">Main lagi</button>
+          <button class="gbtn gbtn--ghost" id="mg-done" type="button" data-i18n="mg.done">Selesai</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="mg-foot">
+      <span data-i18n="mg.foot1">20 detik</span>
+      <span data-i18n="mg.foot2">Ikan = 1 koin</span>
+      <span data-i18n="mg.foot3">Main lagi kapan saja</span>
+    </footer>
+  </section>
+</div>
+
+<!-- ============================== Konfirmasi ============================== -->
+<div class="overlay overlay--confirm" id="confirm-overlay" hidden>
+  <div class="overlay-scrim" data-confirm-close></div>
+  <section class="confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+    <h2 class="confirm-title" id="confirm-title"></h2>
+    <p class="confirm-text" id="confirm-text"></p>
+    <div class="confirm-actions">
+      <button class="gbtn gbtn--ghost" id="confirm-cancel" type="button">Batal</button>
+      <button class="gbtn gbtn--primary" id="confirm-ok" type="button">Ya</button>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

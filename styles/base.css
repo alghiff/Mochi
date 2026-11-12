@@ -1,0 +1,135 @@
+/* ============================================================
+   Mochi — Kucing Virtual
+   CSS ditulis manual, tanpa aset atau font eksternal.
+   ============================================================ */
+
+:root {
+  --bg-0: #0d0915;
+  --bg-1: #1a1128;
+  --bg-2: #2a1b3a;
+  --cream: #fff7ef;
+  --cream-soft: rgba(255, 247, 239, .72);
+  --cream-dim: rgba(255, 247, 239, .48);
+  --ink: #2b1e33;
+  --ink-soft: #6d5a76;
+  --line: rgba(43, 30, 51, .12);
+  --line-light: rgba(255, 247, 239, .12);
+  --accent: #ff8a5c;
+  --accent-strong: #f2703f;
+  --gold: #ffd166;
+  --mint: #9fe3c6;
+  --pink: #ff9dbb;
+  --blue: #8ab6ff;
+  --violet: #b79cff;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+  --fur: #f7dcc0;
+  --fur-2: #e3b58c;
+  --belly: #fff4e6;
+  --ear: #ffc9c0;
+  --shadow: 0 30px 80px -34px rgba(0, 0, 0, .85);
+  --radius: 30px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  color: var(--cream);
+  background:
+    radial-gradient(900px 600px at 18% 8%, rgba(183, 156, 255, .18), transparent 60%),
+    radial-gradient(800px 620px at 86% 92%, rgba(255, 138, 92, .12), transparent 58%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-0) 62%);
+  overflow: hidden;
+}
+
+body.is-locked {
+  overflow: hidden;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid rgba(255, 209, 102, .85);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+svg {
+  display: block;
+}
+
+.skip {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 999;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform .25s var(--ease);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+/* ============================================================
+   Panggung utama
+   ============================================================ */
+
+.game {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 16px;
+}
+
+.room {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 540px);
+  height: min(calc(100vh - 32px), 940px);
+  height: min(calc(100dvh - 32px), 940px);
+  border-radius: var(--radius);
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(180deg, #3a2748 0%, #2a1b36 48%, #1c1228 100%);
+  border: 1px solid rgba(255, 247, 239, .14);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, .12);
+}
+

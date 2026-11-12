@@ -1,0 +1,145 @@
+/* ============================================================
+   Dock aksi
+   ============================================================ */
+
+.dock {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+  margin: 0 12px 12px;
+  padding: 8px;
+  border-radius: 24px;
+  background: rgba(15, 10, 22, .52);
+  border: 1px solid rgba(255, 247, 239, .12);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: 0 20px 44px -26px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+.dock-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 7px 2px 5px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--cream);
+  transition: background .25s ease, transform .3s var(--spring);
+}
+
+.dock-btn:hover {
+  background: rgba(255, 247, 239, .09);
+  transform: translateY(-2px);
+}
+
+.dock-btn:active {
+  transform: scale(.95);
+}
+
+.dock-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255, 247, 239, .09);
+  transition: background .25s ease, color .25s ease, box-shadow .25s ease;
+}
+
+.dock-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.dock-btn[data-action="feed"] .dock-icon { color: #ffb35c; }
+.dock-btn[data-action="bath"] .dock-icon { color: #8ab6ff; }
+.dock-btn[data-action="play"] .dock-icon { color: #ffd166; }
+.dock-btn[data-action="sleep"] .dock-icon { color: #b79cff; }
+.dock-btn[data-action="style"] .dock-icon { color: #ff9dbb; }
+
+.dock-btn[data-action="feed"]:hover .dock-icon { background: rgba(255, 179, 92, .18); }
+.dock-btn[data-action="bath"]:hover .dock-icon { background: rgba(138, 182, 255, .18); }
+.dock-btn[data-action="play"]:hover .dock-icon { background: rgba(255, 209, 102, .18); }
+.dock-btn[data-action="sleep"]:hover .dock-icon { background: rgba(183, 156, 255, .18); }
+.dock-btn[data-action="style"]:hover .dock-icon { background: rgba(255, 157, 187, .18); }
+
+.dock-btn[aria-pressed="true"] .dock-icon {
+  color: #2a1c2e;
+  background: var(--violet);
+  box-shadow: 0 0 22px -4px rgba(183, 156, 255, .65);
+}
+
+.dock-label {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Tambahan: dock tanpa kotak, scene taman, multiplayer, i18n
+   ============================================================ */
+
+/* ---------- Dock: ikon langsung, tanpa panel ---------- */
+
+.dock {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0;
+  margin: 0 8px 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.dock-btn {
+  padding: 6px 2px 4px;
+  border-radius: 14px;
+}
+
+.dock-btn:hover {
+  background: transparent;
+  transform: translateY(-3px);
+}
+
+.dock-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .35));
+}
+
+.dock-btn:hover .dock-icon {
+  background: rgba(255, 247, 239, .1);
+}
+
+.dock-btn[aria-pressed="true"] .dock-icon {
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+.dock-btn[data-action="outside"] .dock-icon { color: #8fe6b0; }
+.dock-btn[data-action="outside"]:hover .dock-icon { background: rgba(143, 230, 176, .16); }
+
+.dock-btn[data-action="sleep"][aria-pressed="true"] .dock-icon { color: #c8b4ff; }
+.dock-btn[data-action="outside"][aria-pressed="true"] .dock-icon { color: #b6f0c9; }
+
+.dock-label {
+  font-size: .62rem;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, .55);
+}
+

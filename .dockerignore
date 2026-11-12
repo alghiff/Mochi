@@ -1,0 +1,6 @@
+.git
+data
+*.log
+.DS_Store
+Dockerfile
+compose.yaml

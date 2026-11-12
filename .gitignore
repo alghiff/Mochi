@@ -1,0 +1,12 @@
+# Data runtime (cloud save fallback & Deno KV)
+data/*
+!data/.gitkeep
+cloud-export-*.json
+
+# Log & OS
+*.log
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
