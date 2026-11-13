@@ -36,6 +36,6 @@ CMD ["run", \
   "--allow-net", \
   "--allow-read=/app", \
   "--allow-write=/app/data,/deno-dir", \
-  "--allow-env=PORT,HOST,MAX_PLAYERS,KV_PATH,DENO_DEPLOYMENT_ID", \
+  "--allow-env=PORT,HOST,MAX_PLAYERS,MAX_ROOMS,MAX_CONNECTIONS,MAX_CONNECTIONS_PER_IP,WS_IP_RATE_LIMIT,KV_PATH,DENO_DEPLOYMENT_ID,PUBLIC_ORIGIN,TRUSTED_PROXIES,CLOUD_CREATE_WINDOW_MS,ROOM_IDLE_MS,CLOUD_MAX_RECORDS", \
   "--unstable-kv", \
   "server.js"]

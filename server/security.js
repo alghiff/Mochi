@@ -137,10 +137,7 @@ export function originAllowed(req) {
   const expected = publicHost();
 
   // Mode produksi: Origin harus sama persis dengan origin publik.
-  if (expected) {
-    const publicOrigin = PUBLIC_ORIGIN.replace(/\/+$/, "");
-    return originUrl.origin === publicOrigin;
-  }
+  if (expected) return originUrl.origin === PUBLIC_ORIGIN;
 
   // Mode pengembangan: cocokkan host saja.
   const requestHost = req.headers.get("host") || "";
@@ -184,9 +181,60 @@ export function createRateLimiter({ windowMs, limit }) {
 
 /* ---------- Identitas klien ---------- */
 
+function normalizeAddress(value) {
+  const address = String(value || "").trim().toLowerCase();
+
+  if (address === "0:0:0:0:0:0:0:1") return "::1";
+
+  // IPv4-mapped IPv6 (::ffff:172.18.0.1) -> IPv4.
+  const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(address);
+
+  return mapped ? mapped[1] : address;
+}
+
+function ipv4ToNumber(value) {
+  const parts = parseIpv4(value);
+
+  if (!parts) return null;
+
+  return (((parts[0] << 24) >>> 0) + (parts[1] << 16) + (parts[2] << 8) + parts[3]) >>> 0;
+}
+
+function ipv4InCidr(value, rule) {
+  const slash = rule.indexOf("/");
+
+  if (slash === -1) return false;
+
+  const base = rule.slice(0, slash);
+  const bits = Number(rule.slice(slash + 1));
+
+  if (!Number.isInteger(bits) || bits < 0 || bits > 32) return false;
+
+  const ip = ipv4ToNumber(value);
+  const network = ipv4ToNumber(base);
+
+  if (ip === null || network === null) return false;
+  if (bits === 0) return true;
+
+  const mask = (0xffffffff << (32 - bits)) >>> 0;
+
+  return ((ip & mask) >>> 0) === ((network & mask) >>> 0);
+}
+
 function isTrustedProxy(address) {
   if (!address) return false;
-  return TRUSTED_PROXIES.includes(address);
+
+  const value = normalizeAddress(address);
+
+  return TRUSTED_PROXIES.some((entry) => {
+    const rule = normalizeAddress(entry);
+
+    if (!rule) return false;
+    if (rule === value) return true;
+    if (rule.includes("/")) return ipv4InCidr(value, rule);
+
+    return false;
+  });
 }
 
 function parseIpv4(value) {

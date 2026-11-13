@@ -6,6 +6,16 @@ cloud-export-*.json
 *.sqlite3-wal
 *.sqlite3-shm
 
+# Rahasia & kredensial — jangan pernah di-commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.cloudflared/
+
 # Log & OS
 *.log
 .DS_Store

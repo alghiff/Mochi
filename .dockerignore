@@ -4,6 +4,13 @@
 data
 *.log
 .DS_Store
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+.cloudflared
 Dockerfile
 compose.yaml
 README.md

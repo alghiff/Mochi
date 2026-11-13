@@ -21,3 +21,6 @@ jobs:
 
       # lint + format check + type check
       - run: deno task verify
+
+      # Regression test server, keamanan, cuaca, dan aset
+      - run: deno task test

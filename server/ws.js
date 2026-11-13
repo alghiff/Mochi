@@ -10,6 +10,7 @@ import { originAllowed, textResponse } from "./security.js";
  * sumber tidak bisa mengambil semua slot.
  */
 const openSockets = new Map();
+let totalSockets = 0;
 
 function socketCount(ip) {
   return openSockets.get(ip) || 0;
@@ -26,7 +27,9 @@ export function handleWebSocket(req, rooms, host, client) {
 
   const ip = client || "local";
 
-  if (openSockets.size >= MAX_CONNECTIONS) {
+  // openSockets menyimpan jumlah per-IP; batas global harus menghitung
+  // total socket, bukan jumlah alamat IP.
+  if (totalSockets >= MAX_CONNECTIONS) {
     return textResponse(503, "Too many connections", host, { "Retry-After": "5" });
   }
 
@@ -47,12 +50,15 @@ export function handleWebSocket(req, rooms, host, client) {
   const { socket, response } = pair;
 
   openSockets.set(ip, socketCount(ip) + 1);
+  totalSockets += 1;
 
   let closed = false;
 
   function release() {
     if (closed) return;
     closed = true;
+
+    totalSockets = Math.max(0, totalSockets - 1);
 
     const left = socketCount(ip) - 1;
 
@@ -78,9 +84,5 @@ export function handleWebSocket(req, rooms, host, client) {
 }
 
 export function connectionStats() {
-  let total = 0;
-
-  for (const count of openSockets.values()) total += count;
-
-  return { total, addresses: openSockets.size };
+  return { total: totalSockets, addresses: openSockets.size };
 }

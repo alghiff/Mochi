@@ -215,6 +215,13 @@
   }
 }
 
+/* Layar pendek: kucing menutupi petunjuk di bawah karpet. */
+@media (max-height: 800px) {
+  .stage-hint {
+    display: none;
+  }
+}
+
 @media (max-height: 720px) {
   .cat-wrap {
     width: min(62%, 250px);

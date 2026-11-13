@@ -15,7 +15,9 @@ services:
       # Origin publik untuk CSP + cek Origin (isi di file .env).
       PUBLIC_ORIGIN: "${PUBLIC_ORIGIN:-}"
       # Proxy yang dipercaya; default: Caddy/cloudflared di host yang sama.
-      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-127.0.0.1,::1}"
+      # 172.16.0.0/12 adalah alamat gateway Docker saat Caddy di host
+      # meneruskan koneksi ke port yang dipublikasikan container.
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-127.0.0.1,::1,172.16.0.0/12}"
     volumes:
       - mochi-data:/app/data
     # Container tidak butuh privilege apa pun.

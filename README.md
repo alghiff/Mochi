@@ -173,16 +173,21 @@ Partikel juga muncul di jendela, dengan ukuran lebih kecil dan lebih lambat.
 
 ## Ikon dan badge vektor
 
-Dua set gambar SVG dipakai game:
+Ikon cuaca sekarang berupa **simbol SVG inline** di `index.html` (sprite
+`wx-spring`, `wx-hot`, `wx-autumn`, `wx-rain`, `wx-snow`). Tidak ada request
+gambar terpisah, jadi ikon tidak bisa rusak karena 404, cache, atau CSP.
 
-- `assets/svg/weather-*.svg` — ikon untuk 5 cuaca, dipakai di pil cuaca.
+Badge misi tetap memakai file:
+
 - `assets/svg/badge-*.svg` — badge untuk 6 misi harian, dipakai di panel misi.
 
 Cara membuat ikon baru:
 
-1. Simpan SVG di `assets/svg/` dengan nama huruf kecil, angka, dan tanda hubung.
-2. Daftarkan path-nya di `src/data/weather.js` atau `src/data/quests.js`.
-3. Jalankan `deno task test` — test aset akan menolak kalau file tidak ada.
+1. Untuk cuaca, tambahkan `<symbol id="wx-...">` di sprite `index.html`, lalu
+   daftarkan `symbol`-nya di `src/data/weather.js`.
+2. Untuk badge, simpan SVG di `assets/svg/` dengan nama huruf kecil, angka,
+   dan tanda hubung, lalu daftarkan path-nya di `src/data/quests.js`.
+3. Jalankan `deno task test` — test aset akan menolak kalau simbol/file tidak ada.
 
 ## Mengganti lagu latar
 
@@ -207,8 +212,8 @@ index.html              Markup game, overlay, dan UI
 assets/
   *.mp3                 Lagu latar (disajikan lewat allowlist audio)
   svg/
-    weather-*.svg       Ikon vektor untuk 5 cuaca
     badge-*.svg         Badge vektor untuk 6 misi harian
+                        (ikon cuaca berupa sprite inline di index.html)
 styles/
   base.css              Reset, token warna, tipografi
   scene.css             Rumah, taman, kucing, cuaca, lampu
@@ -525,9 +530,9 @@ pengunjung -> https://mochi.example.com -> Cloudflare (TLS)
    ```
 
    `PUBLIC_ORIGIN` dipakai server untuk CSP dan cek Origin, jadi permintaan
-   dengan `Host` lain dibalas 421. `TRUSTED_PROXIES` default
-   (`127.0.0.1,::1`) sudah cocok karena Caddy dan cloudflared berjalan di
-   host yang sama.
+   dengan `Host` lain dibalas 421. Compose mengisi `TRUSTED_PROXIES` default
+   (`127.0.0.1,::1,172.16.0.0/12`) supaya koneksi dari Caddy di host, yang
+   masuk lewat gateway Docker, tetap dikenali sebagai proxy tepercaya.
 
 3. Pasang Caddy, lalu salin `deploy/Caddyfile`:
 
@@ -595,7 +600,7 @@ penyimpanan room terpusat.
 | `MAX_PLAYERS` | `6` | Maks pemain per room (2–12) |
 | `KV_PATH` | `data/kv.sqlite3` | Path file Deno KV. Kosong hanya di Deno Deploy (pakai KV platform) |
 | `PUBLIC_ORIGIN` | kosong | Origin publik, mis. `https://extion.site`. Kalau diisi, CSP dan cek Origin memakai nilai ini (bukan Host header) dan Host lain dibalas 421 |
-| `TRUSTED_PROXIES` | `127.0.0.1,::1` | Alamat proxy yang dipercaya. Header `X-Forwarded-For`/`CF-Connecting-IP` hanya dipakai kalau koneksi datang dari daftar ini. `none` = tidak percaya proxy apa pun |
+| `TRUSTED_PROXIES` | `127.0.0.1,::1` (Compose: `127.0.0.1,::1,172.16.0.0/12`) | Alamat/CIDR proxy yang dipercaya. Header `X-Forwarded-For`/`CF-Connecting-IP` hanya dipakai kalau koneksi datang dari daftar ini. `none` = tidak percaya proxy apa pun |
 | `MAX_ROOMS` | `100` | Maks room multiplayer aktif |
 | `ROOM_IDLE_MS` | `600000` | Room tanpa aktivitas dibuang setelah durasi ini |
 | `MAX_CONNECTIONS` | `200` | Maks koneksi WebSocket aktif |
@@ -613,7 +618,9 @@ EOF
 ```
 
 `PUBLIC_ORIGIN` sangat disarankan di produksi: tanpa itu, `Host` header dari
-permintaan bisa memengaruhi CSP dan pemeriksaan Origin.
+permintaan bisa memengaruhi CSP dan pemeriksaan Origin. Isi dengan origin
+lengkap (`https://domain`), bukan path. Nilai kosong/tidak valid membuat
+server memakai mode pengembangan dan menampilkan peringatan saat start.
 
 ## Keamanan
 
@@ -637,6 +644,11 @@ permintaan bisa memengaruhi CSP dan pemeriksaan Origin.
   bisa melewati batas.
 - **Batas abusive** — jumlah room, koneksi WebSocket, koneksi per IP, pesan
   per IP, dan jumlah record cloud semuanya dibatasi.
+- **Kredensial tidak ikut repo** — `.env`, kunci privat, dan folder
+  `.cloudflared/` di-ignore oleh Git dan Docker. Kode cloud adalah bearer
+  token: siapa pun yang memegangnya bisa membaca/menimpa save, jadi jangan
+  dibagikan. File `data/cloud.json` dan `data/kv.sqlite3` hanya berisi hash
+  kode + state pemain; tetap batasi aksesnya.
 - **Izin Deno sempit** — image Docker hanya boleh baca `/app`, tulis
   `/app/data`, dan membaca env yang memang dipakai.
 - **Tanpa dependensi runtime** — tidak ada paket npm yang dieksekusi di browser

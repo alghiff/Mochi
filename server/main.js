@@ -1,4 +1,4 @@
-import { HOST, MAX_PLAYERS, MAX_ROOMS, PORT, ROOT } from "./config.js";
+import { HOST, MAX_PLAYERS, MAX_ROOMS, PORT, PUBLIC_ORIGIN, ROOT } from "./config.js";
 import { handleCloud, startCountRefresh } from "./cloud.js";
 import { createRooms } from "./rooms.js";
 import { clientKey, hostAllowed, jsonResponse, originAllowed, textResponse } from "./security.js";
@@ -89,6 +89,15 @@ Deno.serve(
     onListen: ({ hostname, port }) => {
       console.log(`Mochi berjalan di http://${hostname}:${port}`);
       console.log(`Multiplayer maksimal ${rooms.maxPlayers} pemain per room.`);
+
+      if (!PUBLIC_ORIGIN) {
+        console.warn(
+          "PERINGATAN: PUBLIC_ORIGIN kosong atau tidak valid. Pemeriksaan " +
+            "Host/Origin memakai header permintaan (mode pengembangan). " +
+            "Isi PUBLIC_ORIGIN dengan origin lengkap, mis. https://extion.site.",
+        );
+      }
+
       console.log("Tekan Ctrl+C untuk berhenti.");
     },
     // Jangan biarkan error tak tertangani menjatuhkan seluruh server.

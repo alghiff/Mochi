@@ -81,9 +81,26 @@ export const TRUSTED_PROXIES = listFromEnv("TRUSTED_PROXIES", ["127.0.0.1", "::1
  *
  * Kalau diisi, CSP dan pemeriksaan Origin memakai nilai ini, bukan Host header
  * yang datang dari permintaan. Ini menutup celah host-header injection dan
- * DNS rebinding. Kosong = pakai Host header (mode pengembangan).
+ * DNS rebinding. Nilai yang tidak valid dianggap kosong supaya tidak diam-diam
+ * memakai Host header; server memberi peringatan saat start.
  */
-export const PUBLIC_ORIGIN = env("PUBLIC_ORIGIN", "").replace(/\/+$/, "");
+function originFromEnv(name) {
+  const raw = env(name, "").trim();
+
+  if (!raw) return "";
+
+  try {
+    const url = new URL(raw);
+
+    if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+
+    return url.origin;
+  } catch {
+    return "";
+  }
+}
+
+export const PUBLIC_ORIGIN = originFromEnv("PUBLIC_ORIGIN");
 
 export const MAX_MESSAGE_BYTES = 4096;
 export const MAX_CLOUD_BYTES = 32 * 1024;

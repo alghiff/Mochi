@@ -321,8 +321,18 @@
 }
 
 .weather-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
   font-size: 1.05rem;
   line-height: 1;
+}
+
+.weather-icon svg {
+  display: block;
+  width: 26px;
+  height: 26px;
 }
 
 .weather-label {

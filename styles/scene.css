@@ -242,11 +242,19 @@
 
 .lamp {
   position: absolute;
-  top: 16%;
+  /* Turunkan sedikit supaya kap lampu tidak terpotong panel statistik. */
+  top: 24%;
   right: 31%;
+  z-index: 2;
   width: 80px;
   height: 150px;
   opacity: .95;
+  pointer-events: none;
+}
+
+/* Lampu hanya ada di dalam ruangan, bukan di taman. */
+.room[data-scene="outside"] .lamp {
+  display: none;
 }
 
 .lamp-cord {
@@ -284,6 +292,12 @@
   height: 7px;
   border-radius: 50%;
   background: radial-gradient(ellipse, rgba(255, 231, 168, .95), rgba(255, 196, 110, .08) 72%);
+  opacity: .45;
+  transition: opacity .7s ease;
+}
+
+.room.is-night .lamp-shade::after {
+  opacity: 1;
 }
 
 .lamp-bulb {
@@ -295,11 +309,13 @@
   border-radius: 50%;
   transform: translateX(-50%);
   background: #fff3c9;
-  box-shadow: 0 0 22px 8px rgba(255, 209, 102, .45);
-  animation: bulbGlow 4s ease-in-out infinite;
+  box-shadow: 0 0 10px 4px rgba(255, 209, 102, .2);
+  opacity: .78;
+  animation: bulbGlow 6s ease-in-out infinite;
+  transition: opacity .7s ease, box-shadow .7s ease;
 }
 
-/* Pancaran cahaya落到 dinding, lembut dan tidak flat. */
+/* Pancaran cahaya ke dinding; redup saat siang, hangat saat tidur/malam. */
 .lamp::after {
   content: "";
   position: absolute;
@@ -311,11 +327,13 @@
   pointer-events: none;
   background: radial-gradient(
     ellipse at 50% 0%,
-    rgba(255, 209, 102, .3),
-    rgba(255, 209, 102, .09) 42%,
+    rgba(255, 209, 102, .16),
+    rgba(255, 209, 102, .05) 42%,
     transparent 72%
   );
   filter: blur(7px);
+  opacity: .35;
+  transition: opacity .7s ease, background .7s ease;
 }
 
 /* Pigura */
@@ -367,8 +385,8 @@
 
 .bowl {
   position: absolute;
-  left: 28%;
-  bottom: 14.5%;
+  left: 16%;
+  bottom: 13.5%;
   width: 58px;
   height: 28px;
   border-radius: 6px 6px 26px 26px;
@@ -397,8 +415,8 @@
 
 .toy-ball {
   position: absolute;
-  right: 28%;
-  bottom: 14.5%;
+  right: 16%;
+  bottom: 13.5%;
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -423,17 +441,19 @@
   opacity: 1;
 }
 
-.room.is-night .lamp-bulb,
-.room.is-night .lamp::after {
-  opacity: 1;
-}
-
 .room.is-night .lamp-bulb {
+  opacity: 1;
   box-shadow: 0 0 34px 14px rgba(255, 209, 102, .68);
 }
 
 .room.is-night .lamp::after {
-  background: radial-gradient(ellipse at 50% 0%, rgba(255, 209, 102, .34), transparent 70%);
+  opacity: 1;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 209, 102, .4),
+    rgba(255, 196, 110, .12) 42%,
+    transparent 72%
+  );
 }
 
 /* ============================================================
@@ -1234,9 +1254,9 @@
   height: 260px;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 10%, rgba(255, 214, 130, .28), transparent 68%);
+  background: radial-gradient(ellipse at 50% 10%, rgba(255, 214, 130, .3), transparent 68%);
   pointer-events: none;
-  opacity: .55;
+  opacity: .3;
   transition: opacity .7s ease;
 }
 
@@ -1367,7 +1387,7 @@
   position: absolute;
   left: 50%;
   bottom: -12px;
-  z-index: -1;
+  z-index: 0;
   width: 58%;
   height: 17%;
   min-height: 32px;
@@ -1375,6 +1395,7 @@
   border-radius: 50% 50% 42% 42%;
   background: linear-gradient(180deg, #b79cff, #7b5ec9);
   box-shadow: 0 10px 16px -10px rgba(0, 0, 0, .7), inset 0 -6px 10px -6px rgba(40, 20, 80, .5);
+  pointer-events: none;
 }
 
 .cushion-stitch {
@@ -2048,6 +2069,7 @@
 
 .cat {
   position: relative;
+  z-index: 1;
   translate: var(--pet-x, 0px) var(--pet-y, 0px);
   transition: translate .18s ease-out;
 }

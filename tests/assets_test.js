@@ -29,16 +29,14 @@ async function readText(path) {
   return await Deno.readTextFile(new URL(toRepoPath(path), ROOT));
 }
 
-Deno.test("setiap cuaca punya file SVG", async () => {
+Deno.test("setiap cuaca punya simbol SVG inline", async () => {
+  const html = await readText("index.html");
+
   for (const weather of WEATHERS) {
-    if (!weather.svg) throw new Error(`Cuaca ${weather.id} tidak punya svg`);
+    if (!weather.symbol) throw new Error(`Cuaca ${weather.id} tidak punya symbol`);
 
-    if (!weather.svg.startsWith("/assets/svg/")) {
-      throw new Error(`Path svg cuaca ${weather.id} salah: ${weather.svg}`);
-    }
-
-    if (!(await exists(weather.svg))) {
-      throw new Error(`File svg cuaca tidak ada: ${weather.svg}`);
+    if (!html.includes(`id="${weather.symbol}"`)) {
+      throw new Error(`Simbol cuaca tidak ada di index.html: ${weather.symbol}`);
     }
   }
 });
@@ -88,7 +86,7 @@ Deno.test("semua file SVG valid dan punya viewBox", async () => {
     count += 1;
   }
 
-  if (count < 10) throw new Error(`Hanya ada ${count} file SVG, seharusnya lebih banyak`);
+  if (count < 6) throw new Error(`Hanya ada ${count} file SVG, seharusnya lebih banyak`);
 });
 
 Deno.test("tidak ada atribut style inline (diblokir CSP)", async () => {

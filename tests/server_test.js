@@ -127,7 +127,7 @@ Deno.test("gambar SVG dilayani dengan tipe yang benar", async () => {
   const server = await startServer();
 
   try {
-    const res = await fetch(`${server.base}/assets/svg/weather-spring.svg`);
+    const res = await fetch(`${server.base}/assets/svg/badge-feed.svg`);
 
     assertEquals(res.status, 200, "SVG harus dilayani");
     assertEquals(
@@ -402,6 +402,21 @@ Deno.test("PUBLIC_ORIGIN menolak host lain", async () => {
       "CSP harus memakai host publik",
     );
     assert(!benar.raw.includes("evil.example"), "CSP tidak boleh memakai host request");
+  } finally {
+    await server.stop();
+  }
+});
+
+Deno.test("PUBLIC_ORIGIN dinormalisasi ke origin", async () => {
+  const server = await startServer({ PUBLIC_ORIGIN: "https://extion.site/a/b?x=1" });
+
+  try {
+    const benar = await rawGet(server.port, "/", "extion.site");
+    assertEquals(benar.status, 200, "path pada PUBLIC_ORIGIN harus diabaikan");
+    assert(
+      benar.raw.includes("wss://extion.site"),
+      "CSP harus memakai origin tanpa path",
+    );
   } finally {
     await server.stop();
   }

@@ -133,13 +133,18 @@ export function createRooms({ maxPlayers = 6, maxRooms = MAX_ROOMS } = {}) {
   function joinAllowed(ip) {
     const now = Date.now();
     const times = (joinAttempts.get(ip) || []).filter((time) => now - time < JOIN_WINDOW_MS);
+    const allowed = times.length < JOIN_LIMIT;
 
+    // Simpan paling banyak JOIN_LIMIT entri supaya percobaan yang terus
+    // ditolak tidak membuat array tumbuh tanpa batas selama satu jendela.
     times.push(now);
+    if (times.length > JOIN_LIMIT) times.splice(0, times.length - JOIN_LIMIT);
+
     joinAttempts.set(ip, times);
 
     if (joinAttempts.size > 5000) joinAttempts.clear();
 
-    return times.length <= JOIN_LIMIT;
+    return allowed;
   }
 
   function meta(socket, ip) {
@@ -160,20 +165,28 @@ export function createRooms({ maxPlayers = 6, maxRooms = MAX_ROOMS } = {}) {
   function rateLimited(socket, now) {
     const data = meta(socket);
     const times = data.rateTimes.filter((time) => now - time < WS_RATE_WINDOW_MS);
+    const socketLimited = times.length >= WS_RATE_LIMIT;
+
     times.push(now);
+    if (times.length > WS_RATE_LIMIT) times.splice(0, times.length - WS_RATE_LIMIT);
     data.rateTimes = times;
 
-    if (times.length > WS_RATE_LIMIT) return true;
+    if (socketLimited) return true;
 
     // Batas tambahan untuk seluruh koneksi dari satu alamat IP.
     const ip = data.ip;
     const ipTimes = (ipBuckets.get(ip) || []).filter((time) => now - time < WS_RATE_WINDOW_MS);
+    const ipLimited = ipTimes.length >= WS_IP_RATE_LIMIT;
+
     ipTimes.push(now);
+    if (ipTimes.length > WS_IP_RATE_LIMIT) {
+      ipTimes.splice(0, ipTimes.length - WS_IP_RATE_LIMIT);
+    }
     ipBuckets.set(ip, ipTimes);
 
     if (ipBuckets.size > 5000) ipBuckets.clear();
 
-    return ipTimes.length > WS_IP_RATE_LIMIT;
+    return ipLimited;
   }
 
   function roomsForIp(ip) {
@@ -309,17 +322,19 @@ export function createRooms({ maxPlayers = 6, maxRooms = MAX_ROOMS } = {}) {
       return;
     }
 
+    const data = meta(socket);
+
+    // Hitung percobaan SEBELUM mencari room. Kalau tidak, kode yang tidak
+    // ada tidak pernah memakai jatah join dan bisa ditebak tanpa batas.
+    if (!joinAllowed(data.ip)) {
+      send(socket, { type: "error", code: "rate_limit" });
+      return;
+    }
+
     const room = rooms.get(code);
 
     if (!room) {
       send(socket, { type: "error", code: "not_found" });
-      return;
-    }
-
-    const data = meta(socket);
-
-    if (!joinAllowed(data.ip)) {
-      send(socket, { type: "error", code: "rate_limit" });
       return;
     }
 

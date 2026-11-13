@@ -108,8 +108,9 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
         state.stats.happy,
       );
 
+      // Idle adalah keadaan default. "Happy" hanya dipakai sebentar setelah
+      // pemain berinteraksi, supaya mata kucing tetap terbuka saat diam.
       if (lowest < 30) mood = "sad";
-      else if (state.stats.happy >= 70) mood = "happy";
       else mood = "idle";
     }
 
@@ -577,6 +578,10 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
 
   function onCatPointerDown(event) {
     if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    // Hanya area kucing yang boleh memicu elus/marah. Bantal, balon ucapan,
+    // dan ruang kosong di dalam cat-wrap tidak dihitung sebagai kucing.
+    if (!els.cat || !els.cat.contains(event.target)) return;
 
     if (state.sleeping) {
       if (feedback) feedback.toast(t("toast.sleeping"));

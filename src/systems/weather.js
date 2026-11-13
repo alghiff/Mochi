@@ -179,11 +179,12 @@ export function createWeather({ doc, els, getState, t, onChange, isReducedMotion
     if (els.room) els.room.setAttribute("data-weather", weather.id);
 
     if (els.weatherIcon) {
-      // Ikon vektor kalau elemen gambarnya ada, emoji sebagai cadangan.
-      const image = els.weatherIcon.querySelector("img");
+      // Ikon memakai simbol SVG inline supaya tidak ada request gambar
+      // terpisah yang bisa gagal (404/CSP/cache) dan meninggalkan ikon rusak.
+      const use = els.weatherIcon.querySelector("use");
 
-      if (weather.svg && image) {
-        image.setAttribute("src", weather.svg);
+      if (weather.symbol && use) {
+        use.setAttribute("href", `#${weather.symbol}`);
       } else {
         els.weatherIcon.textContent = weather.icon;
       }

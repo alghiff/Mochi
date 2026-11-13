@@ -109,10 +109,15 @@ export function sanitizeState(raw) {
   else clean.acc = null;
 
   if (Array.isArray(raw.ownedFur)) {
-    clean.ownedFur = raw.ownedFur.filter((id) => typeof id === "string" && validId(FURS, id));
+    // Set membuang duplikat dari cloud save yang rusak/dimodifikasi.
+    clean.ownedFur = [
+      ...new Set(raw.ownedFur.filter((id) => typeof id === "string" && validId(FURS, id))),
+    ];
   }
   if (Array.isArray(raw.ownedAcc)) {
-    clean.ownedAcc = raw.ownedAcc.filter((id) => typeof id === "string" && validId(ACCS, id));
+    clean.ownedAcc = [
+      ...new Set(raw.ownedAcc.filter((id) => typeof id === "string" && validId(ACCS, id))),
+    ];
   }
 
   if (clean.ownedFur.indexOf("cream") === -1) clean.ownedFur.unshift("cream");

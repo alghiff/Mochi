@@ -37,15 +37,13 @@
   box-sizing: border-box;
 }
 
-/*
- * Wadah definisi SVG (gradien, filter, gunting). Disimpan di luar SVG kucing
- * supaya tidak ikut terduplikasi saat kucing di-clone untuk pemain multiplayer.
- */
-.svg-defs {
+/* Sprite ikon cuaca inline; tidak memakan ruang layout. */
+.svg-sprite {
   position: absolute;
   width: 0;
   height: 0;
   overflow: hidden;
+  pointer-events: none;
 }
 
 html {

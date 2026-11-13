@@ -1,9 +1,8 @@
 /*
  * Regression test modul cuaca.
  *
- * Ikon cuaca memakai gambar SVG di dalam span. Fungsi apply() harus
- * mengganti atribut src, bukan mengisi ulang span (textContent = "" akan
- * menghapus elemen gambarnya).
+ * Ikon cuaca memakai simbol SVG inline di dalam span. Fungsi apply() harus
+ * mengganti atribut href pada <use>, bukan mengisi ulang span.
  */
 
 import { createWeather } from "../src/systems/weather.js";
@@ -13,8 +12,8 @@ function createHarness() {
     weather: { id: "spring", nextAt: Date.now() + 600_000 },
   };
 
-  const image = {
-    attrs: { src: "/assets/svg/weather-spring.svg" },
+  const use = {
+    attrs: { href: "#wx-spring" },
     setAttribute(key, value) {
       this.attrs[key] = value;
     },
@@ -25,7 +24,7 @@ function createHarness() {
 
   const icon = {
     textContent: "",
-    querySelector: (selector) => (selector === "img" ? image : null),
+    querySelector: (selector) => (selector === "use" ? use : null),
   };
 
   const els = {
@@ -64,16 +63,16 @@ function createHarness() {
     isReducedMotion: () => true,
   });
 
-  return { weather, state, image, icon, els };
+  return { weather, state, use, icon, els };
 }
 
-Deno.test("ikon cuaca diganti lewat atribut src", () => {
-  const { weather, image } = createHarness();
+Deno.test("ikon cuaca diganti lewat atribut href", () => {
+  const { weather, use } = createHarness();
 
   weather.setWeather("rain");
 
-  if (image.getAttribute("src") !== "/assets/svg/weather-rain.svg") {
-    throw new Error(`Src ikon salah: ${image.getAttribute("src")}`);
+  if (use.getAttribute("href") !== "#wx-rain") {
+    throw new Error(`Href ikon salah: ${use.getAttribute("href")}`);
   }
 });
 
