@@ -36,14 +36,6 @@
         <stop offset="0" style="stop-color:#ffc2cd" />
         <stop offset="1" style="stop-color:var(--ear)" />
       </linearGradient>
-
-      <radialGradient id="m-iris" cx="50%" cy="40%" r="62%">
-        <stop offset="0" style="stop-color:#fff0c4" />
-        <stop offset=".42" style="stop-color:#e8a33d" />
-        <stop offset=".86" style="stop-color:#9c6420" />
-        <stop offset="1" style="stop-color:#5d3a12" />
-      </radialGradient>
-
       <radialGradient id="m-nose" cx="40%" cy="26%" r="82%">
         <stop offset="0" style="stop-color:#ffa3ae" />
         <stop offset=".55" style="stop-color:#e0798a" />
@@ -196,13 +188,6 @@
       </clipPath>
 
       <!-- ---------- Gunting mata ---------- -->
-      <clipPath id="m-eye-l">
-        <ellipse cx="95" cy="95" rx="17" ry="19" />
-      </clipPath>
-
-      <clipPath id="m-eye-r">
-        <ellipse cx="145" cy="95" rx="17" ry="19" />
-      </clipPath>
     </defs>
   </svg>
 
@@ -626,45 +611,28 @@
 
                   <!-- Mata -->
                   <g class="eyes eyes-open">
-                    <ellipse cx="95" cy="95" rx="17" ry="19" fill="#f7efe6" />
-                    <g clip-path="url(#m-eye-l)">
-                      <circle cx="95" cy="97" r="13" fill="url(#m-iris)" />
-                      <ellipse cx="95" cy="97" rx="4.6" ry="11" fill="#2a1a20" />
-                      <circle cx="88" cy="89" r="4.6" fill="#fff" opacity=".95" />
-                      <circle cx="102" cy="102" r="2.4" fill="#fff" opacity=".6" />
-                      <path d="M76 80h38v-12H76Z" fill="#2b1a24" opacity=".16" />
-                    </g>
-                    <ellipse cx="95" cy="95" rx="17" ry="19" fill="none" style="stroke:#6b4653"
-                      stroke-width="2" opacity=".8" />
-
-                    <ellipse cx="145" cy="95" rx="17" ry="19" fill="#f7efe6" />
-                    <g clip-path="url(#m-eye-r)">
-                      <circle cx="145" cy="97" r="13" fill="url(#m-iris)" />
-                      <ellipse cx="145" cy="97" rx="4.6" ry="11" fill="#2a1a20" />
-                      <circle cx="138" cy="89" r="4.6" fill="#fff" opacity=".95" />
-                      <circle cx="152" cy="102" r="2.4" fill="#fff" opacity=".6" />
-                      <path d="M126 80h38v-12h-38Z" fill="#2b1a24" opacity=".16" />
-                    </g>
-                    <ellipse cx="145" cy="95" rx="17" ry="19" fill="none" style="stroke:#6b4653"
-                      stroke-width="2" opacity=".8" />
+                    <ellipse cx="95" cy="96" rx="13" ry="15" fill="#241419" />
+                    <circle cx="89" cy="90" r="4.2" fill="#fff" />
+                    <ellipse cx="145" cy="96" rx="13" ry="15" fill="#241419" />
+                    <circle cx="139" cy="90" r="4.2" fill="#fff" />
                   </g>
 
-                  <g class="eyes eyes-happy" fill="none" style="stroke:#6b4653" stroke-width="3.4"
+                  <g class="eyes eyes-happy" fill="none" style="stroke:#241419" stroke-width="3.6"
                     stroke-linecap="round">
-                    <path d="M80 97q15-17 30 0" />
-                    <path d="M130 97q15-17 30 0" />
+                    <path d="M82 98q13-15 26 0" />
+                    <path d="M132 98q13-15 26 0" />
                   </g>
 
-                  <g class="eyes eyes-closed" fill="none" style="stroke:#6b4653" stroke-width="3.2"
+                  <g class="eyes eyes-closed" fill="none" style="stroke:#241419" stroke-width="3.6"
                     stroke-linecap="round">
-                    <path d="M80 96q15 12 30 0" />
-                    <path d="M130 96q15 12 30 0" />
+                    <path d="M82 97q13 12 26 0" />
+                    <path d="M132 97q13 12 26 0" />
                   </g>
 
-                  <g class="eyes eyes-annoyed" fill="none" style="stroke:#6b4653" stroke-width="3"
+                  <g class="eyes eyes-annoyed" fill="none" style="stroke:#241419" stroke-width="3.4"
                     stroke-linecap="round">
-                    <path d="M82 88l26 9" />
-                    <path d="M158 88l-26 9" />
+                    <path d="M84 88l22 9" />
+                    <path d="M156 88l-22 9" />
                   </g>
 
                   <!-- Alis -->
