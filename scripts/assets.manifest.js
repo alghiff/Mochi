@@ -52,6 +52,11 @@ export const ACCESSORIES = [
   { id: "medal", prompt: "a purple ribbon with a golden star medal" },
   { id: "raincoat", prompt: "a yellow raincoat with buttons" },
   { id: "backpack", prompt: "a small lavender purple backpack" },
+  { id: "headphones", prompt: "a pair of cute pastel headphones" },
+  { id: "sunglasses", prompt: "a pair of stylish dark sunglasses" },
+  { id: "mask", prompt: "a light blue surgical face mask" },
+  { id: "tie", prompt: "a neat red necktie" },
+  { id: "wings", prompt: "a pair of small butterfly wings" },
 ];
 
 export const WEATHER_SCENES = [
