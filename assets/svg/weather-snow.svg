@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img"
+  aria-label="Musim salju">
+  <circle cx="16" cy="16" r="14" fill="#dbeafe" opacity=".35" />
+  <g stroke="#8ab6ff" stroke-width="2" stroke-linecap="round">
+    <path d="M16 5v22M6.6 10.5l18.8 11M25.4 10.5 6.6 21.5" />
+    <path d="M16 5l-2.6 2.8M16 5l2.6 2.8M16 27l-2.6-2.8M16 27l2.6-2.8" />
+    <path d="M6.6 10.5l3.6.5M6.6 10.5l1.6-3.2M25.4 10.5l-3.6.5M25.4 10.5l-1.6-3.2" />
+    <path d="M25.4 21.5l-3.6-.5M25.4 21.5l-1.6 3.2M6.6 21.5l3.6-.5M6.6 21.5l1.6 3.2" />
+  </g>
+  <circle cx="16" cy="16" r="3" fill="#fff7ef" />
+</svg>

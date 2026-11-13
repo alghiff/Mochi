@@ -137,6 +137,24 @@ Lima aksesori musiman hanya bisa dibeli saat cuacanya sedang aktif:
 `flowercrown` (spring), `sunhat` (hot), `leafcrown` (autumn), `raincoat` (rain),
 dan `earmuffs` (snow). Setelah dibeli, item tetap dimiliki selamanya.
 
+Sebelas aksesori digambar langsung sebagai vektor di dalam SVG kucing
+(`beanie`, `scarf`, `glasses`, `bow`, `flowercrown`, `sunhat`, `earmuffs`,
+`leafcrown`, `crown`, `partyhat`, `bell`, `medal`, `raincoat`, `backpack`), jadi
+tampilannya konsisten di semua ukuran layar. Sisanya masih memakai emoji.
+
+## Ikon dan badge vektor
+
+Dua set gambar SVG dipakai game:
+
+- `assets/svg/weather-*.svg` — ikon untuk 5 cuaca, dipakai di pil cuaca.
+- `assets/svg/badge-*.svg` — badge untuk 6 misi harian, dipakai di panel misi.
+
+Cara membuat ikon baru:
+
+1. Simpan SVG di `assets/svg/` dengan nama huruf kecil, angka, dan tanda hubung.
+2. Daftarkan path-nya di `src/data/weather.js` atau `src/data/quests.js`.
+3. Jalankan `deno task test` — test aset akan menolak kalau file tidak ada.
+
 ## Mengganti lagu latar
 
 Lagu yang dipakai ada di `assets/` dan path-nya didaftarkan di
@@ -159,6 +177,9 @@ Sesuai aturan autoplay browser, lagu baru mulai setelah interaksi pertama
 index.html              Markup game, overlay, dan UI
 assets/
   *.mp3                 Lagu latar (disajikan lewat allowlist audio)
+  svg/
+    weather-*.svg       Ikon vektor untuk 5 cuaca
+    badge-*.svg         Badge vektor untuk 6 misi harian
 styles/
   base.css              Reset, token warna, tipografi
   scene.css             Rumah, taman, kucing, cuaca, lampu
@@ -209,6 +230,8 @@ tests/
   server_test.js        Smoke test HTTP, static, cloud, rate limit
   i18n_test.js          Konsistensi terjemahan id/ja/ko
   shop_test.js          Regression test toko (koin & aksesori)
+  weather_test.js       Regression test ikon cuaca
+  assets_test.js        Integritas file SVG (cuaca, badge, aksesori)
 deploy/
   Caddyfile             Contoh reverse proxy lokal untuk tunnel
   cloudflared-config.example.yml
@@ -569,10 +592,10 @@ permintaan bisa memengaruhi CSP dan pemeriksaan Origin.
   `object-src 'none'`, `frame-ancestors 'none'`. `connect-src` dibatasi ke
   origin sendiri + WebSocket host yang sama.
 - **Allowlist statis** — hanya `/`, `/index.html`, `/styles/*.css`,
-  `/src/**/*.js`, dan file audio di `/assets/` (`mp3`, `m4a`, `ogg`, `opus`,
-  `wav`) yang disajikan. `server/`, `data/`, `deno.json`, `deno.lock`,
-  `README.md`, `Dockerfile`, dan file titik selalu 404, termasuk percobaan
-  traversal `../` dan `%2e%2e`.
+  `/src/**/*.js`, file audio di `/assets/` (`mp3`, `m4a`, `ogg`, `opus`,
+  `wav`), dan gambar SVG di `/assets/svg/` yang disajikan. `server/`, `data/`,
+  `deno.json`, `deno.lock`, `README.md`, `Dockerfile`, dan file titik selalu
+  404, termasuk percobaan traversal `../` dan `%2e%2e`.
 - **Header lain** — `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
   `Referrer-Policy`, `Cross-Origin-Resource-Policy`, `Cross-Origin-Opener-Policy`,
   dan `Permissions-Policy` (kamera/lokasi dimatikan, mikrofon hanya untuk self).

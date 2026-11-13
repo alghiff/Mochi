@@ -123,6 +123,29 @@ Deno.test("halaman utama memakai header keamanan", async () => {
   }
 });
 
+Deno.test("gambar SVG dilayani dengan tipe yang benar", async () => {
+  const server = await startServer();
+
+  try {
+    const res = await fetch(`${server.base}/assets/svg/weather-spring.svg`);
+
+    assertEquals(res.status, 200, "SVG harus dilayani");
+    assertEquals(
+      res.headers.get("content-type"),
+      "image/svg+xml",
+      "tipe konten SVG harus benar",
+    );
+
+    const traversal = await fetch(`${server.base}/assets/svg/../../deno.json`);
+    assertEquals(traversal.status, 404, "traversal dari folder svg harus 404");
+
+    const missing = await fetch(`${server.base}/assets/svg/tidak-ada.svg`);
+    assertEquals(missing.status, 404, "svg yang tidak ada harus 404");
+  } finally {
+    await server.stop();
+  }
+});
+
 Deno.test("file di luar allowlist tidak dilayani", async () => {
   const server = await startServer();
 

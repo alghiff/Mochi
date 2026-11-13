@@ -571,7 +571,17 @@
 .cat[data-acc="beanie"] .acc-beanie,
 .cat[data-acc="scarf"] .acc-scarf,
 .cat[data-acc="glasses"] .acc-glasses,
-.cat[data-acc="bow"] .acc-bow {
+.cat[data-acc="bow"] .acc-bow,
+.cat[data-acc="flowercrown"] .acc-flowercrown,
+.cat[data-acc="sunhat"] .acc-sunhat,
+.cat[data-acc="earmuffs"] .acc-earmuffs,
+.cat[data-acc="leafcrown"] .acc-leafcrown,
+.cat[data-acc="crown"] .acc-crown,
+.cat[data-acc="partyhat"] .acc-partyhat,
+.cat[data-acc="bell"] .acc-bell,
+.cat[data-acc="medal"] .acc-medal,
+.cat[data-acc="raincoat"] .acc-raincoat,
+.cat[data-acc="backpack"] .acc-backpack {
   display: inline;
 }
 

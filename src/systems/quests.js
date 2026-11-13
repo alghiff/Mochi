@@ -115,7 +115,17 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
       const icon = doc.createElement("span");
       icon.className = "quest-icon";
       icon.setAttribute("aria-hidden", "true");
-      icon.textContent = quest.icon;
+
+      if (quest.badge) {
+        const badge = doc.createElement("img");
+        badge.src = quest.badge;
+        badge.alt = "";
+        badge.width = 34;
+        badge.height = 34;
+        icon.appendChild(badge);
+      } else {
+        icon.textContent = quest.icon;
+      }
 
       const body = doc.createElement("div");
       body.className = "quest-body";

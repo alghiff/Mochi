@@ -1,9 +1,40 @@
+/*
+ * Cuaca game.
+ *
+ * `icon` dipakai sebagai fallback (emoji), `svg` menunjuk file gambar vektor
+ * di assets/svg/ yang dipakai di pil cuaca.
+ */
 export const WEATHERS = [
-  { id: "spring", icon: "🌸", nameKey: "weather.spring" },
-  { id: "hot", icon: "☀️", nameKey: "weather.hot" },
-  { id: "autumn", icon: "🍂", nameKey: "weather.autumn" },
-  { id: "rain", icon: "🌧️", nameKey: "weather.rain" },
-  { id: "snow", icon: "❄️", nameKey: "weather.snow" },
+  {
+    id: "spring",
+    icon: "🌸",
+    svg: "/assets/svg/weather-spring.svg",
+    nameKey: "weather.spring",
+  },
+  {
+    id: "hot",
+    icon: "☀️",
+    svg: "/assets/svg/weather-hot.svg",
+    nameKey: "weather.hot",
+  },
+  {
+    id: "autumn",
+    icon: "🍂",
+    svg: "/assets/svg/weather-autumn.svg",
+    nameKey: "weather.autumn",
+  },
+  {
+    id: "rain",
+    icon: "🌧️",
+    svg: "/assets/svg/weather-rain.svg",
+    nameKey: "weather.rain",
+  },
+  {
+    id: "snow",
+    icon: "❄️",
+    svg: "/assets/svg/weather-snow.svg",
+    nameKey: "weather.snow",
+  },
 ];
 
 export const WEATHER_ORDER = ["spring", "hot", "autumn", "rain", "snow"];

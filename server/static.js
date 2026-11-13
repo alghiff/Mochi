@@ -2,15 +2,17 @@ import { securityHeaders, textResponse } from "./security.js";
 
 /*
  * Server statis dengan allowlist ketat.
- * Hanya index.html, styles/*.css, src/**\/*.js, dan file audio di assets/
- * yang boleh diakses. Folder server/, data/, deno.json, deno.lock, dan file
- * titik tidak pernah disajikan, meskipun URL-nya ditebak.
+ * Hanya index.html, styles/*.css, src/**\/*.js, file audio di assets/, dan
+ * gambar SVG di assets/svg/ yang boleh diakses. Folder server/, data/,
+ * deno.json, deno.lock, dan file titik tidak pernah disajikan, meskipun
+ * URL-nya ditebak.
  */
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".svg": "image/svg+xml",
   ".mp3": "audio/mpeg",
   ".m4a": "audio/mp4",
   ".ogg": "audio/ogg",
@@ -26,6 +28,7 @@ const ALLOWED = [
   /^\/styles\/[a-z0-9][a-z0-9-]*\.css$/,
   /^\/src\/(?:[a-z0-9][a-z0-9-]*\/)*[a-z0-9][a-z0-9-]*\.js$/,
   /^\/assets\/[^/\\]+\.(?:mp3|m4a|ogg|opus|wav)$/i,
+  /^\/assets\/svg\/[a-z0-9][a-z0-9-]*\.svg$/i,
 ];
 
 function resolvePath(pathname) {

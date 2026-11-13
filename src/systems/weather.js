@@ -85,7 +85,16 @@ export function createWeather({ doc, els, getState, t, onChange, isReducedMotion
 
     if (els.room) els.room.setAttribute("data-weather", weather.id);
 
-    if (els.weatherIcon) els.weatherIcon.textContent = weather.icon;
+    if (els.weatherIcon) {
+      // Ikon vektor kalau elemen gambarnya ada, emoji sebagai cadangan.
+      const image = els.weatherIcon.querySelector("img");
+
+      if (weather.svg && image) {
+        image.setAttribute("src", weather.svg);
+      } else {
+        els.weatherIcon.textContent = weather.icon;
+      }
+    }
     if (els.weatherLabel) els.weatherLabel.textContent = name;
     if (els.weatherPill) {
       els.weatherPill.setAttribute("data-weather", weather.id);
