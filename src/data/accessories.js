@@ -1,5 +1,3 @@
-import { FURS } from "./furs.js";
-
 /*
  * slot: head | face | neck | body | back
  * svg: true berarti aksesorinya digambar langsung di SVG kucing.
@@ -11,10 +9,24 @@ export const ACCS = [
   { id: "glasses", nameKey: "acc.glasses", price: 30, icon: "👓", slot: "face", svg: true },
   { id: "bow", nameKey: "acc.bow", price: 15, icon: "🎀", slot: "head", svg: true },
 
-  { id: "flowercrown", nameKey: "acc.flowercrown", price: 35, icon: "🌸", slot: "head", season: "spring" },
+  {
+    id: "flowercrown",
+    nameKey: "acc.flowercrown",
+    price: 35,
+    icon: "🌸",
+    slot: "head",
+    season: "spring",
+  },
   { id: "sunhat", nameKey: "acc.sunhat", price: 35, icon: "👒", slot: "head", season: "hot" },
   { id: "earmuffs", nameKey: "acc.earmuffs", price: 35, icon: "❄️", slot: "head", season: "snow" },
-  { id: "leafcrown", nameKey: "acc.leafcrown", price: 35, icon: "🍁", slot: "head", season: "autumn" },
+  {
+    id: "leafcrown",
+    nameKey: "acc.leafcrown",
+    price: 35,
+    icon: "🍁",
+    slot: "head",
+    season: "autumn",
+  },
   { id: "raincoat", nameKey: "acc.raincoat", price: 40, icon: "🧥", slot: "body", season: "rain" },
 
   { id: "partyhat", nameKey: "acc.partyhat", price: 28, icon: "🎩", slot: "head" },
@@ -26,13 +38,9 @@ export const ACCS = [
   { id: "bell", nameKey: "acc.bell", price: 22, icon: "🔔", slot: "neck" },
   { id: "tie", nameKey: "acc.tie", price: 26, icon: "👔", slot: "neck" },
   { id: "medal", nameKey: "acc.medal", price: 45, icon: "🏅", slot: "neck" },
-  { id: "wings", nameKey: "acc.wings", price: 60, icon: "🦋", slot: "back" }
+  { id: "wings", nameKey: "acc.wings", price: 60, icon: "🦋", slot: "back" },
 ];
 
 export function accById(id) {
   return ACCS.find((item) => item.id === id) || null;
-}
-
-export function furById(id) {
-  return FURS.find((item) => item.id === id) || null;
 }

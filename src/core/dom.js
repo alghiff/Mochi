@@ -13,7 +13,6 @@ export function collectDom(doc) {
     fx: byId("fx"),
     butterflies: byId("butterflies"),
     hint: byId("hint"),
-    dock: byId("dock"),
     petName: byId("pet-name"),
     level: byId("level"),
     xpFill: byId("xp-fill"),
@@ -92,7 +91,7 @@ export function collectDom(doc) {
     weatherLabel: byId("weather-label"),
     weatherFx: byId("weather-fx"),
     windowFx: byId("window-fx"),
-    remoteCats: byId("remote-cats")
+    remoteCats: byId("remote-cats"),
   };
 
   const statEls = {};
@@ -101,7 +100,7 @@ export function collectDom(doc) {
       value: byId("val-" + key),
       bar: byId("bar-" + key),
       wrap: byId("bar-" + key + "-wrap"),
-      card: doc.querySelector(".stat--" + key)
+      card: doc.querySelector(".stat--" + key),
     };
   }
 

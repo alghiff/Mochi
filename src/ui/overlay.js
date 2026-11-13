@@ -12,9 +12,14 @@ export function createOverlays({ win, doc, els }) {
   }
 
   function focusFirst(overlay) {
-    const target = overlay.querySelector("button:not([disabled]), input:not([disabled]), [tabindex='0']");
+    const target = overlay.querySelector(
+      "button:not([disabled]), input:not([disabled]), [tabindex='0']",
+    );
     if (!target) return;
     win.setTimeout(() => {
+      // Overlay bisa sudah tertutup sebelum timer menyala.
+      if (overlay.hidden) return;
+
       try {
         target.focus();
       } catch {
@@ -26,13 +31,25 @@ export function createOverlays({ win, doc, els }) {
   function open(overlay) {
     if (!overlay) return;
 
+    /*
+     * Dialog konfirmasi yang sedang menunggu jawaban tidak boleh hilang
+     * tanpa jawaban, karena pemanggilnya akan menunggu selamanya.
+     */
+    if (els.confirmOverlay && !els.confirmOverlay.hidden && els.confirmOverlay !== overlay) {
+      closeConfirm(false);
+    }
+
+    // Fokus asal dicatat sebelum overlay lain disembunyikan, supaya fokus
+    // tidak dikembalikan ke elemen di dalam overlay yang sudah tertutup.
+    const previous = doc.activeElement;
+
     for (const item of list) {
       if (item !== overlay) item.hidden = true;
     }
 
     if (!overlay.hidden) return;
 
-    lastFocus = doc.activeElement;
+    lastFocus = previous;
     overlay.hidden = false;
     updatePause();
     focusFirst(overlay);
@@ -113,11 +130,12 @@ export function createOverlays({ win, doc, els }) {
 
   function trapFocus(event, overlay) {
     const nodes = overlay.querySelectorAll(
-      "button, input, [href], [tabindex]:not([tabindex='-1'])"
+      "button, input, [href], [tabindex]:not([tabindex='-1'])",
     );
 
-    const focusable = Array.prototype.filter.call(nodes, (node) => {
-      return !node.disabled && node.getAttribute("aria-hidden") !== "true" && node.offsetParent !== null;
+    const focusable = Array.from(nodes).filter((node) => {
+      return !node.disabled && node.getAttribute("aria-hidden") !== "true" &&
+        node.offsetParent !== null;
     });
 
     if (!focusable.length) return;
@@ -150,12 +168,13 @@ export function createOverlays({ win, doc, els }) {
 
   return {
     list,
+    top,
     open,
     close,
     closeTop,
     confirm,
     isPaused: () => paused,
     updatePause,
-    trapFocus
+    trapFocus,
   };
 }

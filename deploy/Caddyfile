@@ -10,7 +10,8 @@
 :8080 {
 	bind 127.0.0.1
 
-	# Caddy meneruskan Host asli dan X-Forwarded-For secara default,
-	# sehingga CSP, pemeriksaan Origin, dan rate limit per IP tetap benar.
+	# Caddy meneruskan Host asli dan menambahkan alamat peer sebagai entri
+	# terakhir X-Forwarded-For. Server memakai entri itu hanya kalau peer
+	# ada di TRUSTED_PROXIES (default: loopback).
 	reverse_proxy 127.0.0.1:8000
 }

@@ -1,7 +1,16 @@
 import { ACCS } from "../src/data/accessories.js";
 import { FURS } from "../src/data/furs.js";
 import { sanitizeName } from "../src/core/util.js";
-import { IDLE_MS, MAX_MESSAGE_BYTES, ROOM_TTL_MS, WS_RATE_LIMIT, WS_RATE_WINDOW_MS } from "./config.js";
+import {
+  IDLE_MS,
+  MAX_MESSAGE_BYTES,
+  MAX_ROOMS,
+  ROOM_IDLE_MS,
+  ROOM_TTL_MS,
+  WS_IP_RATE_LIMIT,
+  WS_RATE_LIMIT,
+  WS_RATE_WINDOW_MS,
+} from "./config.js";
 
 /*
  * Manajemen room multiplayer.
@@ -13,6 +22,17 @@ import { IDLE_MS, MAX_MESSAGE_BYTES, ROOM_TTL_MS, WS_RATE_LIMIT, WS_RATE_WINDOW_
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 5;
+const CODE_PATTERN = new RegExp(`^[A-Z0-9]{${CODE_LENGTH}}$`);
+
+/* Batas room yang boleh dibuat oleh satu alamat IP. */
+const ROOMS_PER_IP = 5;
+
+/* Batas percobaan gabung room per IP, supaya kode room tidak bisa ditebak. */
+const JOIN_LIMIT = 30;
+const JOIN_WINDOW_MS = 60_000;
+
+/* Jeda minimal antara dua "belai" ke pemain yang sama. */
+const PET_COOLDOWN_MS = 1_000;
 
 const FUR_IDS = new Set(FURS.map((item) => item.id));
 const ACC_IDS = new Set(ACCS.map((item) => item.id));
@@ -44,12 +64,20 @@ function makeCode(rooms) {
 }
 
 function send(socket, payload) {
-  if (!socket || socket.readyState !== 1) return;
+  if (!socket || socket.readyState !== 1) return false;
 
   try {
     socket.send(JSON.stringify(payload));
+    return true;
   } catch {
-    /* socket sudah tertutup */
+    // Peer sudah tertutup. Tutup juga sisi server supaya tidak menumpuk.
+    try {
+      socket.close();
+    } catch {
+      /* sudah tertutup */
+    }
+
+    return false;
   }
 }
 
@@ -78,7 +106,7 @@ export function cleanPublicState(raw) {
   const fur = typeof raw.fur === "string" && FUR_IDS.has(raw.fur) ? raw.fur : "cream";
   const acc = typeof raw.acc === "string" && ACC_IDS.has(raw.acc) ? raw.acc : null;
   const mood = typeof raw.mood === "string" && MOODS.has(raw.mood) ? raw.mood : "idle";
-  const scene = raw.scene === "outside" ? "outside" : "inside";
+  const scene = typeof raw.scene === "string" && SCENES.has(raw.scene) ? raw.scene : "inside";
 
   return {
     name: sanitizeName(raw.name),
@@ -87,22 +115,42 @@ export function cleanPublicState(raw) {
     acc,
     mood,
     sleeping: Boolean(raw.sleeping),
-    scene
+    scene,
   };
 }
 
-export function createRooms({ maxPlayers = 6 } = {}) {
+export function createRooms({ maxPlayers = 6, maxRooms = MAX_ROOMS } = {}) {
   const rooms = new Map();
   const limit = Math.max(2, Math.min(12, Math.floor(Number(maxPlayers) || 6)));
+  const roomLimit = Math.max(5, Math.min(1000, Math.floor(Number(maxRooms) || MAX_ROOMS)));
 
-  function meta(socket) {
+  /* Pembatas laju per alamat IP (semua socket dari IP itu berbagi jatah). */
+  const ipBuckets = new Map();
+
+  /* Percobaan gabung room per IP. */
+  const joinAttempts = new Map();
+
+  function joinAllowed(ip) {
+    const now = Date.now();
+    const times = (joinAttempts.get(ip) || []).filter((time) => now - time < JOIN_WINDOW_MS);
+
+    times.push(now);
+    joinAttempts.set(ip, times);
+
+    if (joinAttempts.size > 5000) joinAttempts.clear();
+
+    return times.length <= JOIN_LIMIT;
+  }
+
+  function meta(socket, ip) {
     if (!socket._mochi) {
       socket._mochi = {
         id: makeId(),
+        ip: ip || "local",
         state: null,
         room: null,
         lastSeen: Date.now(),
-        rateTimes: []
+        rateTimes: [],
       };
     }
 
@@ -115,7 +163,49 @@ export function createRooms({ maxPlayers = 6 } = {}) {
     times.push(now);
     data.rateTimes = times;
 
-    return times.length > WS_RATE_LIMIT;
+    if (times.length > WS_RATE_LIMIT) return true;
+
+    // Batas tambahan untuk seluruh koneksi dari satu alamat IP.
+    const ip = data.ip;
+    const ipTimes = (ipBuckets.get(ip) || []).filter((time) => now - time < WS_RATE_WINDOW_MS);
+    ipTimes.push(now);
+    ipBuckets.set(ip, ipTimes);
+
+    if (ipBuckets.size > 5000) ipBuckets.clear();
+
+    return ipTimes.length > WS_IP_RATE_LIMIT;
+  }
+
+  function roomsForIp(ip) {
+    let count = 0;
+
+    for (const room of rooms.values()) {
+      if (room.ownerIp === ip) count += 1;
+    }
+
+    return count;
+  }
+
+  function evictOldestRoom() {
+    let oldest = null;
+
+    for (const room of rooms.values()) {
+      if (!oldest || room.lastActivity < oldest.lastActivity) oldest = room;
+    }
+
+    if (!oldest) return;
+
+    for (const client of Array.from(oldest.clients.values())) {
+      leaveRoom(client.socket, false);
+
+      try {
+        client.socket.close(1000, "room replaced");
+      } catch {
+        /* sudah tertutup */
+      }
+    }
+
+    rooms.delete(oldest.code);
   }
 
   function leaveRoom(socket, notify) {
@@ -154,7 +244,6 @@ export function createRooms({ maxPlayers = 6 } = {}) {
       id: data.id,
       socket,
       state: data.state,
-      joinedAt: Date.now()
     });
     room.lastActivity = Date.now();
 
@@ -166,7 +255,7 @@ export function createRooms({ maxPlayers = 6 } = {}) {
       max: limit,
       joined: room.clients.size,
       left: Math.max(0, limit - room.clients.size),
-      players: publicPlayers(room, data.id)
+      players: publicPlayers(room, data.id),
     });
 
     broadcast(room, { type: "joined", id: data.id, state: data.state }, data.id);
@@ -176,6 +265,22 @@ export function createRooms({ maxPlayers = 6 } = {}) {
     leaveRoom(socket, false);
 
     const data = meta(socket);
+
+    if (roomsForIp(data.ip) >= ROOMS_PER_IP) {
+      send(socket, { type: "error", code: "rate_limit" });
+      return;
+    }
+
+    // Batasi jumlah room aktif supaya penyang tidak bisa memenuhi memori.
+    if (rooms.size >= roomLimit) {
+      evictOldestRoom();
+    }
+
+    if (rooms.size >= roomLimit) {
+      send(socket, { type: "error", code: "server_full" });
+      return;
+    }
+
     const code = makeCode(rooms);
 
     if (!code) {
@@ -186,9 +291,10 @@ export function createRooms({ maxPlayers = 6 } = {}) {
     const room = {
       code,
       hostId: data.id,
+      ownerIp: data.ip,
       clients: new Map(),
       createdAt: Date.now(),
-      lastActivity: Date.now()
+      lastActivity: Date.now(),
     };
 
     rooms.set(code, room);
@@ -198,7 +304,7 @@ export function createRooms({ maxPlayers = 6 } = {}) {
   function join(socket, rawCode) {
     const code = typeof rawCode === "string" ? rawCode.toUpperCase().trim() : "";
 
-    if (!new RegExp(`^[A-Z0-9]{${CODE_LENGTH}}$`).test(code)) {
+    if (!CODE_PATTERN.test(code)) {
       send(socket, { type: "error", code: "invalid_code" });
       return;
     }
@@ -212,6 +318,11 @@ export function createRooms({ maxPlayers = 6 } = {}) {
 
     const data = meta(socket);
 
+    if (!joinAllowed(data.ip)) {
+      send(socket, { type: "error", code: "rate_limit" });
+      return;
+    }
+
     if (data.room === room) {
       send(socket, {
         type: "room",
@@ -221,7 +332,7 @@ export function createRooms({ maxPlayers = 6 } = {}) {
         max: limit,
         joined: room.clients.size,
         left: Math.max(0, limit - room.clients.size),
-        players: publicPlayers(room, data.id)
+        players: publicPlayers(room, data.id),
       });
       return;
     }
@@ -277,11 +388,19 @@ export function createRooms({ maxPlayers = 6 } = {}) {
       const friend = room.clients.get(target);
 
       if (friend) {
+        // Cegah spam belai ke satu pemain.
+        const now = Date.now();
+        const last = friend.pettedAt || 0;
+
+        if (now - last < PET_COOLDOWN_MS) return;
+
+        friend.pettedAt = now;
+
         send(friend.socket, {
           type: "petted",
           from: data.id,
           target: friend.id,
-          name
+          name,
         });
       }
 
@@ -291,7 +410,7 @@ export function createRooms({ maxPlayers = 6 } = {}) {
     broadcast(room, { type: "petted", from: data.id, name }, data.id);
   }
 
-  function message(socket, raw) {
+  function message(socket, raw, ip) {
     if (typeof raw !== "string") {
       send(socket, { type: "error", code: "bad_message" });
       return;
@@ -299,11 +418,24 @@ export function createRooms({ maxPlayers = 6 } = {}) {
 
     if (raw.length > MAX_MESSAGE_BYTES || encoder.encode(raw).byteLength > MAX_MESSAGE_BYTES) {
       send(socket, { type: "error", code: "message_too_large" });
+
+      // Pesan oversized sudah dibuffer transport, jadi socket ditutup biar
+      // tidak dipakai untuk flood berikutnya.
+      try {
+        socket.close(1009, "message too large");
+      } catch {
+        /* sudah tertutup */
+      }
+
       return;
     }
 
-    const data = meta(socket);
+    const data = meta(socket, ip);
     const now = Date.now();
+
+    // Aktivitas selalu dihitung,even kalau pesannya lebih dari batas laju,
+    // supaya pemain yang aktif tidak dianggap idle.
+    data.lastSeen = now;
 
     if (rateLimited(socket, now)) {
       send(socket, { type: "error", code: "rate_limit" });
@@ -323,7 +455,7 @@ export function createRooms({ maxPlayers = 6 } = {}) {
       return;
     }
 
-    data.lastSeen = now;
+    if (data.room) data.room.lastActivity = now;
 
     switch (payload.type) {
       case "create":
@@ -352,9 +484,9 @@ export function createRooms({ maxPlayers = 6 } = {}) {
     }
   }
 
-  function open(socket) {
-    meta(socket);
-    send(socket, { type: "hello", id: meta(socket).id });
+  function open(socket, ip) {
+    meta(socket, ip);
+    send(socket, { type: "hello", id: meta(socket, ip).id });
   }
 
   function close(socket) {
@@ -382,7 +514,10 @@ export function createRooms({ maxPlayers = 6 } = {}) {
         }
       }
 
-      if (room.clients.size === 0 || now - room.createdAt > ROOM_TTL_MS) {
+      const expired = now - room.createdAt > ROOM_TTL_MS;
+      const inactive = now - room.lastActivity > ROOM_IDLE_MS;
+
+      if (room.clients.size === 0 || expired || inactive) {
         for (const client of Array.from(room.clients.values())) {
           leaveRoom(client.socket, false);
 
@@ -399,7 +534,14 @@ export function createRooms({ maxPlayers = 6 } = {}) {
   }
 
   function startCleanup() {
-    return setInterval(cleanup, 30_000);
+    return setInterval(() => {
+      try {
+        cleanup();
+      } catch (error) {
+        // Interval yang melempar akan menghentikan seluruh server.
+        console.error("Kesalahan cleanup room:", error instanceof Error ? error.message : error);
+      }
+    }, 30_000);
   }
 
   return {
@@ -411,7 +553,7 @@ export function createRooms({ maxPlayers = 6 } = {}) {
     startCleanup,
     stats: () => ({
       rooms: rooms.size,
-      players: Array.from(rooms.values()).reduce((total, room) => total + room.clients.size, 0)
-    })
+      players: Array.from(rooms.values()).reduce((total, room) => total + room.clients.size, 0),
+    }),
   };
 }

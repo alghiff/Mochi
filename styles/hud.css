@@ -209,10 +209,22 @@
   height: 16px;
 }
 
-.stat--hunger .stat-icon { color: #ffb35c; background: rgba(255, 179, 92, .14); }
-.stat--clean .stat-icon { color: #8ab6ff; background: rgba(138, 182, 255, .14); }
-.stat--energy .stat-icon { color: #ffd166; background: rgba(255, 209, 102, .14); }
-.stat--happy .stat-icon { color: #ff9dbb; background: rgba(255, 157, 187, .14); }
+.stat--hunger .stat-icon {
+  color: #ffb35c;
+  background: rgba(255, 179, 92, .14);
+}
+.stat--clean .stat-icon {
+  color: #8ab6ff;
+  background: rgba(138, 182, 255, .14);
+}
+.stat--energy .stat-icon {
+  color: #ffd166;
+  background: rgba(255, 209, 102, .14);
+}
+.stat--happy .stat-icon {
+  color: #ff9dbb;
+  background: rgba(255, 157, 187, .14);
+}
 
 .stat-body {
   flex: 1;
@@ -261,10 +273,18 @@
   transition: width .55s var(--ease), background .4s ease;
 }
 
-.stat--hunger .bar i { background: linear-gradient(90deg, #ffd166, #ff9d5c); }
-.stat--clean .bar i { background: linear-gradient(90deg, #9fe3c6, #8ab6ff); }
-.stat--energy .bar i { background: linear-gradient(90deg, #ffe28a, #ffb35c); }
-.stat--happy .bar i { background: linear-gradient(90deg, #ffb0c8, #ff8a9e); }
+.stat--hunger .bar i {
+  background: linear-gradient(90deg, #ffd166, #ff9d5c);
+}
+.stat--clean .bar i {
+  background: linear-gradient(90deg, #9fe3c6, #8ab6ff);
+}
+.stat--energy .bar i {
+  background: linear-gradient(90deg, #ffe28a, #ffb35c);
+}
+.stat--happy .bar i {
+  background: linear-gradient(90deg, #ffb0c8, #ff8a9e);
+}
 
 .stat.is-low .bar i {
   background: linear-gradient(90deg, #ff8a8a, #f25f5f);
@@ -309,11 +329,21 @@
   white-space: nowrap;
 }
 
-.weather-pill[data-weather="rain"] { color: #c9e2ff; }
-.weather-pill[data-weather="hot"] { color: #ffe08a; }
-.weather-pill[data-weather="snow"] { color: #eaf6ff; }
-.weather-pill[data-weather="autumn"] { color: #ffc98a; }
-.weather-pill[data-weather="spring"] { color: #ffd0e2; }
+.weather-pill[data-weather="rain"] {
+  color: #c9e2ff;
+}
+.weather-pill[data-weather="hot"] {
+  color: #ffe08a;
+}
+.weather-pill[data-weather="snow"] {
+  color: #eaf6ff;
+}
+.weather-pill[data-weather="autumn"] {
+  color: #ffc98a;
+}
+.weather-pill[data-weather="spring"] {
+  color: #ffd0e2;
+}
 
 .quest-btn {
   position: relative;
@@ -347,8 +377,11 @@
 }
 
 @keyframes badgePop {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
 }
-
-

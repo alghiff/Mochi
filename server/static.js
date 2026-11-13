@@ -15,7 +15,7 @@ const MIME = {
   ".m4a": "audio/mp4",
   ".ogg": "audio/ogg",
   ".opus": "audio/ogg",
-  ".wav": "audio/wav"
+  ".wav": "audio/wav",
 };
 
 const AUDIO_EXT = new Set([".mp3", ".m4a", ".ogg", ".opus", ".wav"]);
@@ -25,7 +25,7 @@ const ALLOWED = [
   /^\/index\.html$/,
   /^\/styles\/[a-z0-9][a-z0-9-]*\.css$/,
   /^\/src\/(?:[a-z0-9][a-z0-9-]*\/)*[a-z0-9][a-z0-9-]*\.js$/,
-  /^\/assets\/[^/\\]+\.(?:mp3|m4a|ogg|opus|wav)$/i
+  /^\/assets\/[^/\\]+\.(?:mp3|m4a|ogg|opus|wav)$/i,
 ];
 
 function resolvePath(pathname) {
@@ -48,12 +48,12 @@ function resolvePath(pathname) {
 }
 
 function etagFor(size, mtime) {
-  return `W/\"${size.toString(16)}-${Math.floor((mtime || 0) / 1000).toString(16)}\"`;
+  return `W/\"${size.toString(16)}-${Math.floor(mtime || 0).toString(16)}\"`;
 }
 
 /*
  * Range sederhana untuk audio. Browser memakai Range agar lagu bisa diputar
- * bertahap tanpa mengunduh seluruh file 300 MB sekaligus.
+ * bertahap tanpa mengunduh seluruh file sekaligus.
  */
 function parseRange(header, size) {
   if (typeof header !== "string") return null;
@@ -136,7 +136,7 @@ function streamFile(file, start, end) {
     },
     cancel() {
       close();
-    }
+    },
   });
 }
 
@@ -150,18 +150,27 @@ export async function serveStatic(req, root, host) {
   let info;
 
   try {
-    info = await Deno.stat(fileUrl);
+    // lstat tidak mengikuti symlink, jadi symlink di dalam folder yang
+    // diizinkan tidak bisa dipakai untuk keluar dari root.
+    info = await Deno.lstat(fileUrl);
   } catch {
     return textResponse(404, "Not found", host);
   }
 
+  if (info.isSymlink) return textResponse(404, "Not found", host);
   if (!info.isFile) return textResponse(404, "Not found", host);
 
   const ext = relative.slice(relative.lastIndexOf(".")).toLowerCase();
   const type = MIME[ext] || "application/octet-stream";
   const isHtml = ext === ".html";
   const isAudio = AUDIO_EXT.has(ext);
-  const tag = etagFor(info.size, info.mtime ? info.mtime.getTime() : 0);
+  const mtimeMs = info.mtime ? info.mtime.getTime() : 0;
+  const tag = etagFor(info.size, mtimeMs);
+  const cacheControl = isHtml
+    ? "no-cache"
+    : isAudio
+    ? "public, max-age=3600"
+    : "public, max-age=120";
 
   const rangeHeader = req.headers.get("range");
   const range = isAudio ? parseRange(rangeHeader, info.size) : null;
@@ -169,7 +178,7 @@ export async function serveStatic(req, root, host) {
   if (range && range.invalid) {
     return textResponse(416, "Range not satisfiable", host, {
       "Accept-Ranges": "bytes",
-      "Content-Range": `bytes */${info.size}`
+      "Content-Range": `bytes */${info.size}`,
     });
   }
 
@@ -179,11 +188,18 @@ export async function serveStatic(req, root, host) {
 
   if (!range) {
     const inm = req.headers.get("if-none-match");
+    const ims = req.headers.get("if-modified-since");
+    const lastModified = info.mtime ? info.mtime.toUTCString() : new Date().toUTCString();
+    const etagMatch = inm && inm.split(",").some((value) => value.trim() === tag);
+    const timeMatch = ims && mtimeMs > 0 && new Date(ims).getTime() >= mtimeMs;
 
-    if (inm && inm.split(",").some((value) => value.trim() === tag)) {
+    if (etagMatch || timeMatch) {
       return new Response(null, {
         status: 304,
-        headers: securityHeaders({ ETag: tag, "Cache-Control": "no-cache" }, host)
+        headers: securityHeaders(
+          { ETag: tag, "Cache-Control": cacheControl, "Last-Modified": lastModified },
+          host,
+        ),
       });
     }
   }
@@ -192,11 +208,11 @@ export async function serveStatic(req, root, host) {
     {
       "Content-Type": type,
       "Content-Length": String(length),
-      "Cache-Control": isHtml ? "no-cache" : isAudio ? "public, max-age=3600" : "public, max-age=120",
+      "Cache-Control": cacheControl,
       ETag: tag,
-      "Last-Modified": info.mtime ? info.mtime.toUTCString() : new Date().toUTCString()
+      "Last-Modified": info.mtime ? info.mtime.toUTCString() : new Date().toUTCString(),
     },
-    host
+    host,
   );
 
   if (isAudio) {
@@ -212,8 +228,15 @@ export async function serveStatic(req, root, host) {
 
   try {
     file = await Deno.open(fileUrl, { read: true });
-  } catch {
-    return textResponse(404, "Not found", host);
+  } catch (error) {
+    // File hilang = 404, error lain (izin, I/O) = 500 supaya tidak menyamar
+    // sebagai file tidak ada.
+    const name = error && error.name ? error.name : "";
+
+    if (name === "NotFound") return textResponse(404, "Not found", host);
+
+    console.error("Gagal membuka file:", error instanceof Error ? error.message : error);
+    return textResponse(500, "Internal error", host);
   }
 
   if (start > 0) {
@@ -227,13 +250,13 @@ export async function serveStatic(req, root, host) {
       }
       return textResponse(416, "Range not satisfiable", host, {
         "Accept-Ranges": "bytes",
-        "Content-Range": `bytes */${info.size}`
+        "Content-Range": `bytes */${info.size}`,
       });
     }
   }
 
   return new Response(streamFile(file, start, end), {
     status: range ? 206 : 200,
-    headers
+    headers,
   });
 }

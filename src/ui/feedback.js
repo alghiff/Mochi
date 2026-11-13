@@ -11,7 +11,6 @@ export function createFeedback({ win, doc, els }) {
         reduceMotion = event.matches;
       };
       if (typeof query.addEventListener === "function") query.addEventListener("change", onChange);
-      else if (typeof query.addListener === "function") query.addListener(onChange);
     }
   } catch {
     reduceMotion = false;

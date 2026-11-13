@@ -1,4 +1,4 @@
-import { WEATHER_DURATION_MS, nextWeatherId, weatherById } from "../data/weather.js";
+import { nextWeatherId, WEATHER_DURATION_MS, weatherById } from "../data/weather.js";
 
 export function createWeather({ doc, els, getState, t, onChange, isReducedMotion }) {
   let lastId = null;
@@ -47,7 +47,10 @@ export function createWeather({ doc, els, getState, t, onChange, isReducedMotion
       node.className = `wx wx-${kind}${small ? " wx--small" : ""}`;
       node.style.setProperty("--left", (Math.random() * 100).toFixed(2) + "%");
       node.style.setProperty("--delay", (-Math.random() * 8).toFixed(2) + "s");
-      node.style.setProperty("--dur", (small ? 3.2 : 3.8) + Math.random() * (small ? 3 : 4.2) + "s");
+      node.style.setProperty(
+        "--dur",
+        (small ? 3.2 : 3.8) + Math.random() * (small ? 3 : 4.2) + "s",
+      );
       node.style.setProperty("--size", (small ? 3 : 4) + Math.random() * (small ? 4 : 7) + "px");
       node.style.setProperty("--drift", (Math.random() * 30 - 15).toFixed(1) + "px");
       node.style.setProperty("--hue", String(Math.floor(Math.random() * 40) + 15));

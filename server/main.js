@@ -1,7 +1,7 @@
-import { HOST, MAX_PLAYERS, PORT, ROOT } from "./config.js";
-import { handleCloud } from "./cloud.js";
+import { HOST, MAX_PLAYERS, MAX_ROOMS, PORT, ROOT } from "./config.js";
+import { handleCloud, startCountRefresh } from "./cloud.js";
 import { createRooms } from "./rooms.js";
-import { jsonResponse, originAllowed, textResponse } from "./security.js";
+import { clientKey, hostAllowed, jsonResponse, originAllowed, textResponse } from "./security.js";
 import { serveStatic } from "./static.js";
 import { handleWebSocket } from "./ws.js";
 
@@ -17,23 +17,30 @@ import { handleWebSocket } from "./ws.js";
  *   GET  /api/health       cek server
  */
 
-const rooms = createRooms({ maxPlayers: MAX_PLAYERS });
+const rooms = createRooms({ maxPlayers: MAX_PLAYERS, maxRooms: MAX_ROOMS });
 rooms.startCleanup();
+startCountRefresh();
 
-function hostOf(req) {
+function handleRequest(req, connInfo) {
+  let url;
+
   try {
-    return new URL(req.url).host;
+    url = new URL(req.url);
   } catch {
-    return "";
+    return textResponse(400, "Bad request", "");
   }
-}
 
-async function handleRequest(req) {
-  const host = hostOf(req);
-  const url = new URL(req.url);
+  const host = url.host;
+
+  // Dengan PUBLIC_ORIGIN, hanya Host yang cocok yang dilayani.
+  if (!hostAllowed(req)) {
+    return textResponse(421, "Misdirected Request", host);
+  }
+
+  const client = clientKey(req, connInfo);
 
   if (url.pathname === "/ws") {
-    return handleWebSocket(req, rooms, host);
+    return handleWebSocket(req, rooms, host, client);
   }
 
   if (url.pathname === "/api/health") {
@@ -49,9 +56,9 @@ async function handleRequest(req) {
         ok: true,
         rooms: stats.rooms,
         players: stats.players,
-        maxPlayers: rooms.maxPlayers
+        maxPlayers: rooms.maxPlayers,
       },
-      host
+      host,
     );
   }
 
@@ -60,15 +67,16 @@ async function handleRequest(req) {
       return jsonResponse(403, { error: "origin_not_allowed" }, host);
     }
 
-    return handleCloud(req, host);
+    return handleCloud(req, host, client);
+  }
+
+  if (url.pathname.startsWith("/api/")) {
+    // Rute API yang tidak dikenal selalu 404, apa pun metodenya.
+    return jsonResponse(404, { error: "not_found" }, host);
   }
 
   if (req.method !== "GET" && req.method !== "HEAD") {
     return textResponse(405, "Method not allowed", host, { Allow: "GET, HEAD" });
-  }
-
-  if (url.pathname.startsWith("/api/")) {
-    return jsonResponse(404, { error: "not_found" }, host);
   }
 
   return serveStatic(req, ROOT, host);
@@ -82,7 +90,12 @@ Deno.serve(
       console.log(`Mochi berjalan di http://${hostname}:${port}`);
       console.log(`Multiplayer maksimal ${rooms.maxPlayers} pemain per room.`);
       console.log("Tekan Ctrl+C untuk berhenti.");
-    }
+    },
+    // Jangan biarkan error tak tertangani menjatuhkan seluruh server.
+    onError: (error) => {
+      console.error("Kesalahan permintaan:", error instanceof Error ? error.message : error);
+      return jsonResponse(500, { error: "internal_error" }, "");
+    },
   },
-  handleRequest
+  handleRequest,
 );

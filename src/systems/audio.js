@@ -197,7 +197,8 @@ export function createAudio({ win, getState }) {
     if (typeof win.Audio !== "function") return null;
 
     try {
-      const el = new win.Audio(MUSIC_SRC);
+      const el = new win.Audio();
+      el.src = MUSIC_SRC;
       el.loop = true;
       el.preload = "metadata";
       el.volume = musicVolume();
@@ -254,6 +255,6 @@ export function createAudio({ win, getState }) {
     stopMusic,
     updateMusicVolume,
     getContext: () => getAudio(),
-    getMusicElement: () => song.el
+    getMusicElement: () => song.el,
   };
 }

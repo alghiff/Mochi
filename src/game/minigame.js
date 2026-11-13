@@ -19,14 +19,14 @@ export function createMinigame({
   openOverlay,
   closeOverlay,
   isReducedMotion,
-  onPlay
+  onPlay,
 }) {
   const mg = {
     running: false,
     score: 0,
     deadline: 0,
     timer: 0,
-    spawner: 0
+    spawner: 0,
   };
 
   function stopTimers() {
@@ -64,6 +64,10 @@ export function createMinigame({
 
   function open() {
     const state = getState();
+
+    // Games yang sedang berjalan harus diselesaikan dulu supaya skor
+    // yang sudah didapat tetap tercatat.
+    if (mg.running) end();
 
     if (state.sleeping) {
       toast(t("toast.sleeping"));
@@ -165,10 +169,12 @@ export function createMinigame({
         [
           { transform: "translate3d(0, -48px, 0) rotate(-6deg)" },
           {
-            transform: `translate3d(${drift.toFixed(1)}px, ${fallDistance.toFixed(1)}px, 0) rotate(8deg)`
-          }
+            transform: `translate3d(${drift.toFixed(1)}px, ${
+              fallDistance.toFixed(1)
+            }px, 0) rotate(8deg)`,
+          },
         ],
-        { duration, easing: "linear", fill: "forwards" }
+        { duration, easing: "linear", fill: "forwards" },
       );
 
       animation.onfinish = () => {
@@ -266,6 +272,6 @@ export function createMinigame({
     end,
     close,
     isRunning: () => mg.running,
-    getScore: () => mg.score
+    getScore: () => mg.score,
   };
 }

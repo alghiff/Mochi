@@ -2,8 +2,7 @@ import id from "./id.js";
 import ja from "./ja.js";
 import ko from "./ko.js";
 
-export const LANGS = ["id", "ja", "ko"];
-export const LANG_LABELS = { id: "Indonesia", ja: "日本語", ko: "한국어" };
+export { LANG_LABELS, LANGS } from "../langs.js";
 
 export const I18N = { id, ja, ko };
 

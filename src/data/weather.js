@@ -3,7 +3,7 @@ export const WEATHERS = [
   { id: "hot", icon: "☀️", nameKey: "weather.hot" },
   { id: "autumn", icon: "🍂", nameKey: "weather.autumn" },
   { id: "rain", icon: "🌧️", nameKey: "weather.rain" },
-  { id: "snow", icon: "❄️", nameKey: "weather.snow" }
+  { id: "snow", icon: "❄️", nameKey: "weather.snow" },
 ];
 
 export const WEATHER_ORDER = ["spring", "hot", "autumn", "rain", "snow"];

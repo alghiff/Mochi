@@ -1,4 +1,4 @@
-import { QUESTS, questById } from "../data/quests.js";
+import { questById, QUESTS } from "../data/quests.js";
 import { formatClock, todayKey } from "../core/util.js";
 
 /*
@@ -110,8 +110,7 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
       const claimable = !claimed && progress >= quest.target;
 
       const item = doc.createElement("li");
-      item.className =
-        "quest-item" + (claimed ? " is-claimed" : claimable ? " is-claimable" : "");
+      item.className = "quest-item" + (claimed ? " is-claimed" : claimable ? " is-claimable" : "");
 
       const icon = doc.createElement("span");
       icon.className = "quest-icon";
@@ -163,7 +162,10 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
         button.type = "button";
         button.className = "gbtn gbtn--primary gbtn--small quest-claim";
         button.setAttribute("data-claim", quest.id);
-        button.setAttribute("aria-label", t("quest.claimAria", { name: t("quest.name." + quest.id) }));
+        button.setAttribute(
+          "aria-label",
+          t("quest.claimAria", { name: t("quest.name." + quest.id) }),
+        );
         button.textContent = t("quest.claim");
         side.appendChild(button);
       } else {
@@ -212,7 +214,7 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
     const minutes = Math.floor((left % 3_600_000) / 60_000);
 
     els.questReset.textContent = t("quest.reset", {
-      time: hours > 0 ? `${hours}j ${String(minutes).padStart(2, "0")}m` : formatClock(left)
+      time: hours > 0 ? `${hours}j ${String(minutes).padStart(2, "0")}m` : formatClock(left),
     });
   }
 
@@ -232,6 +234,6 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
     progressOf,
     isClaimed,
     isComplete,
-    isClaimable
+    isClaimable,
   };
 }

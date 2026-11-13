@@ -6,5 +6,5 @@ export const FURS = [
   { id: "lavender", nameKey: "fur.lavender", price: 55 },
   { id: "snow", nameKey: "fur.snow", price: 35 },
   { id: "rose", nameKey: "fur.rose", price: 45 },
-  { id: "mint", nameKey: "fur.mint", price: 50 }
+  { id: "mint", nameKey: "fur.mint", price: 50 },
 ];

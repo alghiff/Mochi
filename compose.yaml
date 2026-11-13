@@ -2,6 +2,8 @@ services:
   mochi:
     build: .
     restart: unless-stopped
+    # Zombie process collector untuk proses Deno.
+    init: true
     # Hanya localhost; akses publik lewat Caddy/cloudflared di host.
     ports:
       - "127.0.0.1:8000:8000"
@@ -10,8 +12,24 @@ services:
       HOST: "0.0.0.0"
       MAX_PLAYERS: "6"
       KV_PATH: "/app/data/kv.sqlite3"
+      # Origin publik untuk CSP + cek Origin (isi di file .env).
+      PUBLIC_ORIGIN: "${PUBLIC_ORIGIN:-}"
+      # Proxy yang dipercaya; default: Caddy/cloudflared di host yang sama.
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-127.0.0.1,::1}"
     volumes:
       - mochi-data:/app/data
+    # Container tidak butuh privilege apa pun.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    # Batasi ukuran log supaya disk tidak penuh.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   mochi-data:

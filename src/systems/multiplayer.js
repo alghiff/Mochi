@@ -1,7 +1,34 @@
 import { accById } from "../data/accessories.js";
+import { FURS } from "../data/furs.js";
+import { sanitizeName } from "../core/util.js";
 
 const EMOTES = ["😺", "👋", "❤️", "✨", "🐟", "🎉", "😴", "🍀"];
 const MAX_FALLBACK = 6;
+
+const FUR_IDS = new Set(FURS.map((item) => item.id));
+const MOODS = new Set(["idle", "happy", "sad", "sleep", "eat", "bath", "play", "annoyed"]);
+const SCENES = new Set(["inside", "outside"]);
+
+/*
+ * State pemain remote selalu divalidasi ulang di sisi klien, walau server
+ * sudah membersihkannya. Ini pertahanan berlapis kalau ada server yang
+ * mengirim data aneh.
+ */
+function cleanRemoteState(raw) {
+  if (!raw || typeof raw !== "object") return null;
+
+  const acc = typeof raw.acc === "string" && accById(raw.acc) ? raw.acc : null;
+
+  return {
+    name: sanitizeName(raw.name),
+    level: Math.min(99, Math.max(1, Math.floor(Number(raw.level) || 1))),
+    fur: FUR_IDS.has(raw.fur) ? raw.fur : "cream",
+    acc,
+    mood: MOODS.has(raw.mood) ? raw.mood : "idle",
+    sleeping: Boolean(raw.sleeping),
+    scene: SCENES.has(raw.scene) ? raw.scene : "inside",
+  };
+}
 
 /*
  * Multiplayer WebSocket.
@@ -21,7 +48,7 @@ export function createMultiplayer({
   spawnFx,
   onRemotePet,
   onEmote,
-  onConnectionChange
+  onConnectionChange,
 }) {
   const mp = {
     ws: null,
@@ -34,7 +61,7 @@ export function createMultiplayer({
     connecting: false,
     stateTimer: 0,
     pingTimer: 0,
-    leaving: false
+    leaving: false,
   };
 
   const nodes = new Map();
@@ -77,6 +104,7 @@ export function createMultiplayer({
 
   function errorMessage(code) {
     if (code === "full") return t("mp.full");
+    if (code === "server_full") return t("mp.serverFull");
     if (code === "not_found") return t("mp.notFound");
     if (code === "invalid_code") return t("mp.invalidCode");
     return t("mp.error");
@@ -265,8 +293,9 @@ export function createMultiplayer({
 
     if (els.mpRoomStatus) {
       if (mp.connecting) els.mpRoomStatus.textContent = t("mp.connecting");
-      else if (inRoom) els.mpRoomStatus.textContent = t("mp.playersCount", { n: playerCount(), max: mp.max });
-      else els.mpRoomStatus.textContent = t("mp.waiting");
+      else if (inRoom) {
+        els.mpRoomStatus.textContent = t("mp.playersCount", { n: playerCount(), max: mp.max });
+      } else els.mpRoomStatus.textContent = t("mp.waiting");
     }
 
     if (els.mpCount) {
@@ -306,7 +335,7 @@ export function createMultiplayer({
       id,
       win.setTimeout(() => {
         bubble.classList.remove("is-on");
-      }, 2200)
+      }, 2200),
     );
   }
 
@@ -347,9 +376,13 @@ export function createMultiplayer({
       if (Array.isArray(msg.players)) {
         for (const player of msg.players) {
           if (!player || !player.id || player.id === mp.selfId) continue;
+
+          // Batasi jumlah pemain remote supaya DOM tidak tumbuh tanpa batas.
+          if (mp.players.size >= mp.max) break;
+
           mp.players.set(String(player.id), {
             id: String(player.id),
-            state: player.state || null
+            state: cleanRemoteState(player.state),
           });
         }
       }
@@ -365,13 +398,15 @@ export function createMultiplayer({
     if (msg.type === "joined") {
       const id = String(msg.id || "");
       if (!id || id === mp.selfId) return;
+      if (mp.players.size >= mp.max) return;
 
-      mp.players.set(id, { id, state: msg.state || null });
+      const state = cleanRemoteState(msg.state);
+      mp.players.set(id, { id, state });
       render();
       sendState();
       sfx("mp");
 
-      const name = msg.state && msg.state.name ? msg.state.name : "Teman";
+      const name = state && state.name ? state.name : "Teman";
       toast(t("mp.friendJoined", { name }));
       return;
     }
@@ -379,6 +414,14 @@ export function createMultiplayer({
     if (msg.type === "left") {
       const id = String(msg.id || "");
       const player = mp.players.get(id);
+
+      // Timer emote pemain yang keluar harus dibuang.
+      const emoteTimer = emoteTimers.get(id);
+
+      if (emoteTimer) {
+        win.clearTimeout(emoteTimer);
+        emoteTimers.delete(id);
+      }
 
       if (player) {
         const name = player.state && player.state.name ? player.state.name : "Teman";
@@ -396,8 +439,12 @@ export function createMultiplayer({
       const id = String(msg.id || "");
       const player = mp.players.get(id);
 
-      if (player && msg.state) {
-        player.state = msg.state;
+      if (player) {
+        const state = cleanRemoteState(msg.state);
+
+        if (!state) return;
+
+        player.state = state;
         renderRemoteCats();
         renderPlayers();
       }
@@ -411,7 +458,8 @@ export function createMultiplayer({
     }
 
     if (msg.type === "emote") {
-      showEmote(String(msg.id || ""), String(msg.emote || "😺"));
+      const emoji = EMOTES.includes(msg.emote) ? msg.emote : "😺";
+      showEmote(String(msg.id || ""), emoji);
       return;
     }
 
@@ -425,7 +473,12 @@ export function createMultiplayer({
       toast(errorMessage(msg.code));
       mp.connecting = false;
 
-      if (msg.code === "full" || msg.code === "not_found" || msg.code === "invalid_code") {
+      if (
+        msg.code === "full" ||
+        msg.code === "server_full" ||
+        msg.code === "not_found" ||
+        msg.code === "invalid_code"
+      ) {
         mp.room = null;
         mp.players.clear();
         mp.connected = false;
@@ -448,6 +501,10 @@ export function createMultiplayer({
     const socket = mp.ws;
     mp.ws = null;
 
+    // Tandai penutupan yang disengaja supaya handler onclose tidak
+    // salah thinks koneksi terputus.
+    socket.__closed = true;
+
     try {
       socket.close();
     } catch {
@@ -462,7 +519,6 @@ export function createMultiplayer({
     mp.players.clear();
     mp.connected = false;
     mp.connecting = false;
-    mp.leaving = false;
 
     win.clearTimeout(mp.stateTimer);
     win.clearInterval(mp.pingTimer);
@@ -500,34 +556,55 @@ export function createMultiplayer({
     mp.ws = socket;
 
     socket.onopen = () => {
+      // Abaikan socket lama yang kebetulan terbuka lagi.
+      if (mp.ws !== socket) return;
+
       if (mode === "join") send({ type: "join", room: code });
       else send({ type: "create" });
     };
 
-    socket.onmessage = handleMessage;
+    socket.onmessage = (event) => {
+      if (mp.ws !== socket) return;
+      handleMessage(event);
+    };
 
     socket.onerror = () => {
+      // Socket lama tidak boleh menyentuh state socket yang baru.
+      if (mp.ws !== socket) return;
+
       mp.connecting = false;
       render();
     };
 
     socket.onclose = () => {
-      const wasConnected = mp.connected;
-      mp.ws = null;
-      mp.connected = false;
-      mp.connecting = false;
-      mp.players.clear();
-      win.clearInterval(mp.pingTimer);
-      mp.pingTimer = 0;
+      const intentional = socket.__closed === true;
 
-      if (!mp.leaving) {
+      /*
+       * Socket lama (yang sudah diganti socket baru) tidak boleh menghapus
+       * session yang sedang berjalan.
+       */
+      if (mp.ws !== socket && !intentional) return;
+
+      const wasConnected = mp.connected;
+
+      if (mp.ws === socket) {
+        mp.ws = null;
+        mp.connected = false;
+        mp.connecting = false;
+        mp.players.clear();
+        win.clearInterval(mp.pingTimer);
+        mp.pingTimer = 0;
+        mp.room = null;
+
+        render();
+      }
+
+      if (!intentional && !mp.leaving) {
         if (wasConnected) toast(t("mp.connLost"));
         else toast(t("mp.noServer"));
       }
 
-      mp.room = null;
       mp.leaving = false;
-      render();
     };
   }
 
@@ -598,7 +675,10 @@ export function createMultiplayer({
     if (!EMOTES.includes(emoji)) return;
 
     send({ type: "emote", emote: emoji });
-    showEmote(mp.selfId, emoji);
+
+    // Kucing sendiri tidak punya node remote, jadi emote ditampilkan
+    // sebagai partikel di layar.
+    spawnFx(emoji, 1);
 
     if (onEmote) onEmote(emoji);
   }
@@ -632,6 +712,6 @@ export function createMultiplayer({
     isInRoom: () => Boolean(mp.room),
     getPlayers: () => Array.from(mp.players.values()),
     getSelfId: () => mp.selfId,
-    getRoom: () => mp.room
+    getRoom: () => mp.room,
   };
 }

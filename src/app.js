@@ -1,20 +1,21 @@
 import { collectDom } from "./core/dom.js";
 import {
-  DECAY,
-  SLEEP_REGEN,
   addXpToState,
   applyOfflineProgress,
+  DECAY,
   freshState,
   loadCloudCode,
   loadState,
   sanitizeState,
   saveCloudCode,
-  saveState
+  saveState,
+  SLEEP_REGEN,
+  storageAvailable,
 } from "./core/state.js";
-import { clamp, nowMs, pick, sanitizeName, xpNeeded } from "./core/util.js";
-import { LANGS, LANG_LABELS, translate } from "./data/i18n/index.js";
+import { clamp, sanitizeName, xpNeeded } from "./core/util.js";
+import { LANG_LABELS, LANGS, translate } from "./data/i18n/index.js";
 import { FOODS } from "./data/foods.js";
-import { ACCS, accById } from "./data/accessories.js";
+import { accById } from "./data/accessories.js";
 import { weatherById } from "./data/weather.js";
 import { createFeedback } from "./ui/feedback.js";
 import { createOverlays } from "./ui/overlay.js";
@@ -37,6 +38,8 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
   let saveTimer = 0;
   let butterflyTimer = 0;
   let lastPetAt = 0;
+  let petCount = 0;
+  let mpSyncTick = 0;
   let lastPetSave = 0;
   let lastReactAt = 0;
   let mic = null;
@@ -57,7 +60,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     startY: 0,
     moved: 0,
     awarded: 0,
-    lastFx: 0
+    lastFx: 0,
   };
 
   function t(key, params) {
@@ -65,7 +68,9 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
   }
 
   function save() {
-    saveState(win, state);
+    // Saat tab disembunyikan, lastSeen dibiarkan, supaya progres offline
+    // dihitung dari waktu pemain benar-benar pergi.
+    saveState(win, state, { keepLastSeen: doc.hidden });
   }
 
   function sendMpState() {
@@ -100,7 +105,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
         state.stats.hunger,
         state.stats.clean,
         state.stats.energy,
-        state.stats.happy
+        state.stats.happy,
       );
 
       if (lowest < 30) mood = "sad";
@@ -157,8 +162,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
 
       const price = button.querySelector(".food-price");
       if (price) {
-        price.textContent =
-          food.price === 0 ? t("food.free") : t("food.coins", { n: food.price });
+        price.textContent = food.price === 0 ? t("food.free") : t("food.coins", { n: food.price });
       }
 
       button.classList.toggle("is-unaffordable", food.price > state.coins);
@@ -221,11 +225,17 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     }
 
     if (els.outsideLabel) {
-      els.outsideLabel.textContent = state.scene === "outside" ? t("dock.inside") : t("dock.outside");
+      els.outsideLabel.textContent = state.scene === "outside"
+        ? t("dock.inside")
+        : t("dock.outside");
     }
 
-    if (els.soundSwitch) els.soundSwitch.setAttribute("aria-pressed", state.sound ? "true" : "false");
-    if (els.musicSwitch) els.musicSwitch.setAttribute("aria-pressed", state.music ? "true" : "false");
+    if (els.soundSwitch) {
+      els.soundSwitch.setAttribute("aria-pressed", state.sound ? "true" : "false");
+    }
+    if (els.musicSwitch) {
+      els.musicSwitch.setAttribute("aria-pressed", state.music ? "true" : "false");
+    }
 
     if (els.musicVol) {
       els.musicVol.value = String(Math.round(clamp(state.musicVol, 0, 1) * 100));
@@ -236,7 +246,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     for (const button of langButtons) {
       button.setAttribute(
         "aria-pressed",
-        button.getAttribute("data-lang") === state.lang ? "true" : "false"
+        button.getAttribute("data-lang") === state.lang ? "true" : "false",
       );
     }
 
@@ -464,6 +474,10 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       }
       if (audio) audio.sfx("sleep");
       clearButterflies();
+
+      // Rantai timer kupu-kupu harus dihentikan, kalau tidak kupu-kupu
+      // terus muncul walau kucing sedang tidur.
+      win.clearTimeout(butterflyTimer);
     } else {
       if (feedback) feedback.say(t("speech.wake"));
       if (audio) audio.sfx("wake");
@@ -490,6 +504,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     if (!force && now - lastPetAt < 300) return false;
 
     lastPetAt = now;
+    petCount += 1;
     drag.awarded += 1;
 
     state.stats.happy = clamp(state.stats.happy + 1.5, 0, 100);
@@ -499,11 +514,11 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     if (feedback) {
       feedback.spawnFx("♥", force ? 4 : 2);
 
-      if (drag.awarded === 1) feedback.say(t("speech.petStart"));
-      else if (drag.awarded % 5 === 0) feedback.say(t("speech.petDrag"));
+      if (petCount === 1) feedback.say(t("speech.petStart"));
+      else if (petCount % 5 === 0) feedback.say(t("speech.petDrag"));
     }
 
-    if (audio && (drag.awarded === 1 || Math.random() < 0.35)) audio.sfx("pet");
+    if (audio && (petCount === 1 || Math.random() < 0.35)) audio.sfx("pet");
 
     if (quests) quests.add("pet");
 
@@ -675,7 +690,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       text: t("settings.resetDesc"),
       okLabel: t("settings.reset"),
       cancelLabel: t("common.cancel"),
-      danger: true
+      danger: true,
     });
 
     if (!ok) return;
@@ -684,7 +699,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       lang: state.lang,
       sound: state.sound,
       music: state.music,
-      musicVol: state.musicVol
+      musicVol: state.musicVol,
     };
 
     state = freshState();
@@ -798,6 +813,9 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
 
     if (code === "not_found") return t("cloud.notFound");
     if (code === "no_server") return t("cloud.noServer");
+    if (code === "timeout" || code === "network_error") return t("cloud.timeout");
+    if (code === "rate_limit") return t("cloud.rateLimit");
+    if (code === "server_full") return t("cloud.serverFull");
     return t("cloud.error");
   }
 
@@ -834,6 +852,22 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     return normalizeCloudCode(els.cloudCode ? els.cloudCode.value : loadCloudCode(win));
   }
 
+  /* Tampilkan waktu simpan terakhir di panel pengaturan. */
+  function setCloudStatus(savedAt) {
+    if (!els.cloudStatus) return;
+
+    const time = Number(savedAt);
+
+    if (!Number.isFinite(time) || time <= 0) {
+      els.cloudStatus.textContent = t("cloud.hint");
+      return;
+    }
+
+    els.cloudStatus.textContent = t("cloud.savedAt", {
+      time: new Date(time).toLocaleString(),
+    });
+  }
+
   async function cloudUpload() {
     if (!cloud || !cloud.available()) {
       if (feedback) feedback.toast(t("cloud.noServer"));
@@ -848,10 +882,10 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     }
 
     try {
-      await cloud.save(code, state);
+      const result = await cloud.save(code, state);
 
       setCloudCode(code);
-      if (els.cloudStatus) els.cloudStatus.textContent = t("cloud.hint");
+      setCloudStatus(result && result.savedAt);
       if (feedback) feedback.toast(t("cloud.uploaded"));
       if (audio) audio.sfx("cloud");
     } catch (error) {
@@ -878,7 +912,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       text: t("cloud.confirmLoad"),
       okLabel: t("cloud.overwrite"),
       cancelLabel: t("common.cancel"),
-      danger: true
+      danger: true,
     });
 
     if (!ok) return;
@@ -894,6 +928,8 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       overlays.close(els.settingsOverlay);
       applyLanguage();
       save();
+
+      setCloudStatus(data.savedAt);
 
       if (feedback) feedback.toast(t("cloud.loaded"));
       if (audio) audio.sfx("cloud");
@@ -912,10 +948,14 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       if (feedback) feedback.toast(t("cloud.copied"));
     };
 
+    const failed = () => {
+      if (feedback) feedback.toast(t("cloud.copyFail"));
+    };
+
     if (win.navigator.clipboard && typeof win.navigator.clipboard.writeText === "function") {
-      win.navigator.clipboard.writeText(code).then(done).catch(done);
+      win.navigator.clipboard.writeText(code).then(done, failed);
     } else {
-      done();
+      failed();
     }
   }
 
@@ -942,7 +982,10 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     if (weather) weather.refresh({ notify: true });
     if (quests) quests.tick();
 
+    // Tab yang disembunyikan tidak boleh Spend stat, dan lastSeen tidak
+    // di-refresh supaya progres offline tetap terhitung saat kembali.
     if (overlays && overlays.isPaused()) return;
+    if (doc.hidden) return;
 
     if (state.sleeping) {
       state.stats.energy = clamp(state.stats.energy + SLEEP_REGEN, 0, 100);
@@ -958,13 +1001,18 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
 
     renderStats();
     maybeReact();
+
+    // Kirim state ke room sesekali supaya mood dan scene teman selalu
+    // sinkron, bukan hanya saat ada aksi.
+    mpSyncTick += 1;
+
+    if (mpSyncTick >= 10) {
+      mpSyncTick = 0;
+      sendMpState();
+    }
   }
 
   /* ---------- Event ---------- */
-
-  function trapFocus(event, overlay) {
-    overlays.trapFocus(event, overlay);
-  }
 
   function unlockAudio() {
     if (state.music && audio) audio.startMusic();
@@ -1015,7 +1063,6 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     if (els.multiplayerBtn) els.multiplayerBtn.addEventListener("click", openMp);
     if (els.openMp) els.openMp.addEventListener("click", openMp);
     if (els.questBtn) els.questBtn.addEventListener("click", openQuests);
-    if (els.questClose) els.questClose.addEventListener("click", () => overlays.close(els.questOverlay));
 
     if (els.saveName) els.saveName.addEventListener("click", saveName);
 
@@ -1118,7 +1165,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
           return;
         }
 
-        const open = overlays.list.find((overlay) => !overlay.hidden);
+        const open = overlays.top();
         if (open) {
           event.preventDefault();
           overlays.closeTop();
@@ -1127,8 +1174,10 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       }
 
       if (event.key === "Tab") {
-        const open = overlays.list.find((overlay) => !overlay.hidden);
-        if (open) trapFocus(event, open);
+        // Overlay yang paling atas yang harus menahan fokus, bukan yang
+        // pertama di DOM (dialog konfirmasi berada paling akhir).
+        const open = overlays.top();
+        if (open) overlays.trapFocus(event, open);
       }
     });
 
@@ -1139,11 +1188,13 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
 
     win.addEventListener("beforeunload", () => {
       save();
+      if (mic) mic.stop();
       if (mp) mp.destroy();
     });
 
     win.addEventListener("pagehide", () => {
       save();
+      if (mic) mic.stop();
       if (mp) mp.destroy();
     });
 
@@ -1176,7 +1227,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       render();
       save();
       sendMpState();
-    }
+    },
   });
 
   weather = createWeather({
@@ -1194,7 +1245,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       if (shop) shop.render();
 
       save();
-    }
+    },
   });
 
   shop = createShop({
@@ -1208,8 +1259,8 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     spawnFx: (symbol, count, variant) => feedback.spawnFx(symbol, count, variant),
     addXp,
     save,
-    render,
-    sendMpState
+    renderApp: render,
+    sendMpState,
   });
 
   mp = createMultiplayer({
@@ -1224,7 +1275,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       acc: state.acc,
       mood: els.cat ? els.cat.getAttribute("data-mood") : "idle",
       sleeping: state.sleeping,
-      scene: state.scene
+      scene: state.scene,
     }),
     t,
     toast: (message) => feedback.toast(message),
@@ -1249,7 +1300,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     onEmote: () => {
       if (quests) quests.add("mpEmote");
     },
-    onConnectionChange: () => updateHint()
+    onConnectionChange: () => updateHint(),
   });
 
   minigame = createMinigame({
@@ -1271,12 +1322,11 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     isReducedMotion: () => feedback.isReducedMotion(),
     onPlay: () => {
       if (quests) quests.add("play");
-    }
+    },
   });
 
   mic = createMic({
     win,
-    getState: () => state,
     getAudioContext: () => audio.getContext(),
     onUpdate: (active, key) => updateMicUi(active, key),
     onVoice: () => {
@@ -1292,7 +1342,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       render();
       save();
       sendMpState();
-    }
+    },
   });
 
   function init() {
@@ -1327,8 +1377,14 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       win.setTimeout(() => feedback.toast(t("toast.welcomeBack")), 700);
     }
 
+    // Kalau localStorage diblokir, pemain perlu tahu progresnya tidak
+    // bisa disimpan di browser ini.
+    if (!storageAvailable()) {
+      win.setTimeout(() => feedback.toast(t("toast.storageBlocked")), 1200);
+    }
+
     win.setTimeout(() => {
-      if (state.sleeping) feedback.say("Zzz...", 2200);
+      if (state.sleeping) feedback.say(t("speech.sleeping"), 2200);
       else feedback.say(t("speech.greet", { name: state.name }));
     }, 800);
   }
@@ -1388,8 +1444,8 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
         win.clearInterval(saveTimer);
         win.clearTimeout(butterflyTimer);
         if (mp) mp.destroy();
-      }
-    }
+      },
+    },
   };
 
   return win.MochiGame;

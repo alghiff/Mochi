@@ -56,17 +56,37 @@
   height: 19px;
 }
 
-.dock-btn[data-action="feed"] .dock-icon { color: #ffb35c; }
-.dock-btn[data-action="bath"] .dock-icon { color: #8ab6ff; }
-.dock-btn[data-action="play"] .dock-icon { color: #ffd166; }
-.dock-btn[data-action="sleep"] .dock-icon { color: #b79cff; }
-.dock-btn[data-action="style"] .dock-icon { color: #ff9dbb; }
+.dock-btn[data-action="feed"] .dock-icon {
+  color: #ffb35c;
+}
+.dock-btn[data-action="bath"] .dock-icon {
+  color: #8ab6ff;
+}
+.dock-btn[data-action="play"] .dock-icon {
+  color: #ffd166;
+}
+.dock-btn[data-action="sleep"] .dock-icon {
+  color: #b79cff;
+}
+.dock-btn[data-action="style"] .dock-icon {
+  color: #ff9dbb;
+}
 
-.dock-btn[data-action="feed"]:hover .dock-icon { background: rgba(255, 179, 92, .18); }
-.dock-btn[data-action="bath"]:hover .dock-icon { background: rgba(138, 182, 255, .18); }
-.dock-btn[data-action="play"]:hover .dock-icon { background: rgba(255, 209, 102, .18); }
-.dock-btn[data-action="sleep"]:hover .dock-icon { background: rgba(183, 156, 255, .18); }
-.dock-btn[data-action="style"]:hover .dock-icon { background: rgba(255, 157, 187, .18); }
+.dock-btn[data-action="feed"]:hover .dock-icon {
+  background: rgba(255, 179, 92, .18);
+}
+.dock-btn[data-action="bath"]:hover .dock-icon {
+  background: rgba(138, 182, 255, .18);
+}
+.dock-btn[data-action="play"]:hover .dock-icon {
+  background: rgba(255, 209, 102, .18);
+}
+.dock-btn[data-action="sleep"]:hover .dock-icon {
+  background: rgba(183, 156, 255, .18);
+}
+.dock-btn[data-action="style"]:hover .dock-icon {
+  background: rgba(255, 157, 187, .18);
+}
 
 .dock-btn[aria-pressed="true"] .dock-icon {
   color: #2a1c2e;
@@ -132,14 +152,21 @@
   filter: drop-shadow(0 0 10px currentColor);
 }
 
-.dock-btn[data-action="outside"] .dock-icon { color: #8fe6b0; }
-.dock-btn[data-action="outside"]:hover .dock-icon { background: rgba(143, 230, 176, .16); }
+.dock-btn[data-action="outside"] .dock-icon {
+  color: #8fe6b0;
+}
+.dock-btn[data-action="outside"]:hover .dock-icon {
+  background: rgba(143, 230, 176, .16);
+}
 
-.dock-btn[data-action="sleep"][aria-pressed="true"] .dock-icon { color: #c8b4ff; }
-.dock-btn[data-action="outside"][aria-pressed="true"] .dock-icon { color: #b6f0c9; }
+.dock-btn[data-action="sleep"][aria-pressed="true"] .dock-icon {
+  color: #c8b4ff;
+}
+.dock-btn[data-action="outside"][aria-pressed="true"] .dock-icon {
+  color: #b6f0c9;
+}
 
 .dock-label {
   font-size: .62rem;
   text-shadow: 0 1px 6px rgba(0, 0, 0, .55);
 }
-

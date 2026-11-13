@@ -1,6 +1,11 @@
 .git
+.gitignore
+.github
 data
 *.log
 .DS_Store
 Dockerfile
 compose.yaml
+README.md
+deploy
+cloud-export-*.json

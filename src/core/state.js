@@ -2,20 +2,20 @@ import { clamp, sanitizeName, todayKey, validId, xpNeeded } from "./util.js";
 import { FURS } from "../data/furs.js";
 import { ACCS } from "../data/accessories.js";
 import { QUEST_IDS, questById } from "../data/quests.js";
-import { WEATHER_DURATION_MS, isWeatherId, weatherById } from "../data/weather.js";
+import { isWeatherId, WEATHER_DURATION_MS, weatherById } from "../data/weather.js";
+import { LANGS } from "../data/langs.js";
 
 export const SAVE_KEY = "mochi.virtualcat.v1";
 export const CLOUD_KEY = "mochi.cloud.code.v1";
 export const SAVE_VERSION = 3;
 export const MAX_OFFLINE_SECONDS = 12 * 60 * 60;
-export const LANGS = ["id", "ja", "ko"];
 export const STAT_KEYS = ["hunger", "clean", "energy", "happy"];
 
 export const DECAY = {
   hunger: 0.045,
   clean: 0.03,
   energy: 0.025,
-  happy: 0.02
+  happy: 0.02,
 };
 
 export const SLEEP_REGEN = 0.4;
@@ -44,7 +44,7 @@ export function freshState() {
     sleeping: false,
     weather: { id: "spring", nextAt: Date.now() + WEATHER_DURATION_MS },
     quests: emptyQuests(),
-    lastSeen: Date.now()
+    lastSeen: Date.now(),
   };
 }
 
@@ -79,7 +79,9 @@ function sanitizeWeather(raw, base) {
 
   return {
     id: weatherById(id).id,
-    nextAt: Number.isFinite(nextAt) ? clamp(nextAt, 0, Date.now() + WEATHER_DURATION_MS * 2) : base.weather.nextAt
+    nextAt: Number.isFinite(nextAt)
+      ? clamp(nextAt, 0, Date.now() + WEATHER_DURATION_MS * 2)
+      : base.weather.nextAt,
   };
 }
 
@@ -141,15 +143,33 @@ export function loadState(win) {
   }
 }
 
-export function saveState(win, state) {
+/*
+ * Status penyimpanan browser.
+ *
+ * localStorage bisa diblokir (mode privat, kuota penuh, setelan browser).
+ * Kegagalan tidak boleh membuat game crash, tapi pemain layak diberi tahu
+ * kalau progresnya tidak tersimpan.
+ */
+let storageFailed = false;
+
+export function storageAvailable() {
+  return !storageFailed;
+}
+
+export function saveState(win, state, options) {
   if (!state) return;
 
-  state.lastSeen = Date.now();
+  const keepLastSeen = Boolean(options && options.keepLastSeen);
+
+  // Saat tab disembunyikan, lastSeen tidak diperbarui supaya progres
+  // offline terhitung benar-benar ketika pemain kembali.
+  if (!keepLastSeen) state.lastSeen = Date.now();
 
   try {
     win.localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    storageFailed = false;
   } catch {
-    /* Penyimpanan bisa diblokir; game tetap jalan. */
+    storageFailed = true;
   }
 }
 

@@ -290,12 +290,24 @@
   box-shadow: inset 0 -10px 18px -12px rgba(0, 0, 0, .35);
 }
 
-.swatch-cream { background: linear-gradient(135deg, #f7dcc0, #e3b58c); }
-.swatch-gray { background: linear-gradient(135deg, #d6dbe8, #8f97ad); }
-.swatch-ginger { background: linear-gradient(135deg, #ffcfa2, #e08a4e); }
-.swatch-charcoal { background: linear-gradient(135deg, #8a8296, #4d4759); }
-.swatch-lavender { background: linear-gradient(135deg, #e7dcff, #b49ce0); }
-.swatch-snow { background: linear-gradient(135deg, #ffffff, #dbe6f5); }
+.swatch-cream {
+  background: linear-gradient(135deg, #f7dcc0, #e3b58c);
+}
+.swatch-gray {
+  background: linear-gradient(135deg, #d6dbe8, #8f97ad);
+}
+.swatch-ginger {
+  background: linear-gradient(135deg, #ffcfa2, #e08a4e);
+}
+.swatch-charcoal {
+  background: linear-gradient(135deg, #8a8296, #4d4759);
+}
+.swatch-lavender {
+  background: linear-gradient(135deg, #e7dcff, #b49ce0);
+}
+.swatch-snow {
+  background: linear-gradient(135deg, #ffffff, #dbe6f5);
+}
 
 .swatch-beanie,
 .swatch-scarf,
@@ -447,7 +459,8 @@
   font-size: .82rem;
   font-weight: 800;
   letter-spacing: -.01em;
-  transition: transform .25s var(--spring), background .25s ease, border-color .25s ease, box-shadow .25s ease;
+  transition: transform .25s var(--spring), background .25s ease, border-color .25s ease, box-shadow
+    .25s ease;
 }
 
 .gbtn:hover {
@@ -616,8 +629,14 @@
   animation: wave 5s ease-in-out infinite;
 }
 
-.mg-water::before { top: -8px; }
-.mg-water::after { top: 2px; animation-delay: 1.4s; opacity: .6; }
+.mg-water::before {
+  top: -8px;
+}
+.mg-water::after {
+  top: 2px;
+  animation-delay: 1.4s;
+  opacity: .6;
+}
 
 .mg-intro,
 .mg-result {
@@ -803,123 +822,258 @@
    ============================================================ */
 
 @keyframes twinkle {
-  0%, 100% { opacity: .25; transform: scale(.8); }
-  50% { opacity: 1; transform: scale(1.2); }
+  0%,
+  100% {
+    opacity: .25;
+    transform: scale(.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
 }
 
 @keyframes bulbGlow {
-  0%, 100% { box-shadow: 0 0 18px 5px rgba(255, 209, 102, .35); }
-  50% { box-shadow: 0 0 28px 10px rgba(255, 209, 102, .55); }
+  0%,
+  100% {
+    box-shadow: 0 0 18px 5px rgba(255, 209, 102, .35);
+  }
+  50% {
+    box-shadow: 0 0 28px 10px rgba(255, 209, 102, .55);
+  }
 }
 
 @keyframes ballRoll {
-  0%, 100% { transform: translateX(0) rotate(0deg); }
-  50% { transform: translateX(-10px) rotate(-18deg); }
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(-10px) rotate(-18deg);
+  }
 }
 
 @keyframes breathe {
-  0%, 100% { transform: scale(1, 1); }
-  50% { transform: scale(1.015, 1.028); }
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.015, 1.028);
+  }
 }
 
 @keyframes headBob {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-2px) rotate(-1deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-2px) rotate(-1deg);
+  }
 }
 
 @keyframes tailSway {
-  0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(7deg); }
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(7deg);
+  }
 }
 
 @keyframes tailFast {
-  0%, 100% { transform: rotate(-10deg); }
-  50% { transform: rotate(14deg); }
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
 }
 
 @keyframes blink {
-  0%, 91%, 100% { transform: scaleY(1); }
-  94%, 96% { transform: scaleY(.08); }
+  0%,
+  91%,
+  100% {
+    transform: scaleY(1);
+  }
+  94%,
+  96% {
+    transform: scaleY(.08);
+  }
 }
 
 @keyframes zFloat {
-  0% { opacity: 0; transform: translateY(4px) scale(.8); }
-  30% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-18px) scale(1.1); }
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(.8);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(1.1);
+  }
 }
 
 @keyframes sleepBreathe {
-  0%, 100% { transform: scale(1, 1); }
-  50% { transform: scale(1.01, 1.04); }
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.01, 1.04);
+  }
 }
 
 @keyframes chew {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(1.5px) scale(1.01, .985); }
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(1.5px) scale(1.01, .985);
+  }
 }
 
 @keyframes bathShake {
-  0%, 100% { transform: translateX(-1px) rotate(-.4deg); }
-  50% { transform: translateX(1px) rotate(.4deg); }
+  0%,
+  100% {
+    transform: translateX(-1px) rotate(-.4deg);
+  }
+  50% {
+    transform: translateX(1px) rotate(.4deg);
+  }
 }
 
 @keyframes hop {
-  0%, 100% { transform: translateY(0) scale(1); }
-  35% { transform: translateY(-10px) scale(1.01); }
-  60% { transform: translateY(0) scale(1.015, .985); }
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-10px) scale(1.01);
+  }
+  60% {
+    transform: translateY(0) scale(1.015, .985);
+  }
 }
 
 @keyframes floatUp {
-  0% { opacity: 0; transform: translate(-50%, 0) scale(.7) rotate(0deg); }
-  18% { opacity: 1; }
-  100% { opacity: 0; transform: translate(calc(-50% + var(--x, 0px)), -110px) scale(var(--scale, 1)) rotate(var(--rot, 0deg)); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(.7) rotate(0deg);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x, 0px)), -110px) scale(var(--scale, 1))
+      rotate(var(--rot, 0deg));
+  }
 }
 
 @keyframes bubbleUp {
-  0% { opacity: 0; transform: translate(-50%, 0) scale(.4); }
-  20% { opacity: 1; }
-  100% { opacity: 0; transform: translate(calc(-50% + var(--x, 0px)), -130px) scale(var(--scale, 1)); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(.4);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x, 0px)), -130px) scale(var(--scale, 1));
+  }
 }
 
 @keyframes lowPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .55; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .55;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes sheetUp {
-  from { opacity: 0; transform: translateY(28px) scale(.98); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes popIn {
-  from { opacity: 0; transform: scale(.94); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
 }
 
 @keyframes tailWiggle {
-  from { transform: rotate(-10deg); }
-  to { transform: rotate(12deg); }
+  from {
+    transform: rotate(-10deg);
+  }
+  to {
+    transform: rotate(12deg);
+  }
 }
 
 @keyframes wave {
-  0%, 100% { transform: translateX(-2%) scaleY(1); }
-  50% { transform: translateX(2%) scaleY(1.25); }
+  0%,
+  100% {
+    transform: translateX(-2%) scaleY(1);
+  }
+  50% {
+    transform: translateX(2%) scaleY(1.25);
+  }
 }
 
 @keyframes popScore {
-  0% { opacity: 0; transform: translate(-50%, -30%) scale(.7); }
-  25% { opacity: 1; transform: translate(-50%, -70%) scale(1.05); }
-  100% { opacity: 0; transform: translate(-50%, -150%) scale(.9); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(.7);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -70%) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -150%) scale(.9);
+  }
 }
 
 /* ---------- Badge mikrofon ---------- */
@@ -944,7 +1098,9 @@
   backdrop-filter: blur(10px);
 }
 
-.mic-badge[hidden] { display: none; }
+.mic-badge[hidden] {
+  display: none;
+}
 
 .mic-dot {
   width: 7px;
@@ -1202,47 +1358,98 @@
 /* ---------- Animasi tambahan ---------- */
 
 @keyframes cloudDrift {
-  from { transform: translateX(0); }
-  to { transform: translateX(190vw); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(190vw);
+  }
 }
 
 @keyframes sunGlow {
-  0%, 100% { box-shadow: 0 0 54px 14px rgba(255, 224, 130, .48); }
-  50% { box-shadow: 0 0 74px 24px rgba(255, 224, 130, .66); }
+  0%,
+  100% {
+    box-shadow: 0 0 54px 14px rgba(255, 224, 130, .48);
+  }
+  50% {
+    box-shadow: 0 0 74px 24px rgba(255, 224, 130, .66);
+  }
 }
 
 @keyframes flowerSway {
-  0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(5deg); }
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
 }
 
 @keyframes firefly {
-  0%, 100% { opacity: 0; transform: translate(0, 0); }
-  30% { opacity: .9; }
-  50% { opacity: .55; transform: translate(10px, -16px); }
-  75% { opacity: .85; transform: translate(-6px, -26px); }
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  30% {
+    opacity: .9;
+  }
+  50% {
+    opacity: .55;
+    transform: translate(10px, -16px);
+  }
+  75% {
+    opacity: .85;
+    transform: translate(-6px, -26px);
+  }
 }
 
 @keyframes butterflyFloat {
-  0%, 100% { transform: translate(0, 0) rotate(-4deg); }
-  25% { transform: translate(var(--drift, 12px), -14px) rotate(5deg); }
-  50% { transform: translate(calc(var(--drift, 12px) * -1), -24px) rotate(-6deg); }
-  75% { transform: translate(8px, -10px) rotate(4deg); }
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-4deg);
+  }
+  25% {
+    transform: translate(var(--drift, 12px), -14px) rotate(5deg);
+  }
+  50% {
+    transform: translate(calc(var(--drift, 12px) * -1), -24px) rotate(-6deg);
+  }
+  75% {
+    transform: translate(8px, -10px) rotate(4deg);
+  }
 }
 
 @keyframes wingFlap {
-  from { transform: scaleX(.62); }
-  to { transform: scaleX(1); }
+  from {
+    transform: scaleX(.62);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 @keyframes micPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.35); opacity: .6; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: .6;
+  }
 }
 
 @keyframes remoteBob {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -6px; }
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -6px;
+  }
 }
 
 @media (max-width: 400px) {
@@ -1564,8 +1771,12 @@
   background: #f6ece2;
 }
 
-.swatch-rose { background: linear-gradient(135deg, #ffd6e0, #e89aae); }
-.swatch-mint { background: linear-gradient(135deg, #dcfff1, #93d6b8); }
+.swatch-rose {
+  background: linear-gradient(135deg, #ffd6e0, #e89aae);
+}
+.swatch-mint {
+  background: linear-gradient(135deg, #dcfff1, #93d6b8);
+}
 
 /* ---------- Multiplayer: jumlah pemain ---------- */
 
@@ -1592,14 +1803,16 @@
   bottom: 7%;
   right: auto;
   width: min(27%, 132px);
-  transform: translateX(calc(-50% + var(--rx, 0px))) translateY(var(--ry, 0px)) scale(var(--rscale, .92));
+  transform: translateX(calc(-50% + var(--rx, 0px))) translateY(var(--ry, 0px)) scale(var(--rscale,
+    .92));
   transform-origin: 50% 100%;
   pointer-events: auto;
   transition: transform .4s var(--spring), opacity .3s ease;
 }
 
 .remote-cats .remote-cat:hover {
-  transform: translateX(calc(-50% + var(--rx, 0px))) translateY(calc(var(--ry, 0px) - 4px)) scale(calc(var(--rscale, .92) + .04));
+  transform: translateX(calc(-50% + var(--rx, 0px))) translateY(calc(var(--ry, 0px) - 4px))
+    scale(calc(var(--rscale, .92) + .04));
 }
 
 .remote-cats .remote-cat.is-elsewhere {
@@ -1688,4 +1901,3 @@
     bottom: 6%;
   }
 }
-

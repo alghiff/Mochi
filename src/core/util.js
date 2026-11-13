@@ -9,13 +9,9 @@ export function nowMs(win) {
   return Date.now();
 }
 
-export function pick(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
-
 export function sanitizeName(value) {
   const name = String(value == null ? "" : value)
-    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/\p{Cc}/gu, "")
     .replace(/[^\p{L}\p{N} .'\-_]/gu, "")
     .replace(/\s+/g, " ")
     .trim()
@@ -45,8 +41,4 @@ export function formatClock(ms) {
   const minutes = Math.floor(total / 60);
   const seconds = total % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-export function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

@@ -1,4 +1,4 @@
-import { ACCS, accById } from "../data/accessories.js";
+import { ACCS } from "../data/accessories.js";
 import { FURS } from "../data/furs.js";
 import { weatherById } from "../data/weather.js";
 
@@ -13,8 +13,8 @@ export function createShop({
   spawnFx,
   addXp,
   save,
-  render,
-  sendMpState
+  renderApp,
+  sendMpState,
 }) {
   let currentTab = "fur";
   let busy = false;
@@ -53,7 +53,9 @@ export function createShop({
 
     if (equipped) return `${name} (${t("shop.equippedTag")})`;
     if (owned) return `${name} (${t("shop.ownedTag")})`;
-    if (item.season) return `${name} · ${t("shop.seasonLock", { name: t(weatherById(item.season).nameKey) })}`;
+    if (item.season) {
+      return `${name} · ${t("shop.seasonLock", { name: t(weatherById(item.season).nameKey) })}`;
+    }
     return `${name} (${t("food.coins", { n: item.price })})`;
   }
 
@@ -73,14 +75,12 @@ export function createShop({
 
     for (const item of list) {
       const isOwned = owned.includes(item.id);
-      const isEquipped =
-        currentTab === "fur" ? state.fur === item.id : state.acc === item.id;
+      const isEquipped = currentTab === "fur" ? state.fur === item.id : state.acc === item.id;
       const locked = Boolean(item.season) && item.season !== state.weather.id;
 
       const card = doc.createElement("button");
       card.type = "button";
-      card.className =
-        "shop-card" +
+      card.className = "shop-card" +
         (isOwned ? " is-owned" : "") +
         (isEquipped ? " is-equipped" : "") +
         (locked ? " is-locked" : "");
@@ -108,7 +108,7 @@ export function createShop({
       else if (isOwned) price.textContent = t("shop.equip");
       else if (locked) {
         price.textContent = t("shop.seasonLock", {
-          name: t(weatherById(item.season).nameKey)
+          name: t(weatherById(item.season).nameKey),
         });
       } else {
         price.textContent = t("shop.buy", { n: item.price });
@@ -163,10 +163,10 @@ export function createShop({
           title: t("shop.confirmTitle", { name }),
           text: t("shop.confirmText", {
             price: item.price,
-            left: Math.max(0, state.coins - item.price)
+            left: Math.max(0, state.coins - item.price),
           }),
           okLabel: t("shop.confirmOk"),
-          cancelLabel: t("shop.cancel")
+          cancelLabel: t("shop.cancel"),
         });
       } finally {
         busy = false;
@@ -213,7 +213,9 @@ export function createShop({
       }
     }
 
+    // Grid toko dulu, lalu seluruh tampilan (koin HUD, aksesori kucing).
     render();
+    renderApp();
     save();
     sendMpState();
 
@@ -238,7 +240,8 @@ export function createShop({
 
         const order = ["fur", "acc", "season"];
         const index = order.indexOf(currentTab);
-        const next = order[(index + (event.key === "ArrowRight" ? 1 : order.length - 1)) % order.length];
+        const next =
+          order[(index + (event.key === "ArrowRight" ? 1 : order.length - 1)) % order.length];
 
         switchTab(next);
 
@@ -257,6 +260,6 @@ export function createShop({
       switchTab(currentTab);
     },
     getTab: () => currentTab,
-    select
+    select,
   };
 }

@@ -1,4 +1,4 @@
-export function createMic({ win, getState, getAudioContext, onUpdate, onVoice }) {
+export function createMic({ win, getAudioContext, onUpdate, onVoice }) {
   const mic = {
     stream: null,
     source: null,
@@ -6,10 +6,11 @@ export function createMic({ win, getState, getAudioContext, onUpdate, onVoice })
     data: null,
     raf: 0,
     active: false,
+    pending: false,
     lastAt: 0,
     denied: false,
     unsupported: false,
-    loudFrames: 0
+    loudFrames: 0,
   };
 
   function statusKey() {
@@ -25,6 +26,7 @@ export function createMic({ win, getState, getAudioContext, onUpdate, onVoice })
 
   function stop() {
     mic.active = false;
+    mic.pending = false;
 
     if (mic.raf) {
       win.cancelAnimationFrame(mic.raf);
@@ -76,12 +78,21 @@ export function createMic({ win, getState, getAudioContext, onUpdate, onVoice })
   }
 
   function start() {
+    /*
+     * Permintaan getUserMedia yang masih berjalan belum selesai. Dua klik
+     * cepat akan meminta izin dua kali dan menyisakan stream yang tidak
+     * pernah dimatikan, jadi klik kedua ditolak di sini.
+     */
+    if (mic.pending) return Promise.resolve({ ok: false, reason: "busy" });
+
+    mic.pending = true;
     mic.denied = false;
     mic.unsupported = false;
 
     const nav = win.navigator;
 
     if (!nav.mediaDevices || typeof nav.mediaDevices.getUserMedia !== "function") {
+      mic.pending = false;
       mic.unsupported = true;
       notify();
       return Promise.resolve({ ok: false, reason: "unsupported" });
@@ -89,6 +100,7 @@ export function createMic({ win, getState, getAudioContext, onUpdate, onVoice })
 
     const ctx = getAudioContext ? getAudioContext() : null;
     if (!ctx) {
+      mic.pending = false;
       mic.unsupported = true;
       notify();
       return Promise.resolve({ ok: false, reason: "unsupported" });
@@ -99,11 +111,37 @@ export function createMic({ win, getState, getAudioContext, onUpdate, onVoice })
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
+          autoGainControl: true,
         },
-        video: false
+        video: false,
       })
       .then((stream) => {
+        // Mikrofon mungkin sudah dimatikan selagi izin diproses.
+        if (!mic.pending) {
+          for (const track of stream.getTracks()) {
+            try {
+              track.stop();
+            } catch {
+              /* track sudah berhenti */
+            }
+          }
+
+          return { ok: false, reason: "off" };
+        }
+
+        mic.pending = false;
+
+        // Jangan sampai ada dua stream aktif bersamaan.
+        if (mic.stream) {
+          for (const track of mic.stream.getTracks()) {
+            try {
+              track.stop();
+            } catch {
+              /* track sudah berhenti */
+            }
+          }
+        }
+
         mic.stream = stream;
         mic.source = ctx.createMediaStreamSource(stream);
         mic.analyser = ctx.createAnalyser();
@@ -120,11 +158,19 @@ export function createMic({ win, getState, getAudioContext, onUpdate, onVoice })
         mic.raf = win.requestAnimationFrame(loop);
         return { ok: true };
       })
-      .catch(() => {
-        mic.denied = true;
+      .catch((error) => {
+        mic.pending = false;
         mic.active = false;
+
+        // Hanya penolakan izin yang berarti "diberi tahu", error lain
+        // (tidak ada perangkat, perangkat dipakai program lain) berbeda.
+        const name = error && error.name ? error.name : "";
+        mic.denied = name === "NotAllowedError" || name === "PermissionDeniedError";
+
+        if (!mic.denied) mic.unsupported = true;
+
         notify();
-        return { ok: false, reason: "denied" };
+        return { ok: false, reason: mic.denied ? "denied" : "error" };
       });
   }
 
@@ -140,6 +186,6 @@ export function createMic({ win, getState, getAudioContext, onUpdate, onVoice })
     toggle,
     stop,
     isActive: () => mic.active,
-    statusKey
+    statusKey,
   };
 }

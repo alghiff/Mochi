@@ -5,6 +5,7 @@
  */
 export function createCloud({ win }) {
   const endpoint = "/api/cloud";
+  const timeoutMs = 15_000;
 
   function available() {
     const loc = win.location;
@@ -15,14 +16,32 @@ export function createCloud({ win }) {
     if (!available()) throw new Error("no_server");
 
     const fetchImpl = win.fetch ? win.fetch.bind(win) : fetch;
-
-    const response = await fetchImpl(endpoint, {
+    const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       credentials: "same-origin",
-      cache: "no-store"
-    });
+      cache: "no-store",
+    };
+
+    // Jangan menggantung selamanya kalau server tidak merespons.
+    const Signal = win.AbortSignal;
+
+    if (Signal && typeof Signal.timeout === "function") {
+      options.signal = Signal.timeout(timeoutMs);
+    }
+
+    let response;
+
+    try {
+      response = await fetchImpl(endpoint, options);
+    } catch (error) {
+      const name = error && error.name ? error.name : "";
+
+      if (name === "TimeoutError" || name === "AbortError") throw new Error("timeout");
+
+      throw new Error("network_error");
+    }
 
     let data = null;
 
@@ -44,7 +63,7 @@ export function createCloud({ win }) {
     available,
     create: () => post({ action: "create" }),
     save: (code, state) => post({ action: "save", code, state }),
-    load: (code) => post({ action: "load", code })
+    load: (code) => post({ action: "load", code }),
   };
 }
 

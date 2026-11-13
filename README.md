@@ -1,5 +1,7 @@
 # Mochi — Kucing Virtual (Web Game)
 
+[![CI](https://github.com/alghiff/Mochi/actions/workflows/ci.yml/badge.svg)](https://github.com/alghiff/Mochi/actions/workflows/ci.yml)
+
 Game web untuk merawat kucing virtual bernama **Mochi**. Bisa dimainkan sendiri
 atau bareng teman lewat multiplayer online. Visual, animasi, dan efek suara
 dibuat dengan HTML, CSS, SVG, dan Web Audio API; lagu latar memakai file MP3 di
@@ -44,6 +46,17 @@ Cek tipe dan sintaks:
 ```bash
 deno task check
 ```
+
+Cek kualitas kode (lint + format + tipe) dan jalankan test:
+
+```bash
+deno task verify   # lint + fmt --check + deno check
+deno task test     # smoke test server + cek terjemahan
+```
+
+`deno task test` menyalakan server sungguhan di port acak lalu memeriksa
+allowlist file, Range untuk audio, endpoint cloud, rate limit, dan
+validasi `PUBLIC_ORIGIN`. Tidak butuh browser dan tidak menyentuh data asli.
 
 ### Cek server yang sedang aktif
 
@@ -167,6 +180,7 @@ src/
     weather.js          5 cuaca + durasi
     quests.js           6 misi harian
     music.js            Path lagu latar dari assets/
+    langs.js            Daftar bahasa yang didukung
     i18n/               id, ja, ko + penerjemah
   game/
     minigame.js         Tangkap ikan
@@ -190,10 +204,17 @@ server/
   ws.js                 Upgrade WebSocket
   cloud.js              Cloud save (Deno KV / file JSON)
 scripts/
-  cloud.js              Alat admin: list/show/export cloud save
+  cloud.js              Alat admin: list/show/addcoins/export cloud save
+tests/
+  server_test.js        Smoke test HTTP, static, cloud, rate limit
+  i18n_test.js          Konsistensi terjemahan id/ja/ko
+  shop_test.js          Regression test toko (koin & aksesori)
+deploy/
+  Caddyfile             Contoh reverse proxy lokal untuk tunnel
+  cloudflared-config.example.yml
 server.js               Launcher tipis untuk `deno task start`
-deno.json               Task start/dev/cloud/check
-Dockerfile, compose.yaml
+deno.json               Task start/dev/cloud/check/lint/test/verify
+Dockerfile, compose.yaml, .github/workflows/ci.yml
 ```
 
 Tidak ada `game.js`/`game.css` monolitik lagi. Setiap modul punya tanggung jawab
@@ -233,6 +254,11 @@ Catatan penting:
   `Connection` agar WebSocket bekerja. Contoh Caddy: `reverse_proxy 127.0.0.1:8000`.
 - Origin request diperiksa: halaman dari domain lain tidak bisa membuka `/ws`
   atau memanggil `/api/cloud` memakai konteks browser pengguna.
+- Ada batas jumlah room (`MAX_ROOMS`), koneksi WebSocket
+  (`MAX_CONNECTIONS`, `MAX_CONNECTIONS_PER_IP`), dan pesan per IP
+  (`WS_IP_RATE_LIMIT`) supaya satu sumber tidak bisa mengambil semua sumber daya.
+- Room yang tidak dipakai selama `ROOM_IDLE_MS` (default 10 menit) dibuang
+  otomatis; kode room berlaku maksimal 6 jam.
 
 ### Protokol singkat
 
@@ -281,6 +307,10 @@ Penyimpanan di server:
 - Record cloud hanya berisi `{ state, createdAt, savedAt }`. State divalidasi
   ulang lewat `sanitizeState()` dan dibatasi 24 KB.
 - Rate limit: 40 request/menit per IP, dan 5 pembuatan kode per 10 menit per IP.
+  Identitas IP diambil dari alamat proxy yang dipercaya (`TRUSTED_PROXIES`),
+  jadi spoofing header proxy tidak melewati batas.
+- Jumlah record cloud dibatasi `CLOUD_MAX_RECORDS` (default 50.000). Setelah
+  penuh, pembuatan kode baru ditolak dengan `server_full`.
 
 Backup: salin folder `data/` (atau file KV) secara berkala. Untuk Docker, data
 berada di volume `mochi-data`.
@@ -367,6 +397,10 @@ Data cloud tersimpan di volume `mochi-data`.
 > Folder `assets/` ikut masuk ke image karena berisi lagu latar
 > (`assets/bgm.mp3`, sekitar 9 MB).
 
+Image sudah dikeraskan: container berjalan tanpa privilege (`cap_drop: ALL`,
+`no-new-privileges`), punya `HEALTHCHECK`, dan log dibatasi supaya disk tidak
+penuh. Izin Deno di dalam image juga sempit (baca `/app`, tulis `/app/data`).
+
 Tanpa Compose:
 
 ```bash
@@ -394,6 +428,7 @@ ExecStart=/usr/local/bin/deno run --allow-net --allow-read --allow-write --allow
 Restart=always
 Environment=PORT=8000
 Environment=KV_PATH=/srv/mochi/data/kv.sqlite3
+Environment=PUBLIC_ORIGIN=https://extion.site
 
 [Install]
 WantedBy=multi-user.target
@@ -425,12 +460,22 @@ pengunjung -> https://mochi.example.com -> Cloudflare (TLS)
 1. Pindahkan nameserver domain ke Cloudflare dan tunggu zona berstatus
    **Active**.
 2. Jalankan app dengan port terbatas ke localhost (sudah menjadi default di
-   `compose.yaml`):
+   `compose.yaml`) dan set origin publiknya:
 
    ```yaml
    ports:
      - "127.0.0.1:8000:8000"
    ```
+
+   ```bash
+   echo "PUBLIC_ORIGIN=https://mochi.example.com" > .env
+   docker compose up -d --build
+   ```
+
+   `PUBLIC_ORIGIN` dipakai server untuk CSP dan cek Origin, jadi permintaan
+   dengan `Host` lain dibalas 421. `TRUSTED_PROXIES` default
+   (`127.0.0.1,::1`) sudah cocok karena Caddy dan cloudflared berjalan di
+   host yang sama.
 
 3. Pasang Caddy, lalu salin `deploy/Caddyfile`:
 
@@ -497,6 +542,26 @@ penyimpanan room terpusat.
 | `HOST` | `0.0.0.0` | Alamat bind |
 | `MAX_PLAYERS` | `6` | Maks pemain per room (2–12) |
 | `KV_PATH` | `data/kv.sqlite3` | Path file Deno KV. Kosong hanya di Deno Deploy (pakai KV platform) |
+| `PUBLIC_ORIGIN` | kosong | Origin publik, mis. `https://extion.site`. Kalau diisi, CSP dan cek Origin memakai nilai ini (bukan Host header) dan Host lain dibalas 421 |
+| `TRUSTED_PROXIES` | `127.0.0.1,::1` | Alamat proxy yang dipercaya. Header `X-Forwarded-For`/`CF-Connecting-IP` hanya dipakai kalau koneksi datang dari daftar ini. `none` = tidak percaya proxy apa pun |
+| `MAX_ROOMS` | `100` | Maks room multiplayer aktif |
+| `ROOM_IDLE_MS` | `600000` | Room tanpa aktivitas dibuang setelah durasi ini |
+| `MAX_CONNECTIONS` | `200` | Maks koneksi WebSocket aktif |
+| `MAX_CONNECTIONS_PER_IP` | `10` | Maks koneksi WebSocket dari satu alamat IP |
+| `WS_IP_RATE_LIMIT` | `120` | Maks pesan WebSocket per IP per 10 detik |
+| `CLOUD_MAX_RECORDS` | `50000` | Maks jumlah record cloud save |
+| `CLOUD_CREATE_WINDOW_MS` | `600000` | Jendela rate limit pembuatan kode cloud |
+
+Contoh produksi (Docker Compose):
+
+```bash
+cat > .env <<'EOF'
+PUBLIC_ORIGIN=https://extion.site
+EOF
+```
+
+`PUBLIC_ORIGIN` sangat disarankan di produksi: tanpa itu, `Host` header dari
+permintaan bisa memengaruhi CSP dan pemeriksaan Origin.
 
 ## Keamanan
 
@@ -515,6 +580,13 @@ penyimpanan room terpusat.
   id bulu/aksesori/mood dicek whitelist, ukuran body dibatasi, tipe konten wajib
   `application/json`.
 - **Rate limit & origin check** — untuk cloud API dan pesan WebSocket.
+  Identitas klien diambil dari alamat peer, kecuali koneksi datang dari proxy
+  yang dipercaya (`TRUSTED_PROXIES`); jadi `X-Forwarded-For` palsu tidak
+  bisa melewati batas.
+- **Batas abusive** — jumlah room, koneksi WebSocket, koneksi per IP, pesan
+  per IP, dan jumlah record cloud semuanya dibatasi.
+- **Izin Deno sempit** — image Docker hanya boleh baca `/app`, tulis
+  `/app/data`, dan membaca env yang memang dipakai.
 - **Tanpa dependensi runtime** — tidak ada paket npm yang dieksekusi di browser
   maupun server produksi. Permukaan serangan kecil dan mudah diaudit.
 - **Tanpa cookie, pelacak, iklan, atau resource pihak ketiga.**

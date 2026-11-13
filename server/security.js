@@ -3,19 +3,37 @@
  * Semua respons HTTP melewati modul ini supaya CSP dan nosniff konsisten.
  */
 
+import { PUBLIC_ORIGIN, TRUSTED_PROXIES } from "./config.js";
+
 const HOST_PATTERN = /^[A-Za-z0-9.\-:[\]]+$/;
 
 function safeHost(host) {
   return typeof host === "string" && HOST_PATTERN.test(host) ? host : "";
 }
 
+/*
+ * Host publik yang dipakai untuk CSP dan pemeriksaan Origin.
+ *
+ * Kalau PUBLIC_ORIGIN diisi (mis. "https://extion.site"), nilai itu yang
+ * dipakai. Dengan begitu Host header dari permintaan tidak bisa menyuntik
+ * CSP atau membypass pemeriksaan Origin (host-header injection / DNS
+ * rebinding).
+ */
+function publicHost() {
+  if (!PUBLIC_ORIGIN) return "";
+
+  try {
+    return new URL(PUBLIC_ORIGIN).host;
+  } catch {
+    return "";
+  }
+}
+
 export function securityHeaders(extra, host) {
   const headers = new Headers(extra || {});
-  const safe = safeHost(host);
+  const safe = safeHost(publicHost() || host);
 
-  const connect = safe
-    ? `'self' ws://${safe} wss://${safe}`
-    : "'self' ws: wss:";
+  const connect = safe ? `'self' ws://${safe} wss://${safe}` : "'self'";
 
   headers.set(
     "Content-Security-Policy",
@@ -30,8 +48,8 @@ export function securityHeaders(extra, host) {
       "object-src 'none'",
       "base-uri 'none'",
       "form-action 'none'",
-      "frame-ancestors 'none'"
-    ].join("; ")
+      "frame-ancestors 'none'",
+    ].join("; "),
   );
 
   headers.set("X-Content-Type-Options", "nosniff");
@@ -41,8 +59,14 @@ export function securityHeaders(extra, host) {
   headers.set("Cross-Origin-Opener-Policy", "same-origin");
   headers.set(
     "Permissions-Policy",
-    "geolocation=(), camera=(), microphone=(self), payment=(), usb=()"
+    "geolocation=(), camera=(), microphone=(self), payment=(), usb=()",
   );
+
+  // HTTPS sudah dihentikan Cloudflare di edge, jadi HSTS cukup diumosi
+  // di origin publik saja.
+  if (PUBLIC_ORIGIN.startsWith("https://")) {
+    headers.set("Strict-Transport-Security", "max-age=31536000");
+  }
 
   return headers;
 }
@@ -51,9 +75,12 @@ export function textResponse(status, message, host, extra) {
   return new Response(message + "\n", {
     status,
     headers: securityHeaders(
-      Object.assign({ "Content-Type": "text/plain; charset=utf-8" }, extra || {}),
-      host
-    )
+      Object.assign(
+        { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+        extra || {},
+      ),
+      host,
+    ),
   });
 }
 
@@ -64,13 +91,29 @@ export function jsonResponse(status, data, host, extra) {
       Object.assign(
         {
           "Content-Type": "application/json; charset=utf-8",
-          "Cache-Control": "no-store"
+          "Cache-Control": "no-store",
         },
-        extra || {}
+        extra || {},
       ),
-      host
-    )
+      host,
+    ),
   });
+}
+
+/*
+ * Host yang boleh dilayani.
+ *
+ * Dengan PUBLIC_ORIGIN, permintaan dengan Host lain ditolak (421) supaya
+ * tidak ada cache poisoning lewat Host header.
+ */
+export function hostAllowed(req) {
+  const expected = publicHost();
+
+  if (!expected) return true;
+
+  const requestHost = req.headers.get("host") || "";
+
+  return requestHost === expected;
 }
 
 /*
@@ -83,17 +126,26 @@ export function originAllowed(req) {
 
   if (!origin) return true;
 
-  let originHost;
+  let originUrl;
 
   try {
-    originHost = new URL(origin).host;
+    originUrl = new URL(origin);
   } catch {
     return false;
   }
 
+  const expected = publicHost();
+
+  // Mode produksi: Origin harus sama persis dengan origin publik.
+  if (expected) {
+    const publicOrigin = PUBLIC_ORIGIN.replace(/\/+$/, "");
+    return originUrl.origin === publicOrigin;
+  }
+
+  // Mode pengembangan: cocokkan host saja.
   const requestHost = req.headers.get("host") || "";
 
-  return Boolean(requestHost) && originHost === requestHost;
+  return Boolean(requestHost) && originUrl.host === requestHost;
 }
 
 export function createRateLimiter({ windowMs, limit }) {
@@ -130,16 +182,86 @@ export function createRateLimiter({ windowMs, limit }) {
   return { take };
 }
 
-export function clientKey(req) {
-  const forwarded = req.headers.get("x-forwarded-for");
+/* ---------- Identitas klien ---------- */
 
-  if (forwarded) {
-    const first = forwarded.split(",")[0].trim();
-    if (first) return first.slice(0, 64);
+function isTrustedProxy(address) {
+  if (!address) return false;
+  return TRUSTED_PROXIES.includes(address);
+}
+
+function parseIpv4(value) {
+  const parts = value.split(".");
+
+  if (parts.length !== 4) return null;
+
+  const numbers = parts.map((part) => Number(part));
+
+  if (numbers.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return null;
+
+  return numbers;
+}
+
+function isPrivateIp(value) {
+  const ip = String(value || "").trim().toLowerCase();
+
+  if (!ip) return true;
+
+  // IPv4-mapped IPv6 (::ffff:1.2.3.4) -> ipv4.
+  const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(ip);
+
+  if (mapped) return isPrivateIp(mapped[1]);
+
+  if (ip === "::1" || ip === "0:0:0:0:0:0:0:1" || ip === "::") return true;
+  if (/^f[cd]/.test(ip)) return true;
+  if (ip.startsWith("fe80:")) return true;
+
+  const parts = parseIpv4(ip);
+
+  if (!parts) return false;
+
+  const [a, b] = parts;
+
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true;
+  if (a === 198 && (b === 18 || b === 19)) return true;
+
+  return false;
+}
+
+/*
+ * Identitas klien untuk rate limit.
+ *
+ * Header proxy (X-Forwarded-For, CF-Connecting-IP) bisa dipalsukan klien,
+ * jadi HANYA dipakai kalau koneksi langsung datang dari proxy yang
+ * dipercaya. Selain itu, alamat peer dipakai apa adanya.
+ */
+export function clientKey(req, connInfo) {
+  const peer = connInfo && connInfo.remoteAddr ? connInfo.remoteAddr.hostname : "";
+
+  if (isTrustedProxy(peer)) {
+    const cf = req.headers.get("cf-connecting-ip");
+
+    if (cf && cf.trim()) return cf.trim().slice(0, 64);
+
+    const forwarded = req.headers.get("x-forwarded-for");
+
+    if (forwarded) {
+      const list = forwarded.split(",").map((value) => value.trim()).filter(Boolean);
+
+      for (let index = list.length - 1; index >= 0; index -= 1) {
+        if (!isPrivateIp(list[index])) return list[index].slice(0, 64);
+      }
+
+      if (list.length > 0) return list[list.length - 1].slice(0, 64);
+    }
+
+    const real = req.headers.get("x-real-ip");
+
+    if (real && real.trim()) return real.trim().slice(0, 64);
   }
 
-  const real = req.headers.get("x-real-ip");
-  if (real) return real.trim().slice(0, 64);
-
-  return "local";
+  return (peer || "local").slice(0, 64);
 }

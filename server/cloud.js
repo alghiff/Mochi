@@ -1,13 +1,15 @@
 import {
   CLOUD_CREATE_LIMIT,
+  CLOUD_CREATE_WINDOW_MS,
   CLOUD_FILE,
+  CLOUD_MAX_RECORDS,
   CLOUD_RATE_LIMIT,
   CLOUD_RATE_WINDOW_MS,
   KV_PATH,
   MAX_CLOUD_BYTES,
-  MAX_CLOUD_STATE_BYTES
+  MAX_CLOUD_STATE_BYTES,
 } from "./config.js";
-import { createRateLimiter, clientKey, jsonResponse } from "./security.js";
+import { clientKey, createRateLimiter, jsonResponse } from "./security.js";
 import { sanitizeState } from "../src/core/state.js";
 
 /*
@@ -26,12 +28,12 @@ const encoder = new TextEncoder();
 
 const requestLimiter = createRateLimiter({
   windowMs: CLOUD_RATE_WINDOW_MS,
-  limit: CLOUD_RATE_LIMIT
+  limit: CLOUD_RATE_LIMIT,
 });
 
 const createLimiter = createRateLimiter({
-  windowMs: 10 * 60_000,
-  limit: CLOUD_CREATE_LIMIT
+  windowMs: CLOUD_CREATE_WINDOW_MS,
+  limit: CLOUD_CREATE_LIMIT,
 });
 
 class CloudError extends Error {
@@ -100,33 +102,48 @@ async function getKv() {
 /* ---------- Penyimpanan: file JSON ---------- */
 
 const fileStore = {
-  loaded: false,
+  loading: null,
   data: Object.create(null),
-  queue: Promise.resolve()
+  queue: Promise.resolve(),
+  pending: false,
 };
 
-async function loadFileStore() {
-  if (fileStore.loaded) return;
-  fileStore.loaded = true;
+/*
+ * Cache file store memakai promise, bukan flag boolean, supaya permintaan
+ * yang datang bersamaan menunggu pembacaan yang sama. Dengan flag boolean,
+ * permintaan kedua bisa membaca data yang belum selesai dimuat.
+ */
+function loadFileStore() {
+  if (!fileStore.loading) {
+    fileStore.loading = (async () => {
+      try {
+        const text = await Deno.readTextFile(CLOUD_FILE);
+        const parsed = JSON.parse(text);
 
-  try {
-    const text = await Deno.readTextFile(CLOUD_FILE);
-    const parsed = JSON.parse(text);
-
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      for (const [key, value] of Object.entries(parsed)) {
-        if (/^[a-f0-9]{64}$/.test(key) && value && typeof value === "object") {
-          fileStore.data[key] = value;
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          for (const [key, value] of Object.entries(parsed)) {
+            if (/^[a-f0-9]{64}$/.test(key) && value && typeof value === "object") {
+              fileStore.data[key] = value;
+            }
+          }
         }
+      } catch {
+        /* file belum ada atau rusak; mulai kosong */
       }
-    }
-  } catch {
-    /* file belum ada atau rusak; mulai kosong */
+    })();
   }
+
+  return fileStore.loading;
 }
 
 function writeFileStore() {
+  fileStore.pending = true;
+
   fileStore.queue = fileStore.queue.then(async () => {
+    if (!fileStore.pending) return;
+
+    fileStore.pending = false;
+
     try {
       await Deno.mkdir(new URL("./", CLOUD_FILE), { recursive: true });
 
@@ -146,7 +163,10 @@ function writeFileStore() {
         }
       }
     } catch (error) {
-      console.error("Cloud save gagal menulis file:", error instanceof Error ? error.message : error);
+      console.error(
+        "Cloud save gagal menulis file:",
+        error instanceof Error ? error.message : error,
+      );
     }
   });
 
@@ -243,9 +263,69 @@ function stateBytes(state) {
   return encoder.encode(JSON.stringify(state)).byteLength;
 }
 
+/* ---------- Batas jumlah record ---------- */
+
+/*
+ * Record cloud dibuat tanpa batas per-IP saja, jadi penyerang dengan banyak
+ * IP bisa memenuhi database. Jumlah record dihitung di latar (bukan di jalur
+ * request) dan pembuatan baru ditolak kalau storage sudah penuh.
+ */
+const COUNT_INTERVAL_MS = 5 * 60_000;
+let recordCount = 0;
+let countKnown = false;
+let countTimer = null;
+
+async function countRecords() {
+  const store = await getKv();
+
+  if (!store) {
+    await loadFileStore();
+    return Object.keys(fileStore.data).length;
+  }
+
+  let count = 0;
+
+  for await (const _ of store.list({ prefix: [KV_PREFIX] })) {
+    count += 1;
+  }
+
+  return count;
+}
+
+async function refreshRecordCount() {
+  try {
+    recordCount = await countRecords();
+    countKnown = true;
+  } catch (error) {
+    console.error(
+      "Gagal menghitung record cloud:",
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
+/* Pemeriksaan kapasitas tidak boleh memblokir jalur request. */
+function hasCapacity() {
+  if (!countKnown) return true;
+  return recordCount < CLOUD_MAX_RECORDS;
+}
+
+export function startCountRefresh() {
+  if (countTimer) return countTimer;
+
+  refreshRecordCount();
+  countTimer = setInterval(refreshRecordCount, COUNT_INTERVAL_MS);
+
+  return countTimer;
+}
+
 /* ---------- Handler ---------- */
 
 async function createRecord() {
+  if (!hasCapacity()) {
+    throw new CloudError("server_full", 503);
+  }
+
   for (let attempt = 0; attempt < 12; attempt += 1) {
     const code = makeCode();
     const key = await hashCloudCode(code);
@@ -257,8 +337,10 @@ async function createRecord() {
     await writeRecord(key, {
       state: null,
       createdAt: now,
-      savedAt: 0
+      savedAt: 0,
     });
+
+    recordCount += 1;
 
     return { code };
   }
@@ -273,6 +355,14 @@ async function saveRecord(codeValue, rawState) {
 
   if (!existing) throw new CloudError("not_found", 404);
 
+  /*
+   * Tanpa state, sanitizeState() akan mengembalikan state default dan
+   * menimpa savean lama. Jadi request tanpa state harus ditolak.
+   */
+  if (!rawState || typeof rawState !== "object" || Array.isArray(rawState)) {
+    throw new CloudError("bad_request", 400);
+  }
+
   const state = sanitizeState(rawState);
   const size = stateBytes(state);
 
@@ -283,7 +373,7 @@ async function saveRecord(codeValue, rawState) {
   await writeRecord(key, {
     state,
     createdAt: existing.createdAt || now,
-    savedAt: now
+    savedAt: now,
   });
 
   return { ok: true, savedAt: now };
@@ -299,21 +389,23 @@ async function loadRecord(codeValue) {
   return {
     ok: true,
     state: sanitizeState(record.state),
-    savedAt: Number(record.savedAt) || 0
+    savedAt: Number(record.savedAt) || 0,
   };
 }
 
-export async function handleCloud(req, host) {
-  const key = clientKey(req);
+export async function handleCloud(req, host, client) {
+  // Cek method dulu: request yang salah method tidak boleh memakai token
+  // rate limit.
+  if (req.method !== "POST") {
+    return jsonResponse(405, { error: "method_not_allowed" }, host, {
+      Allow: "POST",
+    });
+  }
+
+  const key = client || clientKey(req);
 
   if (!requestLimiter.take(key)) {
     return jsonResponse(429, { error: "rate_limit" }, host);
-  }
-
-  if (req.method !== "POST") {
-    return jsonResponse(405, { error: "method_not_allowed" }, host, {
-      Allow: "POST"
-    });
   }
 
   const type = (req.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();

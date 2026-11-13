@@ -240,7 +240,7 @@ async function writeFileRecord(hash, record) {
   }
 }
 
-async function missingRecord(code, hash, source) {
+async function missingRecord(hash, source) {
   console.error(`Kode tidak ditemukan di ${source}.`);
   console.error(`Hash yang dicari: ${hash}`);
   await printHint((line) => console.error(line));
@@ -277,7 +277,7 @@ async function addCoins(code, rawAmount) {
     }
 
     if (!record) {
-      await missingRecord(code, hash, source);
+      await missingRecord(hash, source);
       Deno.exit(1);
     }
 
