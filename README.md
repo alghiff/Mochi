@@ -142,6 +142,35 @@ Sebelas aksesori digambar langsung sebagai vektor di dalam SVG kucing
 `leafcrown`, `crown`, `partyhat`, `bell`, `medal`, `raincoat`, `backpack`), jadi
 tampilannya konsisten di semua ukuran layar. Sisanya masih memakai emoji.
 
+## Aset visual
+
+Semua gambar game dibuat **vektor (SVG/CSS)** — tanpa foto, tanpa emoji untuk
+elemen penting, tanpa dependensi eksternal.
+
+**Kucing** digambar sebagai satu SVG besar di `index.html`:
+
+- Bulu tepi memakai filter `feTurbulence` + `feDisplacementMap` sehingga
+  siluetnya berbulu, bukan garis mulus.
+- Pencahayaan datang dari jendela (kiri atas): ada lapisan cahaya putih dan
+  sisi gelap yang dipotong mengikuti bentuk tubuh dan kepala.
+- Mata punya iris bergradasi, pupil, dua pantulan, dan bayangan kelopak.
+- Kumis, bulu pipi, jari cakar, dan ujung ekor digambar satu per satu.
+
+Warna bulu tetap dikendalikan CSS lewat `--fur`, `--fur-2`, `--belly`, dan
+`--ear`, jadi mengganti bulu cukup mengganti `data-fur` di elemen kucing.
+
+**Cuaca** memakai partikel yang digambar sendiri (bukan emoji):
+
+| Cuaca | Partikel | Efek tanah |
+| --- | --- | --- |
+| Hujan | garis air miring + riak | genangan air dengan riak |
+| Salju | kristal bintang berputar | salju menumpuk |
+| Gugur | helai maple berayun | daun kering bertaburan |
+| Semi | kelopak sakura | bunga kecil di rumput |
+| Panas | butiran debu melayang | — |
+
+Partikel juga muncul di jendela, dengan ukuran lebih kecil dan lebih lambat.
+
 ## Ikon dan badge vektor
 
 Dua set gambar SVG dipakai game:
@@ -154,36 +183,6 @@ Cara membuat ikon baru:
 1. Simpan SVG di `assets/svg/` dengan nama huruf kecil, angka, dan tanda hubung.
 2. Daftarkan path-nya di `src/data/weather.js` atau `src/data/quests.js`.
 3. Jalankan `deno task test` — test aset akan menolak kalau file tidak ada.
-
-## Aset realistis (PNG, opsional)
-
-Game ini bisa memakai aset PNG photorealistic sebagai lapisan tambahan. Semua
-layer PNG bersifat **opsional**: kalau file-nya belum ada, elemen gambarnya
-disembunyikan dan game tetap memakai ilustrasi SVG/CSS seperti biasa.
-
-| Grup | Isi | Lokasi |
-| --- | --- | --- |
-| `cat` | 8 kucing (satu per warna bulu) | `assets/cat/<fur>.png` |
-| `accessories` | 19 aksesori | `assets/accessories/<id>.png` |
-| `weather` | 5 scene cuaca | `assets/weather/<id>.png` |
-| `scenery` | dinding & taman | `assets/scenery/<id>.png` |
-
-Membuatnya:
-
-```bash
-# pakai Gemini (gratis, tanpa watermark, bisa edit gambar)
-GEMINI_API_KEY=xxx deno task assets
-
-# hanya satu kelompok
-GEMINI_API_KEY=xxx deno task assets -- --group cat
-
-# tanpa key: Pollinations (gratis, TAPI ada watermark di pojok)
-deno task assets
-```
-
-Prompt dan daftar asetnya ada di `scripts/assets.manifest.js`, generatornya di
-`scripts/gen-assets.js`. File yang sudah ada tidak digenerate ulang (pakai
-`--force` untuk memaksa).
 
 ## Mengganti lagu latar
 

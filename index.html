@@ -110,6 +110,7 @@
             <span class="out-firefly out-firefly--2"></span>
             <span class="out-firefly out-firefly--3"></span>
             <span class="out-firefly out-firefly--4"></span>
+            <div class="out-ground-fx" id="out-ground-fx" aria-hidden="true"></div>
             <div class="weather-fx" id="weather-fx"></div>
           </div>
         </div>
@@ -266,255 +267,669 @@
 
             <div class="cat" id="cat" data-fur="cream" data-acc="" data-acc-slot=""
               data-mood="idle">
-              <img class="cat-photo" id="cat-photo" alt="" hidden />
               <svg class="cat-svg" viewBox="0 0 240 260" role="presentation" focusable="false">
+                <defs>
+                  <!-- ---------- Gradien bulu ---------- -->
+                  <linearGradient id="m-ear-in" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:#ffc2cd" />
+                    <stop offset="1" style="stop-color:var(--ear)" />
+                  </linearGradient>
+
+                  <radialGradient id="m-iris" cx="50%" cy="40%" r="62%">
+                    <stop offset="0" style="stop-color:#fff0c4" />
+                    <stop offset=".42" style="stop-color:#e8a33d" />
+                    <stop offset=".86" style="stop-color:#9c6420" />
+                    <stop offset="1" style="stop-color:#5d3a12" />
+                  </radialGradient>
+
+                  <radialGradient id="m-nose" cx="40%" cy="26%" r="82%">
+                    <stop offset="0" style="stop-color:#ffa3ae" />
+                    <stop offset=".55" style="stop-color:#e0798a" />
+                    <stop offset="1" style="stop-color:#ad4f61" />
+                  </radialGradient>
+
+                  <linearGradient id="m-muzzle" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:var(--belly);stop-opacity:.95" />
+                    <stop offset="1" style="stop-color:var(--belly);stop-opacity:.25" />
+                  </linearGradient>
+
+                  <!-- ---------- Gradien aksesori ---------- -->
+                  <linearGradient id="m-beanie" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:#ffb08a" />
+                    <stop offset=".55" style="stop-color:#ff8a5c" />
+                    <stop offset="1" style="stop-color:#e2683f" />
+                  </linearGradient>
+
+                  <linearGradient id="m-scarf" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:#bdf0d9" />
+                    <stop offset=".6" style="stop-color:#9fe3c6" />
+                    <stop offset="1" style="stop-color:#74c5a3" />
+                  </linearGradient>
+
+                  <linearGradient id="m-gold" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:#fff0b8" />
+                    <stop offset=".38" style="stop-color:#ffd166" />
+                    <stop offset=".72" style="stop-color:#e0a93f" />
+                    <stop offset="1" style="stop-color:#b9842a" />
+                  </linearGradient>
+
+                  <linearGradient id="m-bow" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" style="stop-color:#ffc2b3" />
+                    <stop offset=".5" style="stop-color:#ff8a5c" />
+                    <stop offset="1" style="stop-color:#d9552f" />
+                  </linearGradient>
+
+                  <linearGradient id="m-straw-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:#ffeab0" />
+                    <stop offset=".6" style="stop-color:#ffd98a" />
+                    <stop offset="1" style="stop-color:#e8b95e" />
+                  </linearGradient>
+
+                  <linearGradient id="m-blue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:#cfe3ff" />
+                    <stop offset=".55" style="stop-color:#8ab6ff" />
+                    <stop offset="1" style="stop-color:#5b87d8" />
+                  </linearGradient>
+
+                  <linearGradient id="m-leaf-a" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" style="stop-color:#ffb185" />
+                    <stop offset="1" style="stop-color:#e2693f" />
+                  </linearGradient>
+
+                  <linearGradient id="m-leaf-b" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" style="stop-color:#ffd18a" />
+                    <stop offset="1" style="stop-color:#dd8f2a" />
+                  </linearGradient>
+
+                  <linearGradient id="m-leaf-c" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" style="stop-color:#ff9a9a" />
+                    <stop offset="1" style="stop-color:#d4453f" />
+                  </linearGradient>
+
+                  <radialGradient id="m-gem-coral" cx="36%" cy="30%" r="72%">
+                    <stop offset="0" style="stop-color:#ffc2cd" />
+                    <stop offset="1" style="stop-color:#e0658f" />
+                  </radialGradient>
+
+                  <radialGradient id="m-gem-mint" cx="36%" cy="30%" r="72%">
+                    <stop offset="0" style="stop-color:#e6fff4" />
+                    <stop offset="1" style="stop-color:#4fbf9a" />
+                  </radialGradient>
+
+                  <radialGradient id="m-gem-blue" cx="36%" cy="30%" r="72%">
+                    <stop offset="0" style="stop-color:#d8e8ff" />
+                    <stop offset="1" style="stop-color:#4a76c9" />
+                  </radialGradient>
+
+                  <linearGradient id="m-violet" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:#d8c8ff" />
+                    <stop offset=".55" style="stop-color:#b79cff" />
+                    <stop offset="1" style="stop-color:#8d6fe0" />
+                  </linearGradient>
+
+                  <linearGradient id="m-coral" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" style="stop-color:#ffb08a" />
+                    <stop offset=".6" style="stop-color:#ff8a5c" />
+                    <stop offset="1" style="stop-color:#d9552f" />
+                  </linearGradient>
+
+                  <linearGradient id="m-rain" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" style="stop-color:#ffe9a8" />
+                    <stop offset=".35" style="stop-color:#ffd166" />
+                    <stop offset=".75" style="stop-color:#f0b74e" />
+                    <stop offset="1" style="stop-color:#d9a13f" />
+                  </linearGradient>
+
+                  <linearGradient id="m-whisker" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" style="stop-color:#fffaf4;stop-opacity:.9" />
+                    <stop offset="1" style="stop-color:#fffaf4;stop-opacity:.1" />
+                  </linearGradient>
+
+                  <!-- ---------- Tekstur ---------- -->
+                  <pattern id="m-knit" width="7" height="7" patternUnits="userSpaceOnUse">
+                    <path d="M0 7 3.5 0 7 7" fill="none" style="stroke:#000000;stroke-opacity:.13"
+                      stroke-width="1.3" />
+                  </pattern>
+
+                  <pattern id="m-straw" width="5" height="5" patternUnits="userSpaceOnUse">
+                    <path d="M0 1h5M0 3.5h5" fill="none" style="stroke:#8a6a26;stroke-opacity:.22"
+                      stroke-width="1" />
+                  </pattern>
+
+                  <!-- ---------- Filter ---------- -->
+                  <filter id="m-fur" x="-14%" y="-14%" width="128%" height="128%">
+                    <feTurbulence type="fractalNoise" baseFrequency=".04 .3" numOctaves="3"
+                      seed="11"
+                      result="n" />
+                    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R"
+                      yChannelSelector="G" />
+                  </filter>
+
+                  <filter id="m-fur-fluff" x="-18%" y="-18%" width="136%" height="136%">
+                    <feTurbulence type="fractalNoise" baseFrequency=".09 .22" numOctaves="4"
+                      seed="5"
+                      result="n" />
+                    <feDisplacementMap in="SourceGraphic" in2="n" scale="4.4" xChannelSelector="R"
+                      yChannelSelector="G" />
+                  </filter>
+
+                  <filter id="m-soft" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="7" />
+                  </filter>
+
+                  <filter id="m-soft-sm" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="2.6" />
+                  </filter>
+
+                  <!-- ---------- Gunting bentuk ---------- -->
+                  <clipPath id="m-head-clip">
+                    <ellipse cx="120" cy="98" rx="60" ry="52" />
+                    <ellipse cx="72" cy="104" rx="19" ry="17" />
+                    <ellipse cx="168" cy="104" rx="19" ry="17" />
+                  </clipPath>
+
+                  <clipPath id="m-body-clip">
+                    <path
+                      d="M120 126c-28 0-47 21-49 51-2 29 13 51 49 51s51-22 49-51c-2-30-21-51-49-51Z" />
+                  </clipPath>
+
+                  <!-- ---------- Gunting mata ---------- -->
+                  <clipPath id="m-eye-l">
+                    <path d="M81 93q16-15 32 0-16 15-32 0Z" />
+                  </clipPath>
+
+                  <clipPath id="m-eye-r">
+                    <path d="M127 93q16-15 32 0-16 15-32 0Z" />
+                  </clipPath>
+                </defs>
+
+                <!-- Bayangan dasar -->
+                <ellipse cx="120" cy="239" rx="74" ry="11" fill="#1b1024" opacity=".3"
+                  filter="url(#m-soft)" />
+
+                <!-- Ekor -->
                 <g class="cat-tail">
-                  <path class="fur-stroke" d="M172 205c34 5 52-19 42-45-7-19 4-32 16-24" fill="none"
-                    stroke-width="17" stroke-linecap="round" />
-                  <path class="fur2-stroke" d="M226 143c2-4 4-7 4-7" fill="none" stroke-width="12"
-                    stroke-linecap="round" />
+                  <path
+                    d="M150 198c28 10 46-8 44-34-2-20-13-31-21-27-6 3-4 13 0 21 5 12 1 25-15 27-9 1-14-2-18-6Z"
+                    fill="var(--fur-2)" />
+                  <path
+                    d="M150 198c28 10 46-8 44-34-2-20-13-31-21-27-6 3-4 13 0 21 5 12 1 25-15 27-9 1-14-2-18-6Z"
+                    fill="var(--fur-2)" opacity=".45" filter="url(#m-soft-sm)" />
+                  <g fill="none" style="stroke:var(--fur);stroke-opacity:.55" stroke-width="2.4"
+                    stroke-linecap="round">
+                    <path d="M176 205c16 4 28-6 28-24" />
+                    <path d="M186 210c14 1 23-8 24-22" />
+                    <path d="M197 200c6-3 9-10 9-18" />
+                  </g>
+                  <path d="M180 143c4-3 9-2 12 2 2 3 1 7-2 9-4 2-9 0-11-4-1-3 0-5 1-7Z"
+                    fill="var(--belly)"
+                    opacity=".85" />
                 </g>
 
+                <!-- Badan -->
                 <g class="cat-body">
-                  <ellipse cx="120" cy="182" rx="64" ry="56" class="fur-fill" />
-                  <ellipse cx="120" cy="192" rx="38" ry="38" class="belly-fill" />
-                  <ellipse cx="88" cy="228" rx="21" ry="11" class="belly-fill" />
-                  <ellipse cx="152" cy="228" rx="21" ry="11" class="belly-fill" />
-                  <ellipse cx="104" cy="218" rx="13" ry="9" class="belly-fill" />
-                  <ellipse cx="136" cy="218" rx="13" ry="9" class="belly-fill" />
-                  <path d="M112 236v5M120 238v5M128 236v5" fill="none" stroke="rgba(60,40,50,.25)"
-                    stroke-width="2" stroke-linecap="round" />
+                  <g filter="url(#m-fur)">
+                    <path
+                      d="M120 126c-28 0-47 21-49 51-2 29 13 51 49 51s51-22 49-51c-2-30-21-51-49-51Z"
+                      fill="var(--fur)" />
+                    <ellipse cx="120" cy="197" rx="34" ry="33" fill="var(--belly)" opacity=".6" />
+                    <ellipse cx="94" cy="229" rx="19" ry="9" fill="var(--belly)" />
+                    <ellipse cx="146" cy="229" rx="19" ry="9" fill="var(--belly)" />
+                  </g>
+
+                  <!-- Bulu dada -->
+                  <g filter="url(#m-fur-fluff)" opacity=".55">
+                    <path
+                      d="M120 134c-13 0-22 10-22 22 0 13 10 22 22 22s22-9 22-22c0-12-9-22-22-22Z"
+                      fill="var(--belly)" opacity=".8" />
+                  </g>
+
+                  <!-- Cakar depan -->
+                  <g>
+                    <path d="M104 168c-4 18-5 40-3 54 1 7 6 10 12 10s11-4 11-11l-1-53Z"
+                      fill="var(--fur)" />
+                    <path d="M136 168c4 18 5 40 3 54-1 7-6 10-12 10s-11-4-11-11l1-53Z"
+                      fill="var(--fur)" />
+                    <ellipse cx="110" cy="228" rx="13" ry="8" fill="var(--belly)" />
+                    <ellipse cx="130" cy="228" rx="13" ry="8" fill="var(--belly)" />
+                    <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.75" stroke-width="1.6"
+                      stroke-linecap="round">
+                      <path d="M105 226v5M110 227v5M115 226v5" />
+                      <path d="M125 226v5M130 227v5M135 226v5" />
+                    </g>
+                  </g>
+
+                  <!-- Cahaya dari jendela & sisi gelap di tubuh -->
+                  <g clip-path="url(#m-body-clip)">
+                    <ellipse cx="90" cy="150" rx="52" ry="30" fill="#fff" opacity=".16"
+                      filter="url(#m-soft-sm)" />
+                    <ellipse cx="152" cy="204" rx="46" ry="40" fill="var(--fur-2)" opacity=".45"
+                      filter="url(#m-soft-sm)" />
+                  </g>
+
+                  <!-- Bulu badan -->
+                  <g fill="none" style="stroke:var(--fur);stroke-opacity:.5" stroke-width="2.2"
+                    stroke-linecap="round">
+                    <path d="M84 160c-3 16-1 34 6 48" />
+                    <path d="M78 178c-2 14 1 28 7 40" />
+                    <path d="M156 162c3 16 1 34-6 48" />
+                    <path d="M162 180c2 14-1 28-7 40" />
+                    <path d="M96 146c-5 12-7 26-6 38" />
+                    <path d="M144 146c5 12 7 26 6 38" />
+                  </g>
                 </g>
 
-                <g class="acc acc-raincoat">
-                  <path d="M64 150q56-18 112 0l6 62q-62 16-124 0Z" fill="#ffd166" stroke="#e0a93f"
-                    stroke-width="3" stroke-linejoin="round" />
-                  <path d="M64 150q56 18 112 0" fill="none" stroke="#e0a93f" stroke-width="3" />
-                  <path d="M120 160v56" stroke="#e0a93f" stroke-width="2.5" opacity=".75" />
-                  <circle cx="120" cy="178" r="4" fill="#ff8a5c" />
-                  <circle cx="120" cy="198" r="4" fill="#ff8a5c" />
-                  <path d="M64 150q-15 16-17 34l17 4Z" fill="#f0b74e" stroke="#e0a93f"
-                    stroke-width="2.5"
-                    stroke-linejoin="round" />
-                  <path d="M176 150q15 16 17 34l-17 4Z" fill="#f0b74e" stroke="#e0a93f"
-                    stroke-width="2.5"
-                    stroke-linejoin="round" />
-                </g>
-
-                <g class="acc acc-backpack">
-                  <path d="M80 148q38-14 76 0" fill="none" stroke="#8d6fe0" stroke-width="8"
-                    stroke-linecap="round" />
-                  <path d="M152 140q11-13 22 0" fill="none" stroke="#8d6fe0" stroke-width="4.5"
-                    stroke-linecap="round" />
-                  <rect x="148" y="140" width="58" height="70" rx="17" fill="#b79cff"
-                    stroke="#8d6fe0"
-                    stroke-width="3" />
-                  <path d="M148 174h58" stroke="#8d6fe0" stroke-width="2.5" />
-                  <rect x="165" y="164" width="24" height="20" rx="7" fill="#ffd166"
-                    stroke="#e0a93f"
-                    stroke-width="2.2" />
-                  <circle cx="177" cy="174" r="3" fill="#ff8a5c" />
-                </g>
-
+                <!-- Kepala -->
                 <g class="cat-head">
-                  <path class="ear ear-l fur-fill" d="M70 82 58 34l50 26Z" stroke="var(--fur-2)"
-                    stroke-width="3" stroke-linejoin="round" />
-                  <path class="ear-in" d="M74 74 68 48l26 13Z" />
-                  <path class="ear ear-r fur-fill" d="M170 82 182 34l-50 26Z" stroke="var(--fur-2)"
-                    stroke-width="3" stroke-linejoin="round" />
-                  <path class="ear-in" d="M166 74 172 48l-26 13Z" />
-
-                  <ellipse cx="120" cy="102" rx="64" ry="57" class="fur-fill" />
-
-                  <g class="fur2-stroke" fill="none" stroke-width="5" stroke-linecap="round"
-                    opacity=".7">
-                    <path d="M106 60q2 12 0 20" />
-                    <path d="M120 56v22" />
-                    <path d="M134 60q-2 12 0 20" />
+                  <!-- Telinga -->
+                  <g class="ear ear-l">
+                    <path d="M74 76 58 26c-1-4 3-6 6-3l38 26Z" fill="var(--fur)"
+                      stroke="var(--fur-2)" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M76 70 66 34c-1-3 2-4 4-2l24 20Z" fill="url(#m-ear-in)" />
+                    <g fill="none" style="stroke:var(--belly);stroke-opacity:.75" stroke-width="1.8"
+                      stroke-linecap="round">
+                      <path d="M70 62l-2-14M76 64l-1-16" />
+                    </g>
                   </g>
 
+                  <g class="ear ear-r">
+                    <path d="M166 76 182 26c1-4-3-6-6-3l-38 26Z" fill="var(--fur)"
+                      stroke="var(--fur-2)" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M164 70 174 34c1-3-2-4-4-2l-24 20Z" fill="url(#m-ear-in)" />
+                    <g fill="none" style="stroke:var(--belly);stroke-opacity:.75" stroke-width="1.8"
+                      stroke-linecap="round">
+                      <path d="M170 62l2-14M164 64l1-16" />
+                    </g>
+                  </g>
+
+                  <!-- Tengkorak + pipi -->
+                  <g filter="url(#m-fur)">
+                    <ellipse cx="120" cy="98" rx="60" ry="52" fill="var(--fur)" />
+                  </g>
+
+                  <!-- Cahaya dari jendela, pipi, dan sisi gelap (dipotong agar tetap di dalam kepala) -->
+                  <g clip-path="url(#m-head-clip)">
+                    <ellipse cx="92" cy="66" rx="46" ry="30" fill="#fff" opacity=".22"
+                      filter="url(#m-soft-sm)" />
+                    <ellipse cx="146" cy="122" rx="48" ry="40" fill="var(--fur-2)" opacity=".5"
+                      filter="url(#m-soft-sm)" />
+                    <ellipse cx="72" cy="104" rx="20" ry="18" fill="var(--belly)" opacity=".38"
+                      filter="url(#m-soft-sm)" />
+                    <ellipse cx="168" cy="104" rx="20" ry="18" fill="var(--belly)" opacity=".38"
+                      filter="url(#m-soft-sm)" />
+                    <ellipse cx="88" cy="112" rx="18" ry="14" fill="var(--belly)" opacity=".26"
+                      filter="url(#m-soft-sm)" />
+                    <ellipse cx="152" cy="112" rx="18" ry="14" fill="var(--belly)" opacity=".26"
+                      filter="url(#m-soft-sm)" />
+                  </g>
+
+                  <!-- Belanguran dahi -->
+                  <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.22" stroke-width="2.4"
+                    stroke-linecap="round">
+                    <path d="M107 58c1 7 1 11 0 15" />
+                    <path d="M120 55v17" />
+                    <path d="M133 58c-1 7-1 11 0 15" />
+                  </g>
+
+                  <!-- Bayangan bawah dagu -->
+                  <ellipse cx="120" cy="142" rx="30" ry="9" fill="#2b1a24" opacity=".16"
+                    filter="url(#m-soft-sm)" />
+
+                  <!-- Moncong -->
+                  <g filter="url(#m-soft-sm)">
+                    <ellipse cx="106" cy="118" rx="15" ry="11" fill="url(#m-muzzle)" />
+                    <ellipse cx="134" cy="118" rx="15" ry="11" fill="url(#m-muzzle)" />
+                  </g>
+
+                  <!-- Kumis -->
+                  <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.3" stroke-width="1.8"
+                    stroke-linecap="round">
+                    <path d="M108 131c-1 4-2 7-2 10M120 134v10M132 131c1 4 2 7 2 10" />
+                  </g>
+
+                  <!-- Hidung -->
+                  <path d="M111 108h18c2 0 3 2 2 4l-7 9c-2 2-5 2-7 0l-7-9c-1-2 0-4 1-4Z"
+                    fill="url(#m-nose)" />
+                  <ellipse cx="116" cy="112" rx="3" ry="2" fill="#fff" opacity=".45" />
+                  <path d="M116 112h2M122 112h2" style="stroke:#7d3a48" stroke-width="1.4"
+                    stroke-linecap="round" opacity=".55" />
+
+                  <!-- Mulut -->
+                  <g class="mouth mouth-neutral" fill="none" style="stroke:#4a2b33"
+                    stroke-width="2.2"
+                    stroke-linecap="round">
+                    <path d="M120 121v5M120 126q-7 6-13 1M120 126q7 6 13 1" />
+                  </g>
+
+                  <g class="mouth mouth-happy" fill="none" style="stroke:#4a2b33" stroke-width="2.4"
+                    stroke-linecap="round">
+                    <path d="M120 121v5M120 126q-9 9-16 1M120 126q9 9 16 1" />
+                  </g>
+
+                  <g class="mouth mouth-sad" fill="none" style="stroke:#4a2b33" stroke-width="2.2"
+                    stroke-linecap="round">
+                    <path d="M120 121v5M120 126q-7-7-13-2M120 126q7-7 13-2" />
+                  </g>
+
+                  <g class="mouth mouth-annoyed" fill="none" style="stroke:#4a2b33"
+                    stroke-width="2.2"
+                    stroke-linecap="round">
+                    <path d="M120 121v5M120 126q-7-4-13-1M120 126q7-4 13-1" />
+                  </g>
+
+                  <!-- Mata -->
                   <g class="eyes eyes-open">
-                    <ellipse cx="97" cy="100" rx="9.5" ry="12.5" fill="#2b1a24" />
-                    <ellipse cx="143" cy="100" rx="9.5" ry="12.5" fill="#2b1a24" />
-                    <circle cx="94" cy="95" r="3.2" fill="#fff" opacity=".95" />
-                    <circle cx="140" cy="95" r="3.2" fill="#fff" opacity=".95" />
-                    <circle cx="100" cy="106" r="1.5" fill="#fff" opacity=".6" />
-                    <circle cx="146" cy="106" r="1.5" fill="#fff" opacity=".6" />
+                    <path d="M81 93q16-15 32 0-16 15-32 0Z" fill="#f6efe8" />
+                    <g clip-path="url(#m-eye-l)">
+                      <circle cx="97" cy="93" r="10.5" fill="url(#m-iris)" />
+                      <ellipse cx="97" cy="93" rx="3.4" ry="8.5" fill="#1d1218" />
+                      <circle cx="93" cy="89" r="3.4" fill="#fff" opacity=".92" />
+                      <circle cx="101" cy="96" r="1.5" fill="#fff" opacity=".55" />
+                      <path d="M81 86h32v-8H81Z" fill="#2b1a24" opacity=".22" />
+                    </g>
+                    <path d="M81 93q16-15 32 0-16 15-32 0Z" fill="none" style="stroke:#2b1a24"
+                      stroke-width="2.4" stroke-linejoin="round" />
+
+                    <path d="M127 93q16-15 32 0-16 15-32 0Z" fill="#f6efe8" />
+                    <g clip-path="url(#m-eye-r)">
+                      <circle cx="143" cy="93" r="10.5" fill="url(#m-iris)" />
+                      <ellipse cx="143" cy="93" rx="3.4" ry="8.5" fill="#1d1218" />
+                      <circle cx="139" cy="89" r="3.4" fill="#fff" opacity=".92" />
+                      <circle cx="147" cy="96" r="1.5" fill="#fff" opacity=".55" />
+                      <path d="M127 86h32v-8h-32Z" fill="#2b1a24" opacity=".22" />
+                    </g>
+                    <path d="M127 93q16-15 32 0-16 15-32 0Z" fill="none" style="stroke:#2b1a24"
+                      stroke-width="2.4" stroke-linejoin="round" />
                   </g>
 
-                  <g class="eyes eyes-happy" fill="none" stroke="#2b1a24" stroke-width="5"
+                  <g class="eyes eyes-happy" fill="none" style="stroke:#2b1a24" stroke-width="3"
                     stroke-linecap="round">
-                    <path d="M87 102q10-13 20 0" />
-                    <path d="M133 102q10-13 20 0" />
+                    <path d="M83 94q14-15 28 0" />
+                    <path d="M129 94q14-15 28 0" />
                   </g>
 
-                  <g class="eyes eyes-closed" fill="none" stroke="#2b1a24" stroke-width="5"
+                  <g class="eyes eyes-closed" fill="none" style="stroke:#2b1a24" stroke-width="3"
                     stroke-linecap="round">
-                    <path d="M87 100q10 10 20 0" />
-                    <path d="M133 100q10 10 20 0" />
+                    <path d="M83 93q14 11 28 0" />
+                    <path d="M129 93q14 11 28 0" />
                   </g>
 
-                  <g class="eyes eyes-annoyed" fill="none" stroke="#2b1a24" stroke-width="5"
+                  <g class="eyes eyes-annoyed" fill="none" style="stroke:#2b1a24" stroke-width="3"
                     stroke-linecap="round">
-                    <path d="M86 95l22 9" />
-                    <path d="M154 95l-22 9" />
+                    <path d="M84 87l26 9" />
+                    <path d="M156 87l-26 9" />
                   </g>
 
-                  <ellipse cx="80" cy="116" rx="11" ry="5.5" fill="#ff9d8a" opacity=".45" />
-                  <ellipse cx="160" cy="116" rx="11" ry="5.5" fill="#ff9d8a" opacity=".45" />
-
-                  <path d="M114 114h12l-6 6Z" fill="#d97b7b" />
-
-                  <path class="mouth mouth-neutral" d="M120 120q0 6-7 6M120 120q0 6 7 6" fill="none"
-                    stroke="#3a2430" stroke-width="2.6" stroke-linecap="round" />
-                  <path class="mouth mouth-happy" d="M110 121q10 12 20 0" fill="none"
-                    stroke="#3a2430" stroke-width="2.8" stroke-linecap="round" />
-                  <path class="mouth mouth-sad" d="M111 127q9-9 18 0" fill="none" stroke="#3a2430"
-                    stroke-width="2.6" stroke-linecap="round" />
-                  <path class="mouth mouth-annoyed" d="M111 127q9-5 18 0" fill="none"
-                    stroke="#3a2430" stroke-width="2.6" stroke-linecap="round" />
-
-                  <g stroke="#fff4e6" stroke-width="2" stroke-linecap="round" opacity=".55">
-                    <path d="M58 108H40" />
-                    <path d="M60 118l-17 6" />
-                    <path d="M182 108h18" />
-                    <path d="M180 118l17 6" />
+                  <!-- Alis -->
+                  <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.55" stroke-width="2.6"
+                    stroke-linecap="round">
+                    <path d="M84 76q12-6 24-2" />
+                    <path d="M132 74q12-4 24 2" />
                   </g>
 
+                  <!-- Pipi merona -->
+                  <ellipse cx="80" cy="108" rx="12" ry="6" fill="#ff9d8a" opacity=".3"
+                    filter="url(#m-soft-sm)" />
+                  <ellipse cx="160" cy="108" rx="12" ry="6" fill="#ff9d8a" opacity=".3"
+                    filter="url(#m-soft-sm)" />
+
+                  <!-- Kumis berearna -->
+                  <g fill="none" style="stroke:url(#m-whisker)" stroke-width="1.7"
+                    stroke-linecap="round">
+                    <path d="M96 116C78 110 60 108 44 110" />
+                    <path d="M96 122C76 122 56 124 40 130" />
+                    <path d="M97 128C80 134 62 140 48 148" />
+                    <path d="M144 116c18-6 36-8 52-6" />
+                    <path d="M144 122c20 0 40 2 56 8" />
+                    <path d="M143 128c17 6 35 12 49 20" />
+                  </g>
+
+                  <!-- Bulu pipi -->
+                  <g fill="none" style="stroke:var(--belly);stroke-opacity:.4" stroke-width="1.6"
+                    stroke-linecap="round">
+                    <path d="M96 132l-4 6M104 136l-3 6M120 138v7M136 136l3 6M144 132l4 6" />
+                  </g>
+
+                  <!-- Aksesori -->
                   <g class="acc acc-beanie">
-                    <path d="M62 62Q120 14 178 62l0 10Q120 50 62 72Z" fill="#ff8a5c"
-                      stroke="#e46f45" stroke-width="3" stroke-linejoin="round" />
-                    <path d="M62 66Q120 44 178 66" fill="none" stroke="#ffc9a8" stroke-width="8"
-                      stroke-linecap="round" />
-                    <circle cx="120" cy="24" r="12" fill="#fff4e6" />
+                    <path
+                      d="M60 66c4-30 28-48 60-48s56 18 60 48c1 7-4 11-11 10-32-8-66-8-98 0-7 1-12-3-11-10Z"
+                      fill="url(#m-beanie)" stroke="#c85f38" stroke-width="3"
+                      stroke-linejoin="round" />
+                    <path
+                      d="M60 66c4-30 28-48 60-48s56 18 60 48c1 7-4 11-11 10-32-8-66-8-98 0-7 1-12-3-11-10Z"
+                      fill="url(#m-knit)" />
+                    <path d="M61 64c22-9 96-9 118 0 2 6-2 9-8 9-32-8-70-8-102 0-6 0-10-3-8-9Z"
+                      fill="#ffd0b4" />
+                    <circle cx="120" cy="16" r="13" fill="#fff4e6" />
+                    <circle cx="120" cy="16" r="13" fill="#fff" opacity=".5"
+                      filter="url(#m-soft-sm)" />
                   </g>
 
                   <g class="acc acc-scarf">
-                    <path d="M76 142q44 24 88 0l6 18q-50 26-100 0Z" fill="#9fe3c6" stroke="#6fc9a6"
-                      stroke-width="3" stroke-linejoin="round" />
-                    <path d="M152 166l16 30-16 6-8-28Z" fill="#8ad8ba" />
+                    <path d="M84 142c22 12 50 12 72 0l5 16c-26 15-56 15-82 0Z" fill="url(#m-scarf)"
+                      stroke="#5fb596" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M84 142c22 12 50 12 72 0l5 16c-26 15-56 15-82 0Z"
+                      fill="url(#m-knit)" />
+                    <path d="M150 160l14 30-15 6-9-28Z" fill="#7fcfae" stroke="#5fb596"
+                      stroke-width="2.5"
+                      stroke-linejoin="round" />
+                    <path d="M152 166l9 20" fill="none" style="stroke:#fff;stroke-opacity:.35"
+                      stroke-width="3" stroke-linecap="round" />
                   </g>
 
                   <g class="acc acc-glasses">
-                    <circle cx="97" cy="100" r="17" fill="rgba(255,255,255,.08)" stroke="#ffd166"
-                      stroke-width="3" />
-                    <circle cx="143" cy="100" r="17" fill="rgba(255,255,255,.08)" stroke="#ffd166"
-                      stroke-width="3" />
-                    <path d="M114 100h12M80 96l-12-6M160 96l12-6" fill="none" stroke="#ffd166"
+                    <g fill="rgba(255,255,255,.1)" stroke="url(#m-gold)" stroke-width="3">
+                      <circle cx="97" cy="93" r="17" />
+                      <circle cx="143" cy="93" r="17" />
+                    </g>
+                    <path d="M114 93h12M80 88l-13-5M160 88l13-5" fill="none" stroke="url(#m-gold)"
+                      stroke-width="3" stroke-linecap="round" />
+                    <path d="M86 84c5-5 13-7 19-5" fill="none" style="stroke:#fff;stroke-opacity:.5"
                       stroke-width="3" stroke-linecap="round" />
                   </g>
 
                   <g class="acc acc-bow">
-                    <path d="M166 62q16-14 22-2-8 12-22 2Z" fill="#ff8a5c" />
-                    <path d="M166 62q16 14 22 2-8-12-22-2Z" fill="#ff8a5c" />
-                    <circle cx="166" cy="62" r="5" fill="#ffd166" />
+                    <path d="M164 58c10-13 20-9 23 2-6 10-16 9-23-2Z" fill="url(#m-bow)" />
+                    <path d="M164 58c10 13 20 9 23-2-6-10-16-9-23 2Z" fill="url(#m-bow)" />
+                    <path d="M164 58c6-4 12-5 18-3" fill="none"
+                      style="stroke:#fff;stroke-opacity:.45"
+                      stroke-width="2" stroke-linecap="round" />
+                    <ellipse cx="164" cy="58" rx="6" ry="5.5" fill="url(#m-gold)" />
                   </g>
 
                   <g class="acc acc-flowercrown">
-                    <path d="M66 68Q120 30 174 68" fill="none" stroke="#6fc9a6" stroke-width="6"
-                      stroke-linecap="round" />
-                    <g fill="#ff9dbb" stroke="#e0658f" stroke-width="2">
-                      <circle cx="78" cy="56" r="8" />
-                      <circle cx="104" cy="42" r="7" />
-                      <circle cx="132" cy="40" r="7.5" />
-                      <circle cx="160" cy="54" r="8" />
+                    <path d="M64 70c30-30 82-30 112 0" fill="none" style="stroke:#5fb596"
+                      stroke-width="6" stroke-linecap="round" />
+                    <g>
+                      <g transform="translate(78 58)">
+                        <g fill="#ff9dbb" stroke="#e0658f" stroke-width="1.4">
+                          <ellipse cx="0" cy="-7" rx="4.4" ry="6" />
+                          <ellipse cx="6.6" cy="-2.2" rx="6" ry="4.4" />
+                          <ellipse cx="4" cy="5.4" rx="4.4" ry="6" />
+                          <ellipse cx="-4" cy="5.4" rx="4.4" ry="6" />
+                          <ellipse cx="-6.6" cy="-2.2" rx="6" ry="4.4" />
+                        </g>
+                        <circle cx="0" cy="0" r="3.4" fill="url(#m-gold)" />
+                      </g>
+                      <g transform="translate(104 44)">
+                        <g fill="#ffc2d6" stroke="#e0658f" stroke-width="1.4">
+                          <ellipse cx="0" cy="-6" rx="3.8" ry="5.2" />
+                          <ellipse cx="5.6" cy="-1.9" rx="5.2" ry="3.8" />
+                          <ellipse cx="3.4" cy="4.6" rx="3.8" ry="5.2" />
+                          <ellipse cx="-3.4" cy="4.6" rx="3.8" ry="5.2" />
+                          <ellipse cx="-5.6" cy="-1.9" rx="5.2" ry="3.8" />
+                        </g>
+                        <circle cx="0" cy="0" r="3" fill="url(#m-gold)" />
+                      </g>
+                      <g transform="translate(136 44)">
+                        <g fill="#ff9dbb" stroke="#e0658f" stroke-width="1.4">
+                          <ellipse cx="0" cy="-6" rx="3.8" ry="5.2" />
+                          <ellipse cx="5.6" cy="-1.9" rx="5.2" ry="3.8" />
+                          <ellipse cx="3.4" cy="4.6" rx="3.8" ry="5.2" />
+                          <ellipse cx="-3.4" cy="4.6" rx="3.8" ry="5.2" />
+                          <ellipse cx="-5.6" cy="-1.9" rx="5.2" ry="3.8" />
+                        </g>
+                        <circle cx="0" cy="0" r="3" fill="url(#m-gold)" />
+                      </g>
+                      <g transform="translate(162 58)">
+                        <g fill="#ffc2d6" stroke="#e0658f" stroke-width="1.4">
+                          <ellipse cx="0" cy="-6" rx="3.8" ry="5.2" />
+                          <ellipse cx="5.6" cy="-1.9" rx="5.2" ry="3.8" />
+                          <ellipse cx="3.4" cy="4.6" rx="3.8" ry="5.2" />
+                          <ellipse cx="-3.4" cy="4.6" rx="3.8" ry="5.2" />
+                          <ellipse cx="-5.6" cy="-1.9" rx="5.2" ry="3.8" />
+                        </g>
+                        <circle cx="0" cy="0" r="3" fill="url(#m-gold)" />
+                      </g>
                     </g>
-                    <g fill="#ffd166">
-                      <circle cx="78" cy="56" r="3" />
-                      <circle cx="104" cy="42" r="2.6" />
-                      <circle cx="132" cy="40" r="2.8" />
-                      <circle cx="160" cy="54" r="3" />
-                    </g>
-                    <path d="M88 50q6-9 13-3" fill="none" stroke="#9fe3c6" stroke-width="4"
-                      stroke-linecap="round" />
+                    <path d="M86 52c5-8 13-9 19-4-2 7-11 9-19 4Z" fill="#7fd4b3" stroke="#5fb596"
+                      stroke-width="1.4" />
+                    <path d="M154 50c5-8 13-9 19-4-2 7-11 9-19 4Z" fill="#7fd4b3" stroke="#5fb596"
+                      stroke-width="1.4" />
                   </g>
 
                   <g class="acc acc-sunhat">
-                    <ellipse cx="120" cy="64" rx="66" ry="16" fill="#ffe08a" stroke="#e0a93f"
+                    <ellipse cx="120" cy="62" rx="68" ry="15" fill="url(#m-straw-grad)"
+                      stroke="#d9a13f"
                       stroke-width="3" />
-                    <path d="M84 60q6-34 36-34t36 34Z" fill="#ffd166" stroke="#e0a93f"
-                      stroke-width="3"
-                      stroke-linejoin="round" />
-                    <path d="M84 58q36 10 72 0" fill="none" stroke="#ff8a5c" stroke-width="7"
+                    <ellipse cx="120" cy="62" rx="68" ry="15" fill="url(#m-straw)" />
+                    <path d="M86 58c2-20 16-34 34-34s32 14 34 34c-22-9-46-9-68 0Z"
+                      fill="url(#m-straw-grad)"
+                      stroke="#d9a13f" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M86 58c2-20 16-34 34-34s32 14 34 34c-22-9-46-9-68 0Z"
+                      fill="url(#m-straw)" />
+                    <path d="M87 54c22-8 44-8 66 0" fill="none" stroke="#ff8a5c" stroke-width="7"
                       stroke-linecap="round" />
+                    <ellipse cx="120" cy="60" rx="30" ry="6" fill="#000" opacity=".14" />
                   </g>
 
                   <g class="acc acc-earmuffs">
-                    <path d="M62 78Q120 6 178 78" fill="none" stroke="#8ab6ff" stroke-width="8"
-                      stroke-linecap="round" />
-                    <circle cx="62" cy="84" r="16" fill="#b9d4ff" stroke="#5b87d8"
-                      stroke-width="3" />
-                    <circle cx="178" cy="84" r="16" fill="#b9d4ff" stroke="#5b87d8"
-                      stroke-width="3" />
-                    <circle cx="56" cy="78" r="4" fill="#fff7ef" opacity=".85" />
-                    <circle cx="172" cy="78" r="4" fill="#fff7ef" opacity=".85" />
+                    <path d="M60 80c4-42 96-42 100 0" fill="none" style="stroke:url(#m-blue)"
+                      stroke-width="9" stroke-linecap="round" />
+                    <g filter="url(#m-fur-fluff)">
+                      <circle cx="60" cy="86" r="17" fill="url(#m-blue)" />
+                      <circle cx="180" cy="86" r="17" fill="url(#m-blue)" />
+                    </g>
+                    <circle cx="60" cy="86" r="12" fill="#dce9ff" opacity=".45" />
+                    <circle cx="180" cy="86" r="12" fill="#dce9ff" opacity=".45" />
+                    <path d="M55 80c3-4 7-4 10 0" fill="none" style="stroke:#fff;stroke-opacity:.6"
+                      stroke-width="3" stroke-linecap="round" />
+                    <path d="M175 80c3-4 7-4 10 0" fill="none" style="stroke:#fff;stroke-opacity:.6"
+                      stroke-width="3" stroke-linecap="round" />
                   </g>
 
                   <g class="acc acc-leafcrown">
-                    <path d="M68 66Q120 30 172 66" fill="none" stroke="#c9542a" stroke-width="5"
-                      stroke-linecap="round" />
-                    <g stroke="#c9542a" stroke-width="1.8" stroke-linejoin="round">
+                    <path d="M66 68c30-28 78-28 108 0" fill="none" style="stroke:#b8501f"
+                      stroke-width="5" stroke-linecap="round" />
+                    <g stroke="#a8451a" stroke-width="1.6" stroke-linejoin="round">
                       <g transform="translate(84 56) rotate(-38)">
-                        <path d="M0 13C-9 8-9-7 0-14 9-7 9 8 0 13Z" fill="#ff8a5c" />
-                        <path d="M0 12v7" fill="none" stroke="#c9542a" stroke-width="1.6"
+                        <path d="M0 13C-9 8-9-7 0-14 9-7 9 8 0 13Z" fill="url(#m-leaf-a)" />
+                        <path d="M0 12v7" fill="none" stroke="#a8451a" stroke-width="1.5"
                           stroke-linecap="round" />
                       </g>
                       <g transform="translate(104 42) rotate(-14)">
-                        <path d="M0 13C-9 8-9-7 0-14 9-7 9 8 0 13Z" fill="#e8a33d" />
-                        <path d="M0 12v7" fill="none" stroke="#c9542a" stroke-width="1.6"
+                        <path d="M0 13C-9 8-9-7 0-14 9-7 9 8 0 13Z" fill="url(#m-leaf-b)" />
+                        <path d="M0 12v7" fill="none" stroke="#a8451a" stroke-width="1.5"
                           stroke-linecap="round" />
                       </g>
                       <g transform="translate(128 38) rotate(12)">
-                        <path d="M0 13C-9 8-9-7 0-14 9-7 9 8 0 13Z" fill="#ff6b6b" />
-                        <path d="M0 12v7" fill="none" stroke="#c9542a" stroke-width="1.6"
+                        <path d="M0 13C-9 8-9-7 0-14 9-7 9 8 0 13Z" fill="url(#m-leaf-c)" />
+                        <path d="M0 12v7" fill="none" stroke="#a8451a" stroke-width="1.5"
                           stroke-linecap="round" />
                       </g>
                       <g transform="translate(152 52) rotate(36)">
-                        <path d="M0 13C-9 8-9-7 0-14 9-7 9 8 0 13Z" fill="#e8a33d" />
-                        <path d="M0 12v7" fill="none" stroke="#c9542a" stroke-width="1.6"
+                        <path d="M0 13C-9 8-9-7 0-14 9-7 9 8 0 13Z" fill="url(#m-leaf-b)" />
+                        <path d="M0 12v7" fill="none" stroke="#a8451a" stroke-width="1.5"
                           stroke-linecap="round" />
                       </g>
                     </g>
                   </g>
 
                   <g class="acc acc-crown">
-                    <path d="M78 52l6 22q36 10 72 0l6-22-18 12-12-18-12 18Z" fill="#ffd166"
-                      stroke="#e0a93f" stroke-width="3" stroke-linejoin="round" />
-                    <circle cx="96" cy="44" r="5" fill="#ff8a5c" />
-                    <circle cx="120" cy="36" r="6" fill="#9fe3c6" />
-                    <circle cx="144" cy="44" r="5" fill="#8ab6ff" />
+                    <path d="M76 54l5 20c26 7 52 7 78 0l5-20-19 12-13-19-12 19Z" fill="url(#m-gold)"
+                      stroke="#c9902f" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M84 56l7 16c19 4 39 4 58 0l7-16-14 9-11-16-11 16Z" fill="#fff"
+                      opacity=".22" />
+                    <circle cx="94" cy="44" r="5" fill="url(#m-gem-coral)" />
+                    <circle cx="120" cy="34" r="6" fill="url(#m-gem-mint)" />
+                    <circle cx="146" cy="44" r="5" fill="url(#m-gem-blue)" />
                   </g>
 
                   <g class="acc acc-partyhat">
-                    <path d="M92 58l28-40 28 40Z" fill="#b79cff" stroke="#8d6fe0" stroke-width="3"
+                    <path d="M92 58 120 16l28 42Z" fill="url(#m-violet)" stroke="#7f5ec9"
+                      stroke-width="3"
                       stroke-linejoin="round" />
-                    <path d="M103 42h34" stroke="#ff9dbb" stroke-width="6" stroke-linecap="round" />
-                    <circle cx="120" cy="16" r="7" fill="#ffd166" stroke="#e0a93f"
-                      stroke-width="2.5" />
+                    <path d="M100 44h40" stroke="#ff9dbb" stroke-width="6" stroke-linecap="round" />
+                    <circle cx="120" cy="14" r="8" fill="url(#m-gold)" stroke="#c9902f"
+                      stroke-width="2" />
                   </g>
                 </g>
 
+                <!-- Aksesori badan -->
                 <g class="acc acc-bell">
-                  <path d="M84 146q36 14 72 0l2 12q-38 16-76 0Z" fill="#ff8a5c" stroke="#f2703f"
-                    stroke-width="3" stroke-linejoin="round" />
-                  <path d="M120 160c-9 0-16 7-16 15v6h32v-6c0-8-7-15-16-15Z" fill="#ffd166"
-                    stroke="#e0a93f" stroke-width="3" stroke-linejoin="round" />
-                  <path d="M107 181h26" stroke="#e0a93f" stroke-width="3" stroke-linecap="round" />
-                  <circle cx="120" cy="175" r="2.4" fill="#e0a93f" />
+                  <path d="M84 148c22 10 50 10 72 0l2 11c-24 12-52 12-76 0Z" fill="url(#m-coral)"
+                    stroke="#c85f38" stroke-width="3" stroke-linejoin="round" />
+                  <path d="M120 160c-9 0-16 7-16 15v6h32v-6c0-8-7-15-16-15Z" fill="url(#m-gold)"
+                    stroke="#c9902f" stroke-width="3" stroke-linejoin="round" />
+                  <path d="M107 181h26" style="stroke:#c9902f" stroke-width="3"
+                    stroke-linecap="round" />
+                  <circle cx="120" cy="174" r="2.6" fill="#a5761f" />
+                  <path d="M112 165c-3 3-4 6-4 9" fill="none" style="stroke:#fff;stroke-opacity:.5"
+                    stroke-width="3" stroke-linecap="round" />
                 </g>
 
                 <g class="acc acc-medal">
-                  <path d="M98 138l22 32 22-32-9-5-13 19-13-19Z" fill="#b79cff" stroke="#8d6fe0"
+                  <path d="M100 138l20 30 20-30-9-5-11 17-11-17Z" fill="url(#m-violet)"
+                    stroke="#7f5ec9"
                     stroke-width="3" stroke-linejoin="round" />
-                  <circle cx="120" cy="182" r="21" fill="#ffd166" stroke="#e0a93f"
+                  <circle cx="120" cy="180" r="21" fill="url(#m-gold)" stroke="#c9902f"
                     stroke-width="3" />
-                  <circle cx="120" cy="182" r="16" fill="none" stroke="#e0a93f" stroke-width="1.6"
-                    opacity=".7" />
+                  <circle cx="120" cy="180" r="16" fill="none"
+                    style="stroke:#c9902f;stroke-opacity:.6"
+                    stroke-width="1.6" />
                   <path
-                    d="M120 169l3.7 7.6 8.4 1.2-6.1 5.9 1.4 8.3-7.4-3.9-7.4 3.9 1.4-8.3-6.1-5.9 8.4-1.2Z"
-                    fill="#fff7ef" stroke="#e0a93f" stroke-width="1.4" stroke-linejoin="round" />
+                    d="M120 167l3.7 7.6 8.4 1.2-6.1 5.9 1.4 8.3-7.4-3.9-7.4 3.9 1.4-8.3-6.1-5.9 8.4-1.2Z"
+                    fill="#fffaf2" stroke="#c9902f" stroke-width="1.4" stroke-linejoin="round" />
                 </g>
 
+                <g class="acc acc-raincoat">
+                  <path d="M64 152c32-12 80-12 112 0l6 60c-38 10-86 10-124 0Z" fill="url(#m-rain)"
+                    stroke="#d9a13f" stroke-width="3" stroke-linejoin="round" />
+                  <path d="M64 152c32 12 80 12 112 0" fill="none" style="stroke:#d9a13f"
+                    stroke-width="3" />
+                  <path d="M120 160v54" style="stroke:#d9a13f;stroke-opacity:.7"
+                    stroke-width="2.5" />
+                  <path d="M76 158c-4 18-4 34-2 50" fill="none"
+                    style="stroke:#fff;stroke-opacity:.35"
+                    stroke-width="5" stroke-linecap="round" />
+                  <circle cx="120" cy="178" r="4.5" fill="url(#m-coral)" />
+                  <circle cx="120" cy="198" r="4.5" fill="url(#m-coral)" />
+                  <path d="M64 152c-10 12-14 24-15 36l14 3Z" fill="#f0b74e" stroke="#d9a13f"
+                    stroke-width="2.5" stroke-linejoin="round" />
+                  <path d="M176 152c10 12 14 24 15 36l-14 3Z" fill="#f0b74e" stroke="#d9a13f"
+                    stroke-width="2.5" stroke-linejoin="round" />
+                </g>
+
+                <g class="acc acc-backpack">
+                  <path d="M80 150c24-10 56-10 80 0" fill="none" style="stroke:#7f5ec9"
+                    stroke-width="8"
+                    stroke-linecap="round" />
+                  <path d="M152 142c8-10 18-10 24 0" fill="none" style="stroke:#7f5ec9"
+                    stroke-width="4.5"
+                    stroke-linecap="round" />
+                  <path d="M148 142h50a16 16 0 0 1 16 16v38a16 16 0 0 1-16 16h-50Z"
+                    fill="url(#m-violet)"
+                    stroke="#7f5ec9" stroke-width="3" />
+                  <path d="M148 174h66" style="stroke:#7f5ec9;stroke-opacity:.7"
+                    stroke-width="2.5" />
+                  <rect x="165" y="164" width="24" height="20" rx="7" fill="url(#m-gold)"
+                    stroke="#c9902f"
+                    stroke-width="2.2" />
+                  <circle cx="177" cy="174" r="3" fill="#e0798a" />
+                </g>
+
+                <!-- Kotor -->
                 <g class="dirt">
                   <ellipse cx="146" cy="74" rx="8" ry="5" fill="#7a5a3a" opacity=".55"
                     transform="rotate(-18 146 74)" />
@@ -527,7 +942,6 @@
               </svg>
 
               <span class="cat-acc-emoji" id="cat-acc-emoji" aria-hidden="true"></span>
-              <img class="cat-acc-photo" id="cat-acc-photo" alt="" hidden />
             </div>
 
             <div class="cat-shadow" aria-hidden="true"></div>

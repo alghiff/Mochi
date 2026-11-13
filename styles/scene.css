@@ -520,29 +520,6 @@
   --ear: #ffc9d4;
 }
 
-.fur-fill {
-  fill: var(--fur);
-}
-.fur2-fill {
-  fill: var(--fur-2);
-}
-.belly-fill {
-  fill: var(--belly);
-}
-.ear-in {
-  fill: var(--ear);
-}
-.fur-stroke {
-  stroke: var(--fur);
-}
-.fur2-stroke {
-  stroke: var(--fur-2);
-}
-
-.ear {
-  stroke: var(--fur-2);
-}
-
 /* ---------- Ekspresi ---------- */
 
 .cat .eyes,
@@ -826,8 +803,10 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(420px 300px at 78% 12%, rgba(255, 246, 196, .9), transparent 60%),
-    linear-gradient(180deg, #6fc3ef 0%, #a9dcf3 40%, #d9edf7 62%, #ffe9c4 82%, #f9d9a8 100%);
+    radial-gradient(520px 340px at 76% 10%, rgba(255, 248, 204, .95), transparent 62%),
+    radial-gradient(900px 220px at 50% 92%, rgba(255, 236, 198, .55), transparent 70%),
+    linear-gradient(180deg, #4fb0e8 0%, #8fd0f0 34%, #cbe8f8 58%, #e8f3f8 72%, #f6e8c4 88%, #f3d9a4
+    100%);
 }
 
 .out-sun {
@@ -847,8 +826,10 @@
   width: 108px;
   height: 32px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, .88);
-  box-shadow: 0 8px 18px -10px rgba(50, 90, 120, .4);
+  background: linear-gradient(180deg, #fff 0%, rgba(243, 248, 255, .9) 60%, rgba(214, 228, 244, .85)
+    100%);
+  box-shadow: 0 10px 20px -12px rgba(50, 90, 120, .45);
+  filter: blur(.2px);
   animation: cloudDrift 34s linear infinite;
 }
 
@@ -902,14 +883,17 @@
   left: -18%;
   width: 90%;
   height: 34%;
-  background: linear-gradient(180deg, #9fd98a, #74bf68 70%, #5aa856);
+  background: linear-gradient(180deg, #b6e0a4, #8fca7c 62%, #74b268);
+  filter: saturate(.92);
+  opacity: .92;
 }
 
 .out-hill--2 {
   right: -22%;
   width: 96%;
   height: 30%;
-  background: linear-gradient(180deg, #8ed07c, #66b45c 70%, #4f9c4d);
+  background: linear-gradient(180deg, #7fc76e, #57a551 62%, #438c44);
+  box-shadow: inset -12px -6px 24px rgba(28, 84, 44, .22);
 }
 
 .out-grass {
@@ -917,8 +901,10 @@
   inset: auto 0 0 0;
   height: 26%;
   background:
-    repeating-linear-gradient(96deg, transparent 0 16px, rgba(42, 120, 60, .16) 16px 18px),
-    linear-gradient(180deg, #7cc96e, #57a955 60%, #3f8a45);
+    repeating-linear-gradient(94deg, transparent 0 14px, rgba(38, 110, 56, .18) 14px 16px),
+    repeating-linear-gradient(86deg, transparent 0 22px, rgba(255, 255, 255, .07) 22px 24px),
+    linear-gradient(180deg, #86cf76 0%, #6cbb60 34%, #4f9c4d 72%, #3a7f40 100%);
+  box-shadow: inset 0 6px 14px -8px rgba(20, 70, 36, .5);
 }
 
 .out-grass::after {
@@ -953,7 +939,10 @@
   height: 70px;
   border-radius: 6px;
   transform: translateX(-50%);
-  background: linear-gradient(90deg, #8a5a3b, #6b432c);
+  background:
+    repeating-linear-gradient(88deg, rgba(60, 34, 18, .22) 0 2px, transparent 2px 6px),
+    linear-gradient(90deg, #a06a45, #6b432c 62%, #55341f);
+  box-shadow: inset -4px 0 6px rgba(40, 22, 12, .35);
 }
 
 .out-crown {
@@ -965,10 +954,27 @@
   border-radius: 48% 52% 46% 54%;
   transform: translateX(-50%);
   background:
-    radial-gradient(circle at 34% 30%, #a8e08e, transparent 55%),
-    radial-gradient(circle at 68% 46%, #7cc96e, transparent 58%),
+    radial-gradient(circle at 30% 26%, #b6e79c, transparent 52%),
+    radial-gradient(circle at 58% 34%, #93d37c, transparent 54%),
+    radial-gradient(circle at 72% 62%, #74c166, transparent 56%),
+    radial-gradient(circle at 38% 66%, #86cd70, transparent 54%),
     linear-gradient(180deg, #79c46b, #4f9c4d);
-  box-shadow: inset -8px -10px 18px rgba(26, 80, 40, .3);
+  box-shadow:
+    inset -8px -10px 18px rgba(26, 80, 40, .32),
+    0 12px 22px -14px rgba(18, 54, 30, .55);
+}
+
+/* Bayangan pohon di tanah. */
+.out-tree::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 84px;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(22, 60, 32, .34), transparent 70%);
 }
 
 .out-bush {
@@ -1507,36 +1513,55 @@
   will-change: transform, opacity;
 }
 
+/* Hujan: garis tipis miring dengan ujung lebih transparan. */
 .wx--rain {
-  width: 2px;
-  height: calc(var(--size, 6px) * 3.2);
+  width: 1.6px;
+  height: calc(var(--size, 6px) * 4.2);
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(190, 225, 255, 0), rgba(190, 225, 255, .85));
-  transform: rotate(12deg);
+  background: linear-gradient(180deg, rgba(200, 228, 255, 0), rgba(214, 236, 255, .9));
+  filter: blur(.3px);
+  transform: rotate(13deg);
   animation-name: wxRain;
 }
 
+/* Salju: kristal bintang, berputar pelan sambil berayun. */
 .wx--snow {
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 6px rgba(255, 255, 255, .8);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round' fill='none'%3E%3Cpath d='M12 2.5v19M4.2 7.2l15.6 9.6M19.8 7.2 4.2 16.8'/%3E%3Cpath d='M12 6.6 9.8 4.4M12 6.6l2.2-2.2M12 17.4l-2.2 2.2M12 17.4l2.2 2.2'/%3E%3C/g%3E%3C/svg%3E")
+    center/contain no-repeat;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, .75)) drop-shadow(0 1px 2px rgba(96, 136, 186,
+    .45));
   animation-name: wxSnow;
 }
 
+/* Daun kering: helai maple yang berputar seperti diterbang angin. */
 .wx--leaf {
-  width: calc(var(--size, 6px) * 1.7);
+  width: calc(var(--size, 6px) * 1.6);
   height: calc(var(--size, 6px) * 1.3);
-  border-radius: 2px 60% 2px 60%;
-  background: hsl(var(--hue, 28) 78% 55%);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5c1.6 3.4 4.6 3.8 6.6 2.6-.6 3.8 1.2 6.2 4.9 6.4-2.2 2.9-1.6 6.2 1.5 8.6-3.2 1.4-4.6 3.8-3.6 6.8-3.4-1.2-6.2-.6-7.6-3.6-3.4 1.6-6.6.4-8-2.7-3.4 1-6.4-.6-8-3.9 1-3.4-.4-5.8-3.4-6.6-1-3.4.4-6 3.4-6.2.6-3.4 2.6-5.4 6.6-5.4Z'/%3E%3Cpath d='M12 4v17' stroke='%23000' stroke-opacity='.25' stroke-width='1.2' fill='none'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5c1.6 3.4 4.6 3.8 6.6 2.6-.6 3.8 1.2 6.2 4.9 6.4-2.2 2.9-1.6 6.2 1.5 8.6-3.2 1.4-4.6 3.8-3.6 6.8-3.4-1.2-6.2-.6-7.6-3.6-3.4 1.6-6.6.4-8-2.7-3.4 1-6.4-.6-8-3.9 1-3.4-.4-5.8-3.4-6.6-1-3.4.4-6 3.4-6.2.6-3.4 2.6-5.4 6.6-5.4Z'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  background: linear-gradient(160deg, hsl(var(--hue, 28) 85% 62%), hsl(var(--hue, 28) 70% 42%));
   animation-name: wxLeaf;
 }
 
+/* Kelopak sakura: bentuk bundar dengan lekukan, jatuh sambil berputar. */
 .wx--petal {
-  width: calc(var(--size, 6px) * 1.3);
-  height: calc(var(--size, 6px) * 1.1);
-  border-radius: 60% 10% 60% 10%;
-  background: hsl(var(--hue, 335) 88% 78%);
-  animation-name: wxLeaf;
+  width: calc(var(--size, 6px) * 1.25);
+  height: calc(var(--size, 6px) * 1.05);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 4c-6 .6-10.4 3-12.8 7.2C6.4 15 6.8 19.6 9 22c.6-3.8 2.4-6.4 5.4-7.8C18 12.8 20.4 9.4 21 4Z'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 4c-6 .6-10.4 3-12.8 7.2C6.4 15 6.8 19.6 9 22c.6-3.8 2.4-6.4 5.4-7.8C18 12.8 20.4 9.4 21 4Z'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  background: linear-gradient(150deg, hsl(var(--hue, 335) 92% 88%), hsl(var(--hue, 335) 80% 72%));
+  animation-name: wxPetal;
+}
+
+/* Cuaca panas: butiran debu/pollen yang melayang naik pelan. */
+.wx--mote {
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 246, 214, .95), rgba(255, 236, 170, 0));
+  animation-name: wxMote;
 }
 
 .wx--small {
@@ -1548,7 +1573,81 @@
 }
 
 .window-fx .wx--rain {
-  height: calc(var(--size, 4px) * 2.4);
+  height: calc(var(--size, 4px) * 2.6);
+}
+
+/* ---------- Efek tanah ---------- */
+
+.out-ground-fx {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 30%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.gf-puddle {
+  position: absolute;
+  left: var(--left, 50%);
+  bottom: 6%;
+  width: var(--size, 24px);
+  height: calc(var(--size, 24px) * .28);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(150, 190, 230, .55), rgba(150, 190, 230, .12) 70%,
+    transparent);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, .35);
+  animation: gfRipple 3.2s ease-in-out infinite;
+}
+
+.gf-snow {
+  position: absolute;
+  left: var(--left, 50%);
+  bottom: 0;
+  width: var(--size, 60px);
+  height: calc(var(--size, 60px) * .34);
+  border-radius: 50% 50% 0 0;
+  background: linear-gradient(180deg, #fff, rgba(226, 240, 255, .85));
+  box-shadow: 0 -2px 8px rgba(255, 255, 255, .55);
+}
+
+.gf-leaf {
+  position: absolute;
+  left: var(--left, 50%);
+  bottom: calc(2% + var(--size, 8px) * .2);
+  width: var(--size, 8px);
+  height: calc(var(--size, 8px) * .72);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5c1.6 3.4 4.6 3.8 6.6 2.6-.6 3.8 1.2 6.2 4.9 6.4-2.2 2.9-1.6 6.2 1.5 8.6-3.2 1.4-4.6 3.8-3.6 6.8-3.4-1.2-6.2-.6-7.6-3.6-3.4 1.6-6.6.4-8-2.7-3.4 1-6.4-.6-8-3.9 1-3.4-.4-5.8-3.4-6.6-1-3.4.4-6 3.4-6.2.6-3.4 2.6-5.4 6.6-5.4Z'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5c1.6 3.4 4.6 3.8 6.6 2.6-.6 3.8 1.2 6.2 4.9 6.4-2.2 2.9-1.6 6.2 1.5 8.6-3.2 1.4-4.6 3.8-3.6 6.8-3.4-1.2-6.2-.6-7.6-3.6-3.4 1.6-6.6.4-8-2.7-3.4 1-6.4-.6-8-3.9 1-3.4-.4-5.8-3.4-6.6-1-3.4.4-6 3.4-6.2.6-3.4 2.6-5.4 6.6-5.4Z'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  background: hsl(var(--hue, 28) 72% 48%);
+  opacity: .9;
+  transform: rotate(var(--tilt, 12deg));
+}
+
+.gf-flower {
+  position: absolute;
+  left: var(--left, 50%);
+  bottom: calc(1% + var(--size, 6px) * .2);
+  width: var(--size, 6px);
+  height: var(--size, 6px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #fff6c9, hsl(var(--hue, 330) 90% 74%) 60%,
+    hsl(var(--hue, 330) 80% 60%));
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .22);
+}
+
+/* Salju menempel di kusen jendela. */
+.room[data-weather="snow"] .window-sill::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: -4px;
+  height: 12px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #fff, rgba(226, 240, 255, .9));
+  box-shadow: 0 -2px 6px rgba(255, 255, 255, .5);
 }
 
 /* ---------- Aksesori emoji ---------- */
@@ -1609,129 +1708,6 @@
   font-size: clamp(2.4rem, 12vw, 3.6rem);
   opacity: .82;
   z-index: 0;
-}
-
-/* ---------- Aset realistis (PNG, opsional) ---------- */
-
-/*
- * Layer gambar PNG. Semuanya disembunyikan secara default; modul
- * src/systems/art.js yang memunculkannya kalau file-nya benar-benar ada.
- * Kalau file belum ada, ilustrasi SVG/CSS tetap yang dipakai.
- */
-
-.cat-photo,
-.cat-acc-photo,
-.window-photo,
-.out-photo {
-  position: absolute;
-  display: block;
-}
-
-.cat-photo {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  z-index: 2;
-  filter: drop-shadow(0 18px 26px rgba(20, 10, 26, .35));
-}
-
-/* Kucing foto menggantikan SVG, tapi aksesori tetap ditampilkan. */
-.cat.has-photo .cat-svg {
-  display: none;
-}
-
-.cat-acc-photo {
-  z-index: 5;
-  width: clamp(60px, 26vw, 104px);
-  height: auto;
-  pointer-events: none;
-  filter: drop-shadow(0 6px 10px rgba(20, 10, 26, .32));
-}
-
-.cat[data-acc-photo][data-acc-slot="head"] .cat-acc-photo {
-  top: -6%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(54px, 22vw, 90px);
-}
-
-.cat[data-acc-photo][data-acc-slot="face"] .cat-acc-photo {
-  top: 26%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(50px, 20vw, 82px);
-}
-
-.cat[data-acc-photo][data-acc-slot="neck"] .cat-acc-photo {
-  top: 46%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(46px, 18vw, 74px);
-}
-
-.cat[data-acc-photo][data-acc-slot="body"] .cat-acc-photo {
-  top: 52%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(62px, 26vw, 108px);
-}
-
-.cat[data-acc-photo][data-acc-slot="back"] .cat-acc-photo {
-  top: 40%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(70px, 30vw, 120px);
-  opacity: .85;
-}
-
-/* Ekspresi SVG tidak ada di kucing foto, jadi mood pakai filter. */
-.cat.has-photo[data-mood="sleep"] .cat-photo {
-  filter: drop-shadow(0 12px 20px rgba(20, 10, 26, .3)) brightness(.82) saturate(.85);
-}
-
-.cat.has-photo[data-mood="happy"] .cat-photo,
-.cat.has-photo[data-mood="play"] .cat-photo {
-  filter: drop-shadow(0 18px 26px rgba(20, 10, 26, .35)) saturate(1.08);
-}
-
-.cat.has-photo[data-mood="sad"] .cat-photo {
-  filter: drop-shadow(0 14px 22px rgba(20, 10, 26, .3)) saturate(.72) brightness(.94);
-}
-
-.cat.has-photo[data-mood="annoyed"] .cat-photo {
-  filter: drop-shadow(0 16px 24px rgba(20, 10, 26, .32)) saturate(.9) hue-rotate(-8deg);
-}
-
-.window-photo {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-}
-
-.out-photo {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-}
-
-/* Layer foto menutupi ilustrasi CSS di wreckage/jendela. */
-.window:has(.window-photo.is-loaded) .window-sky,
-.window:has(.window-photo.is-loaded) .window-cloud,
-.window:has(.window-photo.is-loaded) .window-hill,
-.window:has(.window-photo.is-loaded) .window-tree,
-.outdoor:has(.out-photo.is-loaded) .out-sky,
-.outdoor:has(.out-photo.is-loaded) .out-cloud,
-.outdoor:has(.out-photo.is-loaded) .out-hill,
-.outdoor:has(.out-photo.is-loaded) .out-grass,
-.outdoor:has(.out-photo.is-loaded) .out-tree,
-.outdoor:has(.out-photo.is-loaded) .out-bush {
-  opacity: 0;
 }
 
 /* ---------- Bulu tambahan ---------- */
@@ -1810,18 +1786,64 @@
 
 @keyframes wxSnow {
   0% {
-    transform: translate3d(0, -10vh, 0);
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
     opacity: 0;
   }
   12% {
     opacity: 1;
   }
   50% {
-    transform: translate3d(calc(var(--drift, 0px) * -1), 52vh, 0);
+    transform: translate3d(calc(var(--drift, 0px) * -1), 52vh, 0) rotate(160deg);
   }
   100% {
-    transform: translate3d(var(--drift, 0px), 112vh, 0);
+    transform: translate3d(var(--drift, 0px), 112vh, 0) rotate(340deg);
     opacity: 0;
+  }
+}
+
+@keyframes wxPetal {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(var(--drift, 0px), 52vh, 0) rotate(150deg);
+  }
+  100% {
+    transform: translate3d(calc(var(--drift, 0px) * -1), 112vh, 0) rotate(330deg);
+    opacity: 0;
+  }
+}
+
+@keyframes wxMote {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  20% {
+    opacity: .7;
+  }
+  80% {
+    opacity: .5;
+  }
+  100% {
+    transform: translate3d(var(--drift, 0px), -34vh, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes gfRipple {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: .75;
+  }
+  50% {
+    transform: scaleX(1.18);
+    opacity: .45;
   }
 }
 
