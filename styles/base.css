@@ -37,6 +37,17 @@
   box-sizing: border-box;
 }
 
+/*
+ * Wadah definisi SVG (gradien, filter, gunting). Disimpan di luar SVG kucing
+ * supaya tidak ikut terduplikasi saat kucing di-clone untuk pemain multiplayer.
+ */
+.svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
