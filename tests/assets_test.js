@@ -90,3 +90,27 @@ Deno.test("semua file SVG valid dan punya viewBox", async () => {
 
   if (count < 10) throw new Error(`Hanya ada ${count} file SVG, seharusnya lebih banyak`);
 });
+
+Deno.test("tidak ada atribut style inline (diblokir CSP)", async () => {
+  const html = await readText("index.html");
+  const inline = html.match(/\sstyle="/g);
+
+  if (inline) {
+    throw new Error(
+      `Ada ${inline.length} atribut style inline. CSP "style-src 'self'" memblokirnya, ` +
+        "jadi atributnya diabaikan. Pakai atribut presentasi (fill, stroke, ...).",
+    );
+  }
+});
+
+Deno.test("warna gradient memakai atribut stop-color", async () => {
+  const html = await readText("index.html");
+
+  if (html.includes('style="stop-color')) {
+    throw new Error("stop-color harus pakai atribut presentasi, bukan style inline");
+  }
+
+  const gradients = html.match(/<(linear|radial)Gradient/g) || [];
+
+  if (gradients.length < 5) throw new Error("Gradient SVG tiba-tiba hilang");
+});

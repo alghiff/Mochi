@@ -255,19 +255,35 @@
   left: 50%;
   width: 2px;
   height: 56px;
-  background: rgba(255, 247, 239, .28);
+  background: linear-gradient(180deg, rgba(255, 247, 239, .12), rgba(255, 247, 239, .34));
 }
 
 .lamp-shade {
   position: absolute;
-  top: 52px;
+  top: 50px;
   left: 50%;
-  width: 62px;
-  height: 34px;
-  border-radius: 8px 8px 26px 26px;
+  width: 66px;
+  height: 38px;
+  border-radius: 6px 6px 34px 34px;
   transform: translateX(-50%);
-  background: linear-gradient(180deg, #ffb35c, #e07c4b);
-  box-shadow: 0 10px 24px -8px rgba(255, 138, 92, .55);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .3) 0 16%, transparent 17%),
+    linear-gradient(180deg, #ffc074 0%, #f09a4e 52%, #d97b3c 100%);
+  box-shadow:
+    inset 0 -7px 12px -6px rgba(120, 52, 20, .5),
+    0 12px 26px -10px rgba(255, 138, 92, .5);
+}
+
+/* Tepi bawah lampu menerangi ke bawah. */
+.lamp-shade::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 1px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 231, 168, .95), rgba(255, 196, 110, .08) 72%);
 }
 
 .lamp-bulb {
@@ -283,16 +299,23 @@
   animation: bulbGlow 4s ease-in-out infinite;
 }
 
+/* Pancaran cahaya落到 dinding, lembut dan tidak flat. */
 .lamp::after {
   content: "";
   position: absolute;
-  top: 88px;
+  top: 82px;
   left: 50%;
-  width: 190px;
-  height: 240px;
+  width: 260px;
+  height: 300px;
   transform: translateX(-50%);
-  background: radial-gradient(ellipse at 50% 0%, rgba(255, 209, 102, .2), transparent 68%);
   pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 209, 102, .3),
+    rgba(255, 209, 102, .09) 42%,
+    transparent 72%
+  );
+  filter: blur(7px);
 }
 
 /* Pigura */
@@ -344,8 +367,8 @@
 
 .bowl {
   position: absolute;
-  left: 27%;
-  bottom: 13%;
+  left: 28%;
+  bottom: 14.5%;
   width: 58px;
   height: 28px;
   border-radius: 6px 6px 26px 26px;
@@ -374,8 +397,8 @@
 
 .toy-ball {
   position: absolute;
-  right: 27%;
-  bottom: 13%;
+  right: 28%;
+  bottom: 14.5%;
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -567,6 +590,24 @@
   opacity: .5;
 }
 
+/* Kedip natural saat menganggur. */
+@keyframes catBlink {
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+  }
+  94% {
+    transform: scaleY(0.08);
+  }
+}
+
+.cat[data-mood="idle"] .eyes-open {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: catBlink 5.4s ease-in-out infinite;
+}
+
 /* ---------- Ekspresi ---------- */
 
 .cat .eyes,
@@ -684,24 +725,6 @@
 }
 .cat-wrap.is-sleeping .zzz span:nth-child(3) {
   animation-delay: .7s;
-}
-
-.cat[data-mood="sleep"] {
-  transform: rotate(-4deg) translateY(4px);
-}
-
-.cat[data-mood="sleep"] .cat-body {
-  animation: sleepBreathe 5.5s ease-in-out infinite;
-}
-
-.cat[data-mood="sleep"] .cat-head {
-  animation: none;
-  transform: rotate(-4deg);
-}
-
-.cat[data-mood="sleep"] .cat-tail {
-  animation: none;
-  transform: rotate(16deg);
 }
 
 .cat[data-mood="eat"] .cat-head {
@@ -1343,11 +1366,11 @@
 .cushion {
   position: absolute;
   left: 50%;
-  bottom: -2px;
+  bottom: -12px;
   z-index: -1;
-  width: 46%;
-  height: 13%;
-  min-height: 26px;
+  width: 58%;
+  height: 17%;
+  min-height: 32px;
   transform: translateX(-50%);
   border-radius: 50% 50% 42% 42%;
   background: linear-gradient(180deg, #b79cff, #7b5ec9);
@@ -1426,9 +1449,9 @@
 /* Pot tanaman besar di sudut. */
 .big-plant {
   position: absolute;
-  left: 18%;
+  left: 25%;
   bottom: 34%;
-  z-index: 1;
+  z-index: 3;
   width: 90px;
   height: 150px;
 }

@@ -127,6 +127,11 @@ export function createMultiplayer({
     if (body) {
       body.removeAttribute("id");
       body.classList.add("remote-cat-body");
+
+      // Definisi SVG tidak perlu diduplikasi; pakai definisi yang sudah ada
+      // di dokumen supaya id tidak bentrok.
+      const defs = body.querySelector("defs");
+      if (defs) defs.remove();
       const emoji = body.querySelector(".cat-acc-emoji");
       if (emoji) {
         emoji.removeAttribute("id");
