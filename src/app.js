@@ -20,6 +20,7 @@ import { weatherById } from "./data/weather.js";
 import { createFeedback } from "./ui/feedback.js";
 import { createOverlays } from "./ui/overlay.js";
 import { createAudio } from "./systems/audio.js";
+import { createArt } from "./systems/art.js";
 import { createMic } from "./systems/mic.js";
 import { createWeather } from "./systems/weather.js";
 import { createQuests } from "./systems/quests.js";
@@ -52,6 +53,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
   let feedback = null;
   let overlays = null;
   let audio = null;
+  let art = null;
 
   const drag = {
     active: false,
@@ -198,12 +200,22 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       if (els.catAccEmoji) {
         els.catAccEmoji.textContent = acc && !acc.svg ? acc.icon : "";
       }
+
+      // Aset PNG opsional: kalau file-nya ada, kucing pakai foto; kalau tidak
+      // ada, tetap memakai ilustrasi SVG.
+      if (art) {
+        art.cat(state.fur);
+        art.accessory(state.acc, acc ? acc.slot : "");
+      }
     }
 
     if (els.room) {
       els.room.setAttribute("data-scene", state.scene);
       els.room.classList.toggle("is-night", state.sleeping);
     }
+
+    // Foto cuaca (opsional) untuk jendela dan halaman luar.
+    if (art) art.weather(state.weather.id);
 
     if (els.catWrap) {
       els.catWrap.classList.toggle("is-sleeping", state.sleeping);
@@ -1207,6 +1219,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
   feedback = createFeedback({ win, doc, els });
   overlays = createOverlays({ win, doc, els });
   audio = createAudio({ win, getState: () => state });
+  art = createArt({ win, els });
   cloud = createCloud({ win });
 
   quests = createQuests({

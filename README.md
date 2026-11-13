@@ -155,6 +155,36 @@ Cara membuat ikon baru:
 2. Daftarkan path-nya di `src/data/weather.js` atau `src/data/quests.js`.
 3. Jalankan `deno task test` — test aset akan menolak kalau file tidak ada.
 
+## Aset realistis (PNG, opsional)
+
+Game ini bisa memakai aset PNG photorealistic sebagai lapisan tambahan. Semua
+layer PNG bersifat **opsional**: kalau file-nya belum ada, elemen gambarnya
+disembunyikan dan game tetap memakai ilustrasi SVG/CSS seperti biasa.
+
+| Grup | Isi | Lokasi |
+| --- | --- | --- |
+| `cat` | 8 kucing (satu per warna bulu) | `assets/cat/<fur>.png` |
+| `accessories` | 19 aksesori | `assets/accessories/<id>.png` |
+| `weather` | 5 scene cuaca | `assets/weather/<id>.png` |
+| `scenery` | dinding & taman | `assets/scenery/<id>.png` |
+
+Membuatnya:
+
+```bash
+# pakai Gemini (gratis, tanpa watermark, bisa edit gambar)
+GEMINI_API_KEY=xxx deno task assets
+
+# hanya satu kelompok
+GEMINI_API_KEY=xxx deno task assets -- --group cat
+
+# tanpa key: Pollinations (gratis, TAPI ada watermark di pojok)
+deno task assets
+```
+
+Prompt dan daftar asetnya ada di `scripts/assets.manifest.js`, generatornya di
+`scripts/gen-assets.js`. File yang sudah ada tidak digenerate ulang (pakai
+`--force` untuk memaksa).
+
 ## Mengganti lagu latar
 
 Lagu yang dipakai ada di `assets/` dan path-nya didaftarkan di

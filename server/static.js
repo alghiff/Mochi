@@ -13,6 +13,10 @@ const MIME = {
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
   ".mp3": "audio/mpeg",
   ".m4a": "audio/mp4",
   ".ogg": "audio/ogg",
@@ -22,6 +26,9 @@ const MIME = {
 
 const AUDIO_EXT = new Set([".mp3", ".m4a", ".ogg", ".opus", ".wav"]);
 
+/* Folder aset gambar yang boleh disajikan. */
+const IMAGE_DIRS = ["cat", "accessories", "weather", "scenery"];
+
 const ALLOWED = [
   /^\/$/,
   /^\/index\.html$/,
@@ -29,6 +36,10 @@ const ALLOWED = [
   /^\/src\/(?:[a-z0-9][a-z0-9-]*\/)*[a-z0-9][a-z0-9-]*\.js$/,
   /^\/assets\/[^/\\]+\.(?:mp3|m4a|ogg|opus|wav)$/i,
   /^\/assets\/svg\/[a-z0-9][a-z0-9-]*\.svg$/i,
+  new RegExp(
+    `^/assets/(?:${IMAGE_DIRS.join("|")})/[a-z0-9][a-z0-9-]*\\.(?:png|jpg|jpeg|webp)$`,
+    "i",
+  ),
 ];
 
 function resolvePath(pathname) {

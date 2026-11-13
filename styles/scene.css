@@ -1611,6 +1611,129 @@
   z-index: 0;
 }
 
+/* ---------- Aset realistis (PNG, opsional) ---------- */
+
+/*
+ * Layer gambar PNG. Semuanya disembunyikan secara default; modul
+ * src/systems/art.js yang memunculkannya kalau file-nya benar-benar ada.
+ * Kalau file belum ada, ilustrasi SVG/CSS tetap yang dipakai.
+ */
+
+.cat-photo,
+.cat-acc-photo,
+.window-photo,
+.out-photo {
+  position: absolute;
+  display: block;
+}
+
+.cat-photo {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  z-index: 2;
+  filter: drop-shadow(0 18px 26px rgba(20, 10, 26, .35));
+}
+
+/* Kucing foto menggantikan SVG, tapi aksesori tetap ditampilkan. */
+.cat.has-photo .cat-svg {
+  display: none;
+}
+
+.cat-acc-photo {
+  z-index: 5;
+  width: clamp(60px, 26vw, 104px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(20, 10, 26, .32));
+}
+
+.cat[data-acc-photo][data-acc-slot="head"] .cat-acc-photo {
+  top: -6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(54px, 22vw, 90px);
+}
+
+.cat[data-acc-photo][data-acc-slot="face"] .cat-acc-photo {
+  top: 26%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(50px, 20vw, 82px);
+}
+
+.cat[data-acc-photo][data-acc-slot="neck"] .cat-acc-photo {
+  top: 46%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(46px, 18vw, 74px);
+}
+
+.cat[data-acc-photo][data-acc-slot="body"] .cat-acc-photo {
+  top: 52%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(62px, 26vw, 108px);
+}
+
+.cat[data-acc-photo][data-acc-slot="back"] .cat-acc-photo {
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(70px, 30vw, 120px);
+  opacity: .85;
+}
+
+/* Ekspresi SVG tidak ada di kucing foto, jadi mood pakai filter. */
+.cat.has-photo[data-mood="sleep"] .cat-photo {
+  filter: drop-shadow(0 12px 20px rgba(20, 10, 26, .3)) brightness(.82) saturate(.85);
+}
+
+.cat.has-photo[data-mood="happy"] .cat-photo,
+.cat.has-photo[data-mood="play"] .cat-photo {
+  filter: drop-shadow(0 18px 26px rgba(20, 10, 26, .35)) saturate(1.08);
+}
+
+.cat.has-photo[data-mood="sad"] .cat-photo {
+  filter: drop-shadow(0 14px 22px rgba(20, 10, 26, .3)) saturate(.72) brightness(.94);
+}
+
+.cat.has-photo[data-mood="annoyed"] .cat-photo {
+  filter: drop-shadow(0 16px 24px rgba(20, 10, 26, .32)) saturate(.9) hue-rotate(-8deg);
+}
+
+.window-photo {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.out-photo {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Layer foto menutupi ilustrasi CSS di wreckage/jendela. */
+.window:has(.window-photo.is-loaded) .window-sky,
+.window:has(.window-photo.is-loaded) .window-cloud,
+.window:has(.window-photo.is-loaded) .window-hill,
+.window:has(.window-photo.is-loaded) .window-tree,
+.outdoor:has(.out-photo.is-loaded) .out-sky,
+.outdoor:has(.out-photo.is-loaded) .out-cloud,
+.outdoor:has(.out-photo.is-loaded) .out-hill,
+.outdoor:has(.out-photo.is-loaded) .out-grass,
+.outdoor:has(.out-photo.is-loaded) .out-tree,
+.outdoor:has(.out-photo.is-loaded) .out-bush {
+  opacity: 0;
+}
+
 /* ---------- Bulu tambahan ---------- */
 
 .cat[data-fur="rose"] {

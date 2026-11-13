@@ -8,6 +8,8 @@ export function collectDom(doc) {
     stage: byId("stage"),
     catWrap: byId("cat-wrap"),
     cat: byId("cat"),
+    catPhoto: byId("cat-photo"),
+    catAccPhoto: byId("cat-acc-photo"),
     catAccEmoji: byId("cat-acc-emoji"),
     speech: byId("speech"),
     fx: byId("fx"),
@@ -91,6 +93,8 @@ export function collectDom(doc) {
     weatherLabel: byId("weather-label"),
     weatherFx: byId("weather-fx"),
     windowFx: byId("window-fx"),
+    windowPhoto: byId("window-photo"),
+    outPhoto: byId("out-photo"),
     remoteCats: byId("remote-cats"),
   };
 
