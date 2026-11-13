@@ -51,8 +51,8 @@
       </radialGradient>
 
       <linearGradient id="m-muzzle" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" style="stop-color:var(--belly);stop-opacity:.95" />
-        <stop offset="1" style="stop-color:var(--belly);stop-opacity:.25" />
+        <stop offset="0" style="stop-color:var(--belly);stop-opacity:.8" />
+        <stop offset="1" style="stop-color:var(--belly);stop-opacity:0" />
       </linearGradient>
 
       <!-- ---------- Gradien aksesori ---------- -->
@@ -197,11 +197,11 @@
 
       <!-- ---------- Gunting mata ---------- -->
       <clipPath id="m-eye-l">
-        <path d="M81 93q16-15 32 0-16 15-32 0Z" />
+        <ellipse cx="95" cy="95" rx="17" ry="19" />
       </clipPath>
 
       <clipPath id="m-eye-r">
-        <path d="M127 93q16-15 32 0-16 15-32 0Z" />
+        <ellipse cx="145" cy="95" rx="17" ry="19" />
       </clipPath>
     </defs>
   </svg>
@@ -474,10 +474,11 @@
                     <path
                       d="M120 126c-28 0-47 21-49 51-2 29 13 51 49 51s51-22 49-51c-2-30-21-51-49-51Z"
                       fill="var(--fur)" />
-                    <ellipse cx="120" cy="197" rx="34" ry="33" fill="var(--belly)" opacity=".6" />
-                    <ellipse cx="94" cy="229" rx="19" ry="9" fill="var(--belly)" />
-                    <ellipse cx="146" cy="229" rx="19" ry="9" fill="var(--belly)" />
+                    <ellipse cx="86" cy="205" rx="25" ry="21" fill="var(--fur)" />
+                    <ellipse cx="154" cy="205" rx="25" ry="21" fill="var(--fur)" />
                   </g>
+                  <!-- Perut -->
+                  <ellipse cx="120" cy="199" rx="30" ry="30" fill="var(--belly)" opacity=".5" />
 
                   <!-- Bulu dada -->
                   <g filter="url(#m-fur-fluff)" opacity=".55">
@@ -485,20 +486,25 @@
                       d="M120 134c-13 0-22 10-22 22 0 13 10 22 22 22s22-9 22-22c0-12-9-22-22-22Z"
                       fill="var(--belly)" opacity=".8" />
                   </g>
-
-                  <!-- Cakar depan -->
+                  <!-- Kaki depan: pendek dan bulat, supaya kucing tetap imut -->
                   <g>
-                    <path d="M104 168c-4 18-5 40-3 54 1 7 6 10 12 10s11-4 11-11l-1-53Z"
+                    <path d="M103 196c-3 10-4 19-2 24 2 6 8 8 13 6 5-2 7-7 6-13l-3-17Z"
                       fill="var(--fur)" />
-                    <path d="M136 168c4 18 5 40 3 54-1 7-6 10-12 10s-11-4-11-11l1-53Z"
+                    <path d="M137 196c3 10 4 19 2 24-2 6-8 8-13 6-5-2-7-7-6-13l3-17Z"
                       fill="var(--fur)" />
-                    <ellipse cx="110" cy="228" rx="13" ry="8" fill="var(--belly)" />
-                    <ellipse cx="130" cy="228" rx="13" ry="8" fill="var(--belly)" />
-                    <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.75" stroke-width="1.6"
+                    <ellipse cx="110" cy="222" rx="12" ry="7.5" fill="var(--belly)" />
+                    <ellipse cx="130" cy="222" rx="12" ry="7.5" fill="var(--belly)" />
+                    <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.55" stroke-width="1.5"
                       stroke-linecap="round">
-                      <path d="M105 226v5M110 227v5M115 226v5" />
-                      <path d="M125 226v5M130 227v5M135 226v5" />
+                      <path d="M106 220v4.5M110 221v4.5M114 220v4.5" />
+                      <path d="M126 220v4.5M130 221v4.5M134 220v4.5" />
                     </g>
+                  </g>
+
+                  <!-- Cakar belakang -->
+                  <g>
+                    <ellipse cx="92" cy="229" rx="17" ry="8" fill="var(--belly)" />
+                    <ellipse cx="148" cy="229" rx="17" ry="8" fill="var(--belly)" />
                   </g>
 
                   <!-- Cahaya dari jendela & sisi gelap di tubuh -->
@@ -546,7 +552,9 @@
 
                   <!-- Tengkorak + pipi -->
                   <g filter="url(#m-fur)">
-                    <ellipse cx="120" cy="98" rx="60" ry="52" fill="var(--fur)" />
+                    <ellipse cx="120" cy="98" rx="61" ry="53" fill="var(--fur)" />
+                    <circle cx="65" cy="107" r="17" fill="var(--fur)" />
+                    <circle cx="175" cy="107" r="17" fill="var(--fur)" />
                   </g>
 
                   <!-- Cahaya dari jendela, pipi, dan sisi gelap (dipotong agar tetap di dalam kepala) -->
@@ -555,13 +563,9 @@
                       filter="url(#m-soft-sm)" />
                     <ellipse cx="146" cy="122" rx="48" ry="40" fill="var(--fur-2)" opacity=".5"
                       filter="url(#m-soft-sm)" />
-                    <ellipse cx="72" cy="104" rx="20" ry="18" fill="var(--belly)" opacity=".38"
+                    <ellipse cx="86" cy="110" rx="17" ry="14" fill="var(--belly)" opacity=".3"
                       filter="url(#m-soft-sm)" />
-                    <ellipse cx="168" cy="104" rx="20" ry="18" fill="var(--belly)" opacity=".38"
-                      filter="url(#m-soft-sm)" />
-                    <ellipse cx="88" cy="112" rx="18" ry="14" fill="var(--belly)" opacity=".26"
-                      filter="url(#m-soft-sm)" />
-                    <ellipse cx="152" cy="112" rx="18" ry="14" fill="var(--belly)" opacity=".26"
+                    <ellipse cx="154" cy="110" rx="17" ry="14" fill="var(--belly)" opacity=".3"
                       filter="url(#m-soft-sm)" />
                   </g>
 
@@ -579,8 +583,8 @@
 
                   <!-- Moncong -->
                   <g filter="url(#m-soft-sm)">
-                    <ellipse cx="106" cy="118" rx="15" ry="11" fill="url(#m-muzzle)" />
-                    <ellipse cx="134" cy="118" rx="15" ry="11" fill="url(#m-muzzle)" />
+                    <ellipse cx="108" cy="114" rx="13" ry="9" fill="url(#m-muzzle)" />
+                    <ellipse cx="132" cy="114" rx="13" ry="9" fill="url(#m-muzzle)" />
                   </g>
 
                   <!-- Kumis -->
@@ -590,76 +594,77 @@
                   </g>
 
                   <!-- Hidung -->
-                  <path d="M111 108h18c2 0 3 2 2 4l-7 9c-2 2-5 2-7 0l-7-9c-1-2 0-4 1-4Z"
+                  <path
+                    d="M113 107h14c1.8 0 2.8 1.8 2 3.3l-4.2 6.2c-1 1.4-2.9 1.4-3.9 0l-4.2-6.2c-.8-1.5.2-3.3 2-3.3Z"
                     fill="url(#m-nose)" />
-                  <ellipse cx="116" cy="112" rx="3" ry="2" fill="#fff" opacity=".45" />
-                  <path d="M116 112h2M122 112h2" style="stroke:#7d3a48" stroke-width="1.4"
-                    stroke-linecap="round" opacity=".55" />
+                  <ellipse cx="117" cy="110" rx="2.6" ry="1.7" fill="#fff" opacity=".5" />
+                  <path d="M116 111h2.4M121.6 111h2.4" style="stroke:#7d3a48" stroke-width="1.3"
+                    stroke-linecap="round" opacity=".5" />
 
                   <!-- Mulut -->
-                  <g class="mouth mouth-neutral" fill="none" style="stroke:#4a2b33"
+                  <g class="mouth mouth-neutral" fill="none" style="stroke:#5b3742"
                     stroke-width="2.2"
                     stroke-linecap="round">
-                    <path d="M120 121v5M120 126q-7 6-13 1M120 126q7 6 13 1" />
+                    <path d="M120 117v4M120 121q-6 5-10 1M120 121q6 5 10 1" />
                   </g>
 
-                  <g class="mouth mouth-happy" fill="none" style="stroke:#4a2b33" stroke-width="2.4"
+                  <g class="mouth mouth-happy" fill="none" style="stroke:#5b3742" stroke-width="2.4"
                     stroke-linecap="round">
-                    <path d="M120 121v5M120 126q-9 9-16 1M120 126q9 9 16 1" />
+                    <path d="M120 117v4M120 121q-8 8-14 1M120 121q8 8 14 1" />
                   </g>
 
-                  <g class="mouth mouth-sad" fill="none" style="stroke:#4a2b33" stroke-width="2.2"
+                  <g class="mouth mouth-sad" fill="none" style="stroke:#5b3742" stroke-width="2.2"
                     stroke-linecap="round">
-                    <path d="M120 121v5M120 126q-7-7-13-2M120 126q7-7 13-2" />
+                    <path d="M120 117v4M120 121q-6-6-11-2M120 121q6-6 11-2" />
                   </g>
 
-                  <g class="mouth mouth-annoyed" fill="none" style="stroke:#4a2b33"
+                  <g class="mouth mouth-annoyed" fill="none" style="stroke:#5b3742"
                     stroke-width="2.2"
                     stroke-linecap="round">
-                    <path d="M120 121v5M120 126q-7-4-13-1M120 126q7-4 13-1" />
+                    <path d="M120 117v4M120 121q-6-3-11-1M120 121q6-3 11-1" />
                   </g>
 
                   <!-- Mata -->
                   <g class="eyes eyes-open">
-                    <path d="M81 93q16-15 32 0-16 15-32 0Z" fill="#f6efe8" />
+                    <ellipse cx="95" cy="95" rx="17" ry="19" fill="#f7efe6" />
                     <g clip-path="url(#m-eye-l)">
-                      <circle cx="97" cy="93" r="10.5" fill="url(#m-iris)" />
-                      <ellipse cx="97" cy="93" rx="3.4" ry="8.5" fill="#1d1218" />
-                      <circle cx="93" cy="89" r="3.4" fill="#fff" opacity=".92" />
-                      <circle cx="101" cy="96" r="1.5" fill="#fff" opacity=".55" />
-                      <path d="M81 86h32v-8H81Z" fill="#2b1a24" opacity=".22" />
+                      <circle cx="95" cy="97" r="13" fill="url(#m-iris)" />
+                      <ellipse cx="95" cy="97" rx="4.6" ry="11" fill="#2a1a20" />
+                      <circle cx="88" cy="89" r="4.6" fill="#fff" opacity=".95" />
+                      <circle cx="102" cy="102" r="2.4" fill="#fff" opacity=".6" />
+                      <path d="M76 80h38v-12H76Z" fill="#2b1a24" opacity=".16" />
                     </g>
-                    <path d="M81 93q16-15 32 0-16 15-32 0Z" fill="none" style="stroke:#2b1a24"
-                      stroke-width="2.4" stroke-linejoin="round" />
+                    <ellipse cx="95" cy="95" rx="17" ry="19" fill="none" style="stroke:#6b4653"
+                      stroke-width="2" opacity=".8" />
 
-                    <path d="M127 93q16-15 32 0-16 15-32 0Z" fill="#f6efe8" />
+                    <ellipse cx="145" cy="95" rx="17" ry="19" fill="#f7efe6" />
                     <g clip-path="url(#m-eye-r)">
-                      <circle cx="143" cy="93" r="10.5" fill="url(#m-iris)" />
-                      <ellipse cx="143" cy="93" rx="3.4" ry="8.5" fill="#1d1218" />
-                      <circle cx="139" cy="89" r="3.4" fill="#fff" opacity=".92" />
-                      <circle cx="147" cy="96" r="1.5" fill="#fff" opacity=".55" />
-                      <path d="M127 86h32v-8h-32Z" fill="#2b1a24" opacity=".22" />
+                      <circle cx="145" cy="97" r="13" fill="url(#m-iris)" />
+                      <ellipse cx="145" cy="97" rx="4.6" ry="11" fill="#2a1a20" />
+                      <circle cx="138" cy="89" r="4.6" fill="#fff" opacity=".95" />
+                      <circle cx="152" cy="102" r="2.4" fill="#fff" opacity=".6" />
+                      <path d="M126 80h38v-12h-38Z" fill="#2b1a24" opacity=".16" />
                     </g>
-                    <path d="M127 93q16-15 32 0-16 15-32 0Z" fill="none" style="stroke:#2b1a24"
-                      stroke-width="2.4" stroke-linejoin="round" />
+                    <ellipse cx="145" cy="95" rx="17" ry="19" fill="none" style="stroke:#6b4653"
+                      stroke-width="2" opacity=".8" />
                   </g>
 
-                  <g class="eyes eyes-happy" fill="none" style="stroke:#2b1a24" stroke-width="3"
+                  <g class="eyes eyes-happy" fill="none" style="stroke:#6b4653" stroke-width="3.4"
                     stroke-linecap="round">
-                    <path d="M83 94q14-15 28 0" />
-                    <path d="M129 94q14-15 28 0" />
+                    <path d="M80 97q15-17 30 0" />
+                    <path d="M130 97q15-17 30 0" />
                   </g>
 
-                  <g class="eyes eyes-closed" fill="none" style="stroke:#2b1a24" stroke-width="3"
+                  <g class="eyes eyes-closed" fill="none" style="stroke:#6b4653" stroke-width="3.2"
                     stroke-linecap="round">
-                    <path d="M83 93q14 11 28 0" />
-                    <path d="M129 93q14 11 28 0" />
+                    <path d="M80 96q15 12 30 0" />
+                    <path d="M130 96q15 12 30 0" />
                   </g>
 
-                  <g class="eyes eyes-annoyed" fill="none" style="stroke:#2b1a24" stroke-width="3"
+                  <g class="eyes eyes-annoyed" fill="none" style="stroke:#6b4653" stroke-width="3"
                     stroke-linecap="round">
-                    <path d="M84 87l26 9" />
-                    <path d="M156 87l-26 9" />
+                    <path d="M82 88l26 9" />
+                    <path d="M158 88l-26 9" />
                   </g>
 
                   <!-- Alis -->
@@ -670,26 +675,26 @@
                   </g>
 
                   <!-- Pipi merona -->
-                  <ellipse cx="80" cy="108" rx="12" ry="6" fill="#ff9d8a" opacity=".3"
+                  <ellipse cx="79" cy="110" rx="13" ry="7" fill="#ff9d8a" opacity=".38"
                     filter="url(#m-soft-sm)" />
-                  <ellipse cx="160" cy="108" rx="12" ry="6" fill="#ff9d8a" opacity=".3"
+                  <ellipse cx="161" cy="110" rx="13" ry="7" fill="#ff9d8a" opacity=".38"
                     filter="url(#m-soft-sm)" />
 
                   <!-- Kumis berearna -->
                   <g fill="none" style="stroke:url(#m-whisker)" stroke-width="1.7"
                     stroke-linecap="round">
-                    <path d="M96 116C78 110 60 108 44 110" />
-                    <path d="M96 122C76 122 56 124 40 130" />
-                    <path d="M97 128C80 134 62 140 48 148" />
-                    <path d="M144 116c18-6 36-8 52-6" />
-                    <path d="M144 122c20 0 40 2 56 8" />
-                    <path d="M143 128c17 6 35 12 49 20" />
+                    <path d="M103 110C90 106 76 105 64 107" />
+                    <path d="M103 116C89 116 73 118 61 122" />
+                    <path d="M104 122C92 126 79 131 68 137" />
+                    <path d="M137 110c13-4 27-5 39-3" />
+                    <path d="M137 116c15 0 31 2 43 6" />
+                    <path d="M136 122c12 4 26 9 36 15" />
                   </g>
 
                   <!-- Bulu pipi -->
-                  <g fill="none" style="stroke:var(--belly);stroke-opacity:.4" stroke-width="1.6"
+                  <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.3" stroke-width="1.5"
                     stroke-linecap="round">
-                    <path d="M96 132l-4 6M104 136l-3 6M120 138v7M136 136l3 6M144 132l4 6" />
+                    <path d="M101 128l-3 5M107 131l-2 5M120 133v6M133 131l2 5M139 128l3 5" />
                   </g>
 
                   <!-- Aksesori -->
