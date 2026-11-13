@@ -178,7 +178,7 @@
 
       <clipPath id="m-body-clip">
         <path
-          d="M120 126c-28 0-47 21-49 51-2 29 13 51 49 51s51-22 49-51c-2-30-21-51-49-51Z" />
+          d="M120 124c-27 0-45 20-47 50-2 30 12 58 47 58s49-28 47-58c-2-30-20-50-47-50Z" />
       </clipPath>
 
       <!-- ---------- Gunting mata ---------- -->
@@ -466,16 +466,16 @@
 
                 <!-- Ekor -->
                 <g class="cat-tail" filter="url(#m-fur)">
-                  <path
-                    d="M160 208c30 6 52-10 50-34-1-16-8-24-16-22-7 2-7 11 0 18 7 8 5 17-6 20-8 2-14 1-20-2Z"
-                    fill="var(--fur)" />
-                  <path d="M194 154c6-4 13-1 14 5 1 7-5 12-11 10-6-2-8-10-3-15Z"
-                    fill="var(--belly)" opacity=".85" />
-                  <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.32" stroke-width="2.2"
+                  <path d="M158 212C188 218 210 200 204 176 200 160 188 158 184 166"
+                    fill="none" style="stroke:var(--fur)" stroke-width="20"
+                    stroke-linecap="round" />
+                  <path d="M184 166c-4-5-11-4-13 1-2 6 4 11 10 9 5-2 6-7 3-10Z"
+                    fill="var(--belly)" opacity=".9" />
+                  <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.28" stroke-width="2"
                     stroke-linecap="round">
-                    <path d="M172 210c16 1 30-6 36-18" />
-                    <path d="M182 214c14-2 25-9 30-20" />
-                    <path d="M206 190c5-7 6-15 3-22" />
+                    <path d="M170 212c14 1 26-4 32-13" />
+                    <path d="M179 215c13-2 23-8 28-17" />
+                    <path d="M199 190c3-8 2-15-2-19" />
                   </g>
                 </g>
 
@@ -483,13 +483,13 @@
                 <g class="cat-body">
                   <g filter="url(#m-fur)">
                     <path
-                      d="M120 126c-28 0-47 21-49 51-2 29 13 51 49 51s51-22 49-51c-2-30-21-51-49-51Z"
+                      d="M120 124c-27 0-45 20-47 50-2 30 12 58 47 58s49-28 47-58c-2-30-20-50-47-50Z"
                       fill="var(--fur)" />
-                    <ellipse cx="86" cy="205" rx="25" ry="21" fill="var(--fur)" />
-                    <ellipse cx="154" cy="205" rx="25" ry="21" fill="var(--fur)" />
+                    <ellipse cx="86" cy="206" rx="24" ry="20" fill="var(--fur)" />
+                    <ellipse cx="154" cy="206" rx="24" ry="20" fill="var(--fur)" />
                   </g>
                   <!-- Perut -->
-                  <ellipse cx="120" cy="199" rx="30" ry="30" fill="var(--belly)" opacity=".5" />
+                  <ellipse cx="120" cy="202" rx="27" ry="27" fill="var(--belly)" opacity=".45" />
 
                   <!-- Bulu dada -->
                   <g filter="url(#m-fur-fluff)" opacity=".55">
@@ -497,24 +497,26 @@
                       d="M120 134c-13 0-22 10-22 22 0 13 10 22 22 22s22-9 22-22c0-12-9-22-22-22Z"
                       fill="var(--belly)" opacity=".8" />
                   </g>
-                  <!-- Kaki depan: hanya cakar pendek di bawah, biar tidak seperti kelinci -->
+                  <!-- Empat cakar: depan dan belakang sama besar, rata di dasar tubuh -->
                   <g>
-                    <ellipse cx="108" cy="227" rx="12" ry="8" fill="var(--fur)" />
-                    <ellipse cx="132" cy="227" rx="12" ry="8" fill="var(--fur)" />
-                    <ellipse cx="108" cy="228" rx="8.5" ry="5" fill="var(--belly)" />
-                    <ellipse cx="132" cy="228" rx="8.5" ry="5" fill="var(--belly)" />
-                    <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.5" stroke-width="1.4"
+                    <ellipse cx="107" cy="228" rx="12" ry="8" fill="var(--fur)" />
+                    <ellipse cx="133" cy="228" rx="12" ry="8" fill="var(--fur)" />
+                    <ellipse cx="91" cy="228" rx="12" ry="8" fill="var(--fur)" />
+                    <ellipse cx="149" cy="228" rx="12" ry="8" fill="var(--fur)" />
+                    <ellipse cx="107" cy="229" rx="8" ry="5" fill="var(--belly)" />
+                    <ellipse cx="133" cy="229" rx="8" ry="5" fill="var(--belly)" />
+                    <ellipse cx="91" cy="229" rx="8" ry="5" fill="var(--belly)" />
+                    <ellipse cx="149" cy="229" rx="8" ry="5" fill="var(--belly)" />
+                    <g fill="none" style="stroke:var(--fur-2);stroke-opacity:.45" stroke-width="1.3"
                       stroke-linecap="round">
-                      <path d="M105 225.5v4M108.5 226.5v4M112 225.5v4" />
-                      <path d="M129 225.5v4M132.5 226.5v4M136 225.5v4" />
+                      <path d="M103 226.5v4M107 227.5v4M111 226.5v4" />
+                      <path d="M129 226.5v4M133 227.5v4M137 226.5v4" />
+                      <path d="M87 226.5v4M91 227.5v4M95 226.5v4" />
+                      <path d="M145 226.5v4M149 227.5v4M153 226.5v4" />
                     </g>
                   </g>
 
                   <!-- Cakar belakang -->
-                  <g>
-                    <ellipse cx="90" cy="232" rx="17" ry="8" fill="var(--belly)" />
-                    <ellipse cx="150" cy="232" rx="17" ry="8" fill="var(--belly)" />
-                  </g>
 
                   <!-- Cahaya dari jendela & sisi gelap di tubuh -->
                   <g clip-path="url(#m-body-clip)">
@@ -533,6 +535,20 @@
                     <path d="M162 180c2 14-1 28-7 40" />
                     <path d="M96 146c-5 12-7 26-6 38" />
                     <path d="M144 146c5 12 7 26 6 38" />
+                  </g>
+                </g>
+
+                <!-- Ekor saat tidur: melingkar di depan cakar -->
+                <g class="cat-tail-sleep" filter="url(#m-fur)">
+                  <path d="M162 206c-16 8-38 16-44 32-4 12 12 18 22 9"
+                    fill="none" style="stroke:var(--fur-2)" stroke-width="20"
+                    stroke-linecap="round" />
+                  <path d="M118 246c-8 1-14-4-13-10 1-5 8-7 12-3 4 4 3 9-1 13Z"
+                    fill="var(--belly)" opacity=".9" />
+                  <g fill="none" style="stroke:var(--fur);stroke-opacity:.3" stroke-width="2"
+                    stroke-linecap="round">
+                    <path d="M150 212c-10 5-24 10-33 19" />
+                    <path d="M136 218c-8 4-16 8-22 13" />
                   </g>
                 </g>
 
@@ -569,6 +585,10 @@
                   <!-- Cahaya dari jendela, pipi, dan sisi gelap (dipotong agar tetap di dalam kepala) -->
                   <g clip-path="url(#m-head-clip)">
                     <ellipse cx="92" cy="66" rx="46" ry="30" fill="#fff" opacity=".22"
+                      filter="url(#m-soft-sm)" />
+                    <ellipse cx="86" cy="109" rx="11" ry="6" fill="#ff9d8a" opacity=".42"
+                      filter="url(#m-soft-sm)" />
+                    <ellipse cx="154" cy="109" rx="11" ry="6" fill="#ff9d8a" opacity=".42"
                       filter="url(#m-soft-sm)" />
                     <ellipse cx="146" cy="122" rx="48" ry="40" fill="var(--fur-2)" opacity=".5"
                       filter="url(#m-soft-sm)" />
@@ -635,28 +655,28 @@
 
                   <!-- Mata -->
                   <g class="eyes eyes-open">
-                    <ellipse cx="95" cy="95" rx="10" ry="12" fill="#241419" />
-                    <circle cx="90.5" cy="90" r="3.2" fill="#fff" />
-                    <ellipse cx="145" cy="95" rx="10" ry="12" fill="#241419" />
-                    <circle cx="140.5" cy="90" r="3.2" fill="#fff" />
+                    <ellipse cx="95" cy="95" rx="9" ry="11" fill="#241419" />
+                    <circle cx="91" cy="90.5" r="2.9" fill="#fff" />
+                    <ellipse cx="145" cy="95" rx="9" ry="11" fill="#241419" />
+                    <circle cx="141" cy="90.5" r="2.9" fill="#fff" />
                   </g>
 
-                  <g class="eyes eyes-happy" fill="none" style="stroke:#241419" stroke-width="3.2"
+                  <g class="eyes eyes-happy" fill="none" style="stroke:#241419" stroke-width="3"
                     stroke-linecap="round">
-                    <path d="M87 97q8-11 16 0" />
-                    <path d="M137 97q8-11 16 0" />
+                    <path d="M88 96q7-10 14 0" />
+                    <path d="M138 96q7-10 14 0" />
                   </g>
 
-                  <g class="eyes eyes-closed" fill="none" style="stroke:#241419" stroke-width="3.2"
+                  <g class="eyes eyes-closed" fill="none" style="stroke:#241419" stroke-width="3"
                     stroke-linecap="round">
-                    <path d="M87 96q8 9 16 0" />
-                    <path d="M137 96q8 9 16 0" />
+                    <path d="M88 95q7 8 14 0" />
+                    <path d="M138 95q7 8 14 0" />
                   </g>
 
-                  <g class="eyes eyes-annoyed" fill="none" style="stroke:#241419" stroke-width="3"
+                  <g class="eyes eyes-annoyed" fill="none" style="stroke:#241419" stroke-width="2.8"
                     stroke-linecap="round">
-                    <path d="M88 90l15 7" />
-                    <path d="M152 90l-15 7" />
+                    <path d="M89 90l13 6" />
+                    <path d="M151 90l-13 6" />
                   </g>
 
                   <!-- Alis -->
@@ -667,11 +687,6 @@
                   </g>
 
                   <!-- Pipi merona -->
-                  <ellipse cx="84" cy="110" rx="12" ry="6.5" fill="#ff9d8a" opacity=".38"
-                    filter="url(#m-soft-sm)" />
-                  <ellipse cx="156" cy="110" rx="12" ry="6.5" fill="#ff9d8a" opacity=".38"
-                    filter="url(#m-soft-sm)" />
-
                   <!-- Kumis berearna -->
                   <g fill="none" style="stroke:#fffaf4;stroke-opacity:.72" stroke-width="1.7"
                     stroke-linecap="round">
