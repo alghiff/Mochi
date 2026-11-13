@@ -140,14 +140,18 @@
 .window-cross {
   position: absolute;
   inset: 0;
+  /* Di atas cuaca (hill 1, tree 2), tapi di bawah partikel (4). */
+  z-index: 3;
 }
 
 .window-cross::before,
 .window-cross::after {
   content: "";
   position: absolute;
-  background: #64415a;
-  box-shadow: 0 0 0 1px rgba(255, 247, 239, .06);
+  background: linear-gradient(180deg, #7d5468, #563646);
+  box-shadow:
+    0 0 0 1px rgba(255, 247, 239, .12),
+    0 2px 6px -2px rgba(0, 0, 0, .55);
 }
 
 .window-cross::before {
@@ -340,7 +344,7 @@
 
 .bowl {
   position: absolute;
-  left: 33%;
+  left: 27%;
   bottom: 13%;
   width: 58px;
   height: 28px;
@@ -370,7 +374,7 @@
 
 .toy-ball {
   position: absolute;
-  right: 31%;
+  right: 27%;
   bottom: 13%;
   width: 30px;
   height: 30px;
@@ -426,8 +430,9 @@
 
 .cat-wrap {
   position: relative;
-  /* Kucing duduk di atas karpet, bukan melayang di atasnya. */
-  top: 62px;
+  /* Kucing duduk di atas karpet, bukan melayang di atasnya. Persentase
+     supaya tetap pas di layar pendek maupun tinggi. */
+  top: 13%;
   width: min(74%, 300px);
   cursor: grab;
   touch-action: none;
@@ -1222,7 +1227,7 @@
 .bookcase {
   position: absolute;
   left: 2%;
-  bottom: 13%;
+  bottom: 34%;
   z-index: 2;
   width: 118px;
   height: 156px;
@@ -1337,11 +1342,13 @@
 /* Bantal lantai. */
 .cushion {
   position: absolute;
-  right: 9%;
-  bottom: 13%;
-  z-index: 2;
-  width: 78px;
-  height: 30px;
+  left: 50%;
+  bottom: -2px;
+  z-index: -1;
+  width: 46%;
+  height: 13%;
+  min-height: 26px;
+  transform: translateX(-50%);
   border-radius: 50% 50% 42% 42%;
   background: linear-gradient(180deg, #b79cff, #7b5ec9);
   box-shadow: 0 10px 16px -10px rgba(0, 0, 0, .7), inset 0 -6px 10px -6px rgba(40, 20, 80, .5);
@@ -1349,8 +1356,8 @@
 
 .cushion-stitch {
   position: absolute;
-  left: 12%;
-  right: 12%;
+  left: 10%;
+  right: 10%;
   top: 42%;
   height: 2px;
   border-radius: 2px;
@@ -1362,7 +1369,7 @@
 .side-table {
   position: absolute;
   right: 21%;
-  bottom: 13%;
+  bottom: 34%;
   z-index: 1;
   width: 58px;
   height: 46px;
@@ -1420,7 +1427,7 @@
 .big-plant {
   position: absolute;
   left: 18%;
-  bottom: 13%;
+  bottom: 34%;
   z-index: 1;
   width: 90px;
   height: 150px;
@@ -1630,6 +1637,18 @@
   border-radius: 50%;
   transform: translateX(-50%);
   background: radial-gradient(circle at 40% 35%, #9fe08a, #5aa856 75%);
+}
+
+/* Kilau kaca di atas seluruh jendela. */
+.window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, .2) 0 16%, transparent 34% 100%),
+    linear-gradient(118deg, rgba(255, 255, 255, .1) 0 46%, transparent 56% 100%);
 }
 
 .window-sill {
