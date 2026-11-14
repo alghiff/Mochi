@@ -658,6 +658,10 @@
 .cat[data-acc="leafcrown"] .acc-leafcrown,
 .cat[data-acc="crown"] .acc-crown,
 .cat[data-acc="partyhat"] .acc-partyhat,
+.cat[data-acc="tophat"] .acc-tophat,
+.cat[data-acc="headphones"] .acc-headphones,
+.cat[data-acc="sunglasses"] .acc-sunglasses,
+.cat[data-acc="mask"] .acc-mask,
 .cat[data-acc="bell"] .acc-bell,
 .cat[data-acc="medal"] .acc-medal,
 .cat[data-acc="raincoat"] .acc-raincoat,
@@ -668,7 +672,12 @@
 .cat[data-acc="eyepatch"] .acc-eyepatch,
 .cat[data-acc="bandana"] .acc-bandana,
 .cat[data-acc="cape"] .acc-cape,
-.cat[data-acc="halo"] .acc-halo {
+.cat[data-acc="halo"] .acc-halo,
+.cat[data-acc="tie"] .acc-tie,
+.cat[data-acc="necklace"] .acc-necklace,
+.cat[data-acc="wings"] .acc-wings,
+.cat[data-acc="socks"] .acc-socks,
+.cat[data-acc="balloon"] .acc-balloon {
   display: inline;
 }
 
@@ -710,60 +719,45 @@
 /*
  * Indikator tidur.
  *
- * Sengaja berupa gelembung kecil di dekat kepala, bukan teks di balon
- * ucapan, supaya tidak ada dua "Zzz" yang muncul bersamaan. Ukurannya
- * tetap kecil agar tidak menutupi wajah Mochi.
+ * Hanya teks "Zzz" kecil yang muncul serong di kanan kepala kucing,
+ * tanpa kotak/balon, dan tidak terlalu jauh seperti orang tidur biasanya.
  */
 .zzz {
   position: absolute;
-  top: 7%;
-  right: 3%;
+  top: 5%;
+  right: -5%;
   z-index: 6;
   display: flex;
-  align-items: flex-end;
-  gap: 1px;
-  padding: 4px 9px 5px;
-  border: 1px solid rgba(207, 216, 255, .28);
-  border-radius: 999px;
-  background: rgba(24, 18, 40, .55);
-  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, .8);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  align-items: center;
+  gap: 3px;
   opacity: 0;
-  transform: rotate(-6deg) translateY(4px) scale(.9);
+  transform: rotate(-14deg) translateY(2px) scale(1);
   transition: opacity .4s ease, transform .4s var(--spring);
   pointer-events: none;
 }
 
 .zzz span {
-  font-size: .78rem;
+  font-size: 1rem;
   font-weight: 800;
   line-height: 1;
   color: #dbe3ff;
   text-shadow: 0 2px 8px rgba(0, 0, 0, .45);
 }
 
-.zzz span:nth-child(2) {
-  font-size: 1rem;
-}
-.zzz span:nth-child(3) {
-  font-size: 1.22rem;
-}
-
 .cat-wrap.is-sleeping .zzz {
   opacity: 1;
-  transform: rotate(-6deg) translateY(0) scale(1);
+  transform: rotate(-14deg) translateY(0) scale(1);
 }
 
 .cat-wrap.is-sleeping .zzz span {
-  animation: zFloat 2.8s ease-in-out infinite;
+  animation: zFloat 2.6s ease-in-out infinite;
 }
 
 .cat-wrap.is-sleeping .zzz span:nth-child(2) {
-  animation-delay: .35s;
+  animation-delay: .3s;
 }
 .cat-wrap.is-sleeping .zzz span:nth-child(3) {
-  animation-delay: .7s;
+  animation-delay: .6s;
 }
 
 .cat[data-mood="eat"] .cat-head {
