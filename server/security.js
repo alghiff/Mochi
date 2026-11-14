@@ -14,7 +14,7 @@ function safeHost(host) {
 /*
  * Host publik yang dipakai untuk CSP dan pemeriksaan Origin.
  *
- * Kalau PUBLIC_ORIGIN diisi (mis. "https://extion.site"), nilai itu yang
+ * Kalau PUBLIC_ORIGIN diisi (mis. "https://mochi.example.com"), nilai itu yang
  * dipakai. Dengan begitu Host header dari permintaan tidak bisa menyuntik
  * CSP atau membypass pemeriksaan Origin (host-header injection / DNS
  * rebinding).

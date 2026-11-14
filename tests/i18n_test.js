@@ -33,7 +33,7 @@ function placeholders(text) {
 Deno.test("semua bahasa punya key yang sama", () => {
   const base = Object.keys(I18N.id).sort();
 
-  for (const lang of ["ja", "ko"]) {
+  for (const lang of Object.keys(I18N).filter((id) => id !== "id")) {
     const keys = Object.keys(I18N[lang]).sort();
     const missing = base.filter((key) => !keys.includes(key));
     const extra = keys.filter((key) => !base.includes(key));
@@ -89,12 +89,20 @@ Deno.test("key yang dipakai di kode selalu ada", async () => {
 });
 
 Deno.test("key misi dinamis tersedia untuk semua quest", async () => {
-  const { QUESTS } = await import("../src/data/quests.js");
+  const { QUESTS, WEEKLY_QUESTS } = await import("../src/data/quests.js");
   const known = new Set(Object.keys(I18N.id));
   const missing = [];
 
   for (const quest of QUESTS) {
     for (const prefix of ["quest.name.", "quest.desc."]) {
+      const key = prefix + quest.id;
+
+      if (!known.has(key)) missing.push(key);
+    }
+  }
+
+  for (const quest of WEEKLY_QUESTS) {
+    for (const prefix of ["quest.weekly.", "quest.weekly.desc."]) {
       const key = prefix + quest.id;
 
       if (!known.has(key)) missing.push(key);

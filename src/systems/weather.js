@@ -15,13 +15,13 @@ export function createWeather({ doc, els, getState, t, onChange, isReducedMotion
       weather.nextAt = now + WEATHER_DURATION_MS;
     }
 
-    let changed = false;
+    let cycles = 0;
     let guard = 0;
 
     while (now >= weather.nextAt && guard < 40) {
       weather.id = nextWeatherId(weather.id);
       weather.nextAt += WEATHER_DURATION_MS;
-      changed = true;
+      cycles += 1;
       guard += 1;
     }
 
@@ -30,7 +30,7 @@ export function createWeather({ doc, els, getState, t, onChange, isReducedMotion
     }
 
     state.weather = weather;
-    return changed;
+    return cycles;
   }
 
   /*
@@ -205,14 +205,14 @@ export function createWeather({ doc, els, getState, t, onChange, isReducedMotion
   function refresh(options) {
     const now = Date.now();
     const previous = getState().weather.id;
-    const changed = advance(now);
+    const cycles = advance(now);
     apply();
 
-    if (changed && options && options.notify && onChange) {
-      onChange(getState().weather.id, previous);
+    if (cycles > 0 && options && options.notify && onChange) {
+      onChange(getState().weather.id, previous, { cycle: true, cycles });
     }
 
-    return changed;
+    return cycles;
   }
 
   function setWeather(id) {
@@ -221,7 +221,7 @@ export function createWeather({ doc, els, getState, t, onChange, isReducedMotion
     const next = weatherById(id);
     state.weather = { id: next.id, nextAt: Date.now() + WEATHER_DURATION_MS };
     apply();
-    if (previous !== next.id && onChange) onChange(next.id, previous);
+    if (previous !== next.id && onChange) onChange(next.id, previous, { cycle: false, cycles: 0 });
   }
 
   function timeLeft() {

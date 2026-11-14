@@ -5,6 +5,6 @@ tunnel: GANTI-DENGAN-UUID-TUNNEL
 credentials-file: /home/GANTI-USER/.cloudflared/GANTI-DENGAN-UUID-TUNNEL.json
 
 ingress:
-  - hostname: extion.site
+  - hostname: mochi.example.com
     service: http://127.0.0.1:8080
   - service: http_status:404

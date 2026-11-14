@@ -1,10 +1,11 @@
 import id from "./id.js";
 import ja from "./ja.js";
 import ko from "./ko.js";
+import en from "./en.js";
 
 export { LANG_LABELS, LANGS } from "../langs.js";
 
-export const I18N = { id, ja, ko };
+export const I18N = { id, ja, ko, en };
 
 export function translate(lang, key, params) {
   const dict = I18N[lang] || I18N.id;

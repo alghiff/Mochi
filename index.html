@@ -190,6 +190,12 @@
             <span class="out-flower out-flower--4"></span>
             <span class="out-flower out-flower--5"></span>
             <span class="out-flower out-flower--6"></span>
+            <span class="out-flower out-flower--7"></span>
+            <span class="out-flower out-flower--8"></span>
+            <span class="out-flower out-flower--9"></span>
+            <span class="out-flower out-flower--10"></span>
+            <span class="out-flower out-flower--11"></span>
+            <span class="out-flower out-flower--12"></span>
             <span class="out-firefly out-firefly--1"></span>
             <span class="out-firefly out-firefly--2"></span>
             <span class="out-firefly out-firefly--3"></span>
@@ -357,8 +363,8 @@
             <div class="speech" id="speech" role="status" aria-live="polite"></div>
 
             <div class="zzz" aria-hidden="true">
-          <span>z</span><span>z</span><span>z</span>
-        </div>
+              <span>z</span><span>z</span><span>z</span>
+            </div>
 
             <div class="cat" id="cat" data-fur="cream" data-acc="" data-acc-slot=""
               data-mood="idle">
@@ -514,20 +520,40 @@
                 <ellipse cx="120" cy="239" rx="74" ry="11" fill="#1b1024" opacity=".3"
                   filter="url(#m-soft)" />
 
-                <!-- Ekor -->
+                <!-- Ekor: batang melengkung dengan ujung berbulu -->
                 <g class="cat-tail" filter="url(#m-fur)">
-                  <path d="M158 212C186 220 208 202 204 178 202 164 192 159 187 165"
-                    fill="none" stroke="var(--fur)" stroke-width="21" stroke-linecap="round" />
-                  <path d="M204 178C202 165 193 160 188 165"
-                    fill="none" stroke="var(--fur)" stroke-width="13" stroke-linecap="round" />
-                  <path d="M188 165c-4-3-9-1-10 3-1 5 4 8 8 6 4-2 5-7 2-9Z"
+                  <path d="M156 213C190 224 212 207 207 183 204 168 193 161 186 167"
+                    fill="none" stroke="var(--fur)" stroke-width="20" stroke-linecap="round" />
+                  <!-- Ujung ekor yang lebih gemuk dan berbulu -->
+                  <path d="M186 167c-6-6-15-4-16 4-1 8 7 13 14 10 7-2 8-9 2-14Z"
+                    fill="var(--fur)" />
+                  <circle cx="180" cy="164" r="5" fill="var(--fur)" />
+                  <circle cx="188" cy="160" r="4.4" fill="var(--fur)" />
+                  <circle cx="194" cy="164" r="3.6" fill="var(--fur)" />
+                  <path d="M180 170c-3-3-8-1-8 3 0 4 5 6 8 4 3-2 3-5 0-7Z"
                     fill="var(--belly)" opacity=".9" />
+                  <path d="M166 209c18 4 33-2 38-17" fill="none" stroke="var(--fur-2)"
+                    stroke-opacity=".2" stroke-width="6" stroke-linecap="round" />
                   <g fill="none" stroke="var(--fur-2)" stroke-opacity=".28" stroke-width="2"
                     stroke-linecap="round">
-                    <path d="M170 212c14 1 27-4 33-13" />
-                    <path d="M179 215c13-2 24-8 29-17" />
-                    <path d="M198 189c3-8 2-14-2-18" />
+                    <path d="M170 212c12 1 23-3 30-10" />
+                    <path d="M180 216c11-2 20-7 25-14" />
+                    <path d="M197 190c4-6 4-13 1-18" />
                   </g>
+                </g>
+
+                <!-- Cape di belakang badan -->
+                <g class="acc acc-cape">
+                  <path d="M92 142c-22 18-32 46-28 78l24 10c-4-26 4-48 20-64Z"
+                    fill="url(#m-violet)" stroke="#7f5ec9" stroke-width="3"
+                    stroke-linejoin="round" />
+                  <path d="M118 146c12 20 15 46 8 70l-22 8c8-24 6-48-6-68Z"
+                    fill="#9c83e8" stroke="#7f5ec9" stroke-width="3"
+                    stroke-linejoin="round" />
+                  <path d="M76 164c-8 16-11 34-9 52" fill="none" stroke="#fff"
+                    stroke-opacity=".3" stroke-width="5" stroke-linecap="round" />
+                  <path d="M112 158c7 18 8 38 3 56" fill="none" stroke="#5f43b5"
+                    stroke-opacity=".5" stroke-width="2.5" stroke-linecap="round" />
                 </g>
 
                 <!-- Badan -->
@@ -573,8 +599,6 @@
                   <g clip-path="url(#m-body-clip)">
                     <ellipse cx="90" cy="150" rx="52" ry="30" fill="#fff" opacity=".16"
                       filter="url(#m-soft-sm)" />
-                    <ellipse cx="152" cy="204" rx="46" ry="40" fill="var(--fur-2)" opacity=".45"
-                      filter="url(#m-soft-sm)" />
                   </g>
 
                   <!-- Bulu badan -->
@@ -589,16 +613,22 @@
                   </g>
                 </g>
 
-                <!-- Ekor saat tidur: melingkar di depan cakar -->
+                <!-- Ekor saat tidur: melingkar hangat di depan cakar -->
                 <g class="cat-tail-sleep" filter="url(#m-fur)">
-                  <path d="M158 208c-22 4-46 14-50 31-3 13 12 20 24 10"
-                    fill="none" stroke="var(--fur-2)" stroke-width="21" stroke-linecap="round" />
-                  <path d="M132 249c-8 2-15-3-14-10 1-6 9-8 14-3 4 4 3 10 0 13Z"
+                  <path d="M160 206c-26 1-52 12-57 30-4 14 11 23 25 14"
+                    fill="none" stroke="var(--fur)" stroke-width="20" stroke-linecap="round" />
+                  <path d="M128 250c-9 3-16-2-16-9 0-7 8-10 14-5 5 4 5 10 2 14Z"
+                    fill="var(--fur)" />
+                  <circle cx="122" cy="245" r="5" fill="var(--fur)" />
+                  <circle cx="116" cy="249" r="4.2" fill="var(--fur)" />
+                  <path d="M120 248c-4 0-7 3-6 6 1 3 5 3 7 1 2-2 1-5-1-7Z"
                     fill="var(--belly)" opacity=".9" />
-                  <g fill="none" stroke="var(--fur)" stroke-opacity=".3" stroke-width="2"
+                  <path d="M146 212c-15 3-31 11-38 22" fill="none" stroke="var(--fur-2)"
+                    stroke-opacity=".2" stroke-width="6" stroke-linecap="round" />
+                  <g fill="none" stroke="var(--fur-2)" stroke-opacity=".28" stroke-width="2"
                     stroke-linecap="round">
-                    <path d="M146 214c-12 4-26 10-33 19" />
-                    <path d="M132 221c-9 3-17 8-21 14" />
+                    <path d="M148 215c-13 4-27 11-34 20" />
+                    <path d="M134 222c-9 3-18 8-23 15" />
                   </g>
                 </g>
                 </g>
@@ -925,6 +955,54 @@
                     <circle cx="120" cy="14" r="8" fill="url(#m-gold)" stroke="#c9902f"
                       stroke-width="2" />
                   </g>
+
+                  <g class="acc acc-santa">
+                    <path
+                      d="M72 62c2-26 24-44 52-44 23 0 40 11 46 29 2 7-3 11-9 9-19-6-40-6-60 0-7 2-11 0-10-6Z"
+                      fill="#e04b4b" stroke="#b73535" stroke-width="3"
+                      stroke-linejoin="round" />
+                    <path d="M73 58c24-8 66-8 90 0 1 8-4 12-11 11-23-5-47-5-70 0-7 1-11-3-9-11Z"
+                      fill="#fff7ef" />
+                    <path d="M73 58c24-8 66-8 90 0" fill="none" stroke="#ffd9d9"
+                      stroke-width="2.5" stroke-linecap="round" />
+                    <circle cx="168" cy="29" r="11" fill="#fff7ef" />
+                    <circle cx="168" cy="29" r="11" fill="#fff" opacity=".55"
+                      filter="url(#m-soft-sm)" />
+                  </g>
+
+                  <g class="acc acc-beret">
+                    <ellipse cx="112" cy="42" rx="43" ry="18" transform="rotate(-12 112 42)"
+                      fill="#7f9cf5" stroke="#5b7ad8" stroke-width="3" />
+                    <ellipse cx="108" cy="38" rx="30" ry="10" transform="rotate(-12 108 38)"
+                      fill="#a9c0ff" opacity=".45" />
+                    <path d="M146 30c6-7 12-8 15-3" fill="none" stroke="#5b7ad8"
+                      stroke-width="3" stroke-linecap="round" />
+                    <circle cx="152" cy="24" r="4.5" fill="#5b7ad8" />
+                  </g>
+
+                  <g class="acc acc-starclip">
+                    <path d="M72 58l4 9 10 1-8 7 2 10-8-5-8 5 2-10-8-7 10-1Z"
+                      fill="url(#m-gold)" stroke="#c9902f" stroke-width="2"
+                      stroke-linejoin="round" />
+                    <circle cx="72" cy="69" r="2.6" fill="#fff7ef" opacity=".8" />
+                  </g>
+
+                  <g class="acc acc-eyepatch">
+                    <path d="M80 83c11-6 23-2 27 7 4 9-2 17-13 17-11 0-19-8-19-17 0-2 2-5 5-7Z"
+                      fill="#2b1d2a" />
+                    <path d="M80 84 69 75M106 85l13-9" fill="none" stroke="#2b1d2a"
+                      stroke-width="3" stroke-linecap="round" />
+                    <path d="M86 90c5-3 11-3 16 0" fill="none" stroke="#6b5b74"
+                      stroke-width="2" stroke-linecap="round" />
+                  </g>
+
+                  <g class="acc acc-halo">
+                    <ellipse cx="120" cy="24" rx="27" ry="7" fill="none" stroke="url(#m-gold)"
+                      stroke-width="5" />
+                    <ellipse cx="120" cy="24" rx="27" ry="7" fill="none" stroke="#fff7ef"
+                      stroke-opacity=".55" stroke-width="1.6" />
+                    <ellipse cx="120" cy="22" rx="21" ry="4" fill="#fff7ef" opacity=".18" />
+                  </g>
                 </g>
 
                 <!-- Aksesori badan -->
@@ -938,6 +1016,16 @@
                   <circle cx="120" cy="174" r="2.6" fill="#a5761f" />
                   <path d="M112 165c-3 3-4 6-4 9" fill="none" stroke="#fff" stroke-opacity=".5"
                     stroke-width="3" stroke-linecap="round" />
+                </g>
+
+                <g class="acc acc-bandana">
+                  <path d="M84 146c22 10 50 10 72 0l2 11c-24 12-52 12-76 0Z" fill="#ff8a5c"
+                    stroke="#c85f38" stroke-width="3" stroke-linejoin="round" />
+                  <path d="M120 158l-16 30 16-7 16 7-16-30Z" fill="#ff8a5c" stroke="#c85f38"
+                    stroke-width="2.5" stroke-linejoin="round" />
+                  <path d="M120 162l-8 17 8-4 8 4-8-17Z" fill="#ffd0b4" opacity=".65" />
+                  <path d="M90 150c18 7 42 7 60 0" fill="none" stroke="#fff"
+                    stroke-opacity=".35" stroke-width="3" stroke-linecap="round" />
                 </g>
 
                 <g class="acc acc-medal">
@@ -1186,16 +1274,25 @@
       <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="quest-title">
         <header class="sheet-head">
           <div>
-            <h2 class="sheet-title" id="quest-title" data-i18n="quest.title">Misi harian</h2>
+            <h2 class="sheet-title" id="quest-title" data-i18n="quest.title">Misi</h2>
             <p class="sheet-sub"
-              data-i18n="quest.sub">Selesaikan misi hari ini untuk koin dan XP ekstra.</p>
+              data-i18n="quest.sub">Selesaikan misi harian dan mingguan untuk koin dan XP ekstra.</p>
           </div>
           <button class="sheet-close" id="quest-close" type="button" data-close aria-label="Tutup"
             data-i18n-aria="common.close">&times;</button>
         </header>
         <div class="sheet-body">
-          <ul class="quest-list" id="quest-list"></ul>
-          <p class="quest-reset" id="quest-reset"></p>
+          <div class="quest-section">
+            <p class="quest-section-title" data-i18n="quest.dailyTitle">Misi harian</p>
+            <ul class="quest-list" id="quest-list"></ul>
+            <p class="quest-reset" id="quest-reset"></p>
+          </div>
+
+          <div class="quest-section">
+            <p class="quest-section-title" data-i18n="quest.weeklyTitle">Misi mingguan</p>
+            <ul class="quest-list" id="quest-weekly-list"></ul>
+            <p class="quest-reset" id="quest-weekly-reset"></p>
+          </div>
         </div>
       </section>
     </div>
@@ -1278,6 +1375,8 @@
                 aria-pressed="false">日本語</button>
               <button class="lang-btn" type="button" data-lang="ko"
                 aria-pressed="false">한국어</button>
+              <button class="lang-btn" type="button" data-lang="en"
+                aria-pressed="false">English</button>
             </div>
           </div>
 
@@ -1373,6 +1472,35 @@
 
             <p class="settings-label mp-players-label" data-i18n="mp.players">Pemain</p>
             <ul class="mp-players" id="mp-players"></ul>
+
+            <div class="mp-voice">
+              <div class="settings-copy">
+                <p class="settings-label" data-i18n="mp.voice">Voice chat</p>
+                <p class="settings-desc" id="mp-voice-status"
+                  data-i18n="mp.voiceOff">Mikrofon mati</p>
+              </div>
+              <button class="switch" id="mp-voice-switch" type="button" aria-pressed="false"
+                aria-label="Voice chat" data-i18n-aria="mp.voice" disabled></button>
+            </div>
+            <div class="mp-audio" id="mp-audio" aria-hidden="true"></div>
+
+            <div class="mp-chat">
+              <p class="settings-label" data-i18n="chat.title">Chat</p>
+              <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Chat"
+                data-i18n-aria="chat.title"></div>
+              <form class="chat-form" id="chat-form">
+                <button class="chat-emoji-btn" id="chat-emoji-btn" type="button" aria-label="Emoji"
+                  aria-expanded="false" data-i18n-aria="chat.picker">😊</button>
+                <input class="text-input chat-input" id="chat-input" type="text" maxlength="160"
+                  autocomplete="off" spellcheck="false" placeholder="Tulis pesan..."
+                  aria-label="Pesan chat" data-i18n-aria="chat.input"
+                  data-i18n-placeholder="chat.placeholder" />
+                <button class="gbtn gbtn--primary gbtn--small" id="chat-send" type="submit"
+                  data-i18n="chat.send">Kirim</button>
+              </form>
+              <div class="emoji-picker" id="emoji-picker" hidden aria-label="Pilih emoji"
+                data-i18n-aria="chat.picker"></div>
+            </div>
 
             <p class="settings-label mp-emote-label" data-i18n="mp.emote">Kirim emoji</p>
             <div class="mp-emotes" id="mp-emotes">

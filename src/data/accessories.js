@@ -88,6 +88,19 @@ export const ACCS = [
   { id: "tie", nameKey: "acc.tie", price: 26, icon: "👔", slot: "neck" },
   { id: "medal", nameKey: "acc.medal", price: 45, icon: "🏅", slot: "neck", svg: true },
   { id: "wings", nameKey: "acc.wings", price: 60, icon: "🦋", slot: "back" },
+
+  /* Gelombang kedua: total 30 aksesori. */
+  { id: "santa", nameKey: "acc.santa", price: 55, icon: "🎅", slot: "head", svg: true },
+  { id: "beret", nameKey: "acc.beret", price: 34, icon: "🎨", slot: "head", svg: true },
+  { id: "starclip", nameKey: "acc.starclip", price: 24, icon: "⭐", slot: "head", svg: true },
+  { id: "eyepatch", nameKey: "acc.eyepatch", price: 26, icon: "🏴‍☠️", slot: "face", svg: true },
+  { id: "bandana", nameKey: "acc.bandana", price: 28, icon: "🪢", slot: "neck", svg: true },
+  { id: "cape", nameKey: "acc.cape", price: 65, icon: "🦸", slot: "back", svg: true },
+  { id: "halo", nameKey: "acc.halo", price: 75, icon: "😇", slot: "head", svg: true },
+  { id: "tophat", nameKey: "acc.tophat", price: 42, icon: "🎩", slot: "head" },
+  { id: "necklace", nameKey: "acc.necklace", price: 30, icon: "📿", slot: "neck" },
+  { id: "socks", nameKey: "acc.socks", price: 22, icon: "🧦", slot: "body" },
+  { id: "balloon", nameKey: "acc.balloon", price: 18, icon: "🎈", slot: "back" },
 ];
 
 export function accById(id) {

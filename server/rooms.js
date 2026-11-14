@@ -34,6 +34,13 @@ const JOIN_WINDOW_MS = 60_000;
 /* Jeda minimal antara dua "belai" ke pemain yang sama. */
 const PET_COOLDOWN_MS = 1_000;
 
+/* Batas chat dan jeda antar pesan supaya room tidak bisa dibanjiri. */
+const CHAT_MAX = 160;
+const CHAT_COOLDOWN_MS = 500;
+
+const MAX_LEVEL = 199;
+const RTC_KINDS = new Set(["offer", "answer", "ice"]);
+
 const FUR_IDS = new Set(FURS.map((item) => item.id));
 const ACC_IDS = new Set(ACCS.map((item) => item.id));
 const MOODS = new Set(["idle", "happy", "sad", "sleep", "eat", "bath", "play", "annoyed"]);
@@ -102,7 +109,7 @@ function publicPlayers(room, exceptId) {
 export function cleanPublicState(raw) {
   if (!raw || typeof raw !== "object") return null;
 
-  const level = Math.min(99, Math.max(1, Math.floor(Number(raw.level) || 1)));
+  const level = Math.min(MAX_LEVEL, Math.max(1, Math.floor(Number(raw.level) || 1)));
   const fur = typeof raw.fur === "string" && FUR_IDS.has(raw.fur) ? raw.fur : "cream";
   const acc = typeof raw.acc === "string" && ACC_IDS.has(raw.acc) ? raw.acc : null;
   const mood = typeof raw.mood === "string" && MOODS.has(raw.mood) ? raw.mood : "idle";
@@ -390,6 +397,61 @@ export function createRooms({ maxPlayers = 6, maxRooms = MAX_ROOMS } = {}) {
     broadcast(room, { type: "emote", id: data.id, emote }, data.id);
   }
 
+  function chat(socket, rawText) {
+    const data = meta(socket);
+    const room = data.room;
+
+    if (!room || typeof rawText !== "string") return;
+
+    const text = rawText
+      .replace(/\p{Cc}/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, CHAT_MAX);
+
+    if (!text) return;
+
+    const now = Date.now();
+    if (now - (data.lastChatAt || 0) < CHAT_COOLDOWN_MS) return;
+    data.lastChatAt = now;
+
+    const name = data.state && data.state.name ? data.state.name : "Teman";
+    room.lastActivity = now;
+    broadcast(room, { type: "chat", id: data.id, name, text }, data.id);
+  }
+
+  function voice(socket, on) {
+    const data = meta(socket);
+    const room = data.room;
+
+    if (!room) return;
+
+    room.lastActivity = Date.now();
+    broadcast(room, { type: "voice", id: data.id, on: Boolean(on) }, data.id);
+  }
+
+  function rtc(socket, target, payload) {
+    const data = meta(socket);
+    const room = data.room;
+
+    if (!room) return;
+    if (typeof target !== "string" || !target || target === data.id) return;
+
+    const friend = room.clients.get(target);
+    if (!friend) return;
+    if (!payload || typeof payload !== "object") return;
+    if (!RTC_KINDS.has(payload.kind)) return;
+
+    if (payload.kind === "ice") {
+      if (!payload.candidate || typeof payload.candidate !== "object") return;
+    } else if (!payload.sdp || typeof payload.sdp !== "object") {
+      return;
+    }
+
+    room.lastActivity = Date.now();
+    send(friend.socket, { type: "rtc", from: data.id, data: payload });
+  }
+
   function pet(socket, target) {
     const data = meta(socket);
     const room = data.room;
@@ -484,6 +546,15 @@ export function createRooms({ maxPlayers = 6, maxRooms = MAX_ROOMS } = {}) {
         break;
       case "emote":
         emote(socket, payload.emote);
+        break;
+      case "chat":
+        chat(socket, payload.text);
+        break;
+      case "voice":
+        voice(socket, payload.on);
+        break;
+      case "rtc":
+        rtc(socket, payload.to, payload.data);
         break;
       case "pet":
         pet(socket, payload.target);

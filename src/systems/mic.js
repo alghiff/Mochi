@@ -186,6 +186,7 @@ export function createMic({ win, getAudioContext, onUpdate, onVoice }) {
     toggle,
     stop,
     isActive: () => mic.active,
+    getStream: () => mic.stream,
     statusKey,
   };
 }

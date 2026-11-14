@@ -1,90 +1,162 @@
-import { questById, QUESTS } from "../data/quests.js";
-import { formatClock, todayKey } from "../core/util.js";
+import { questById, QUESTS, WEEKLY_QUESTS, weeklyById } from "../data/quests.js";
+import { formatClock, todayKey, weekKey } from "../core/util.js";
+
+const PERIODS = {
+  daily: {
+    defs: QUESTS,
+    byId: questById,
+    stamp: "date",
+    stampValue: todayKey,
+  },
+  weekly: {
+    defs: WEEKLY_QUESTS,
+    byId: weeklyById,
+    stamp: "week",
+    stampValue: weekKey,
+  },
+};
+
+function emptyStore(period) {
+  const info = PERIODS[period];
+  return { [info.stamp]: info.stampValue(), progress: {}, claimed: {}, announced: {} };
+}
 
 /*
- * Misi harian.
- * Progres disimpan di state.quests dan direset otomatis saat tanggal berubah.
+ * Misi harian dan mingguan.
+ *
+ * Keduanya disimpan terpisah di state. Aksi yang sama (mis. memberi makan)
+ * menambah progres misi harian dan mingguan sekaligus. Reset harian terjadi
+ * saat tanggal berganti; reset mingguan setiap Senin.
  */
 export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast }) {
-  function ensureToday() {
+  function ensurePeriods() {
     const state = getState();
+    let dailyReset = false;
+    let weeklyReset = false;
+
     if (!state.quests || typeof state.quests !== "object") {
-      state.quests = { date: todayKey(), progress: {}, claimed: {}, announced: {} };
-      return true;
+      state.quests = emptyStore("daily");
+      dailyReset = true;
+    } else if (state.quests.date !== todayKey()) {
+      state.quests = emptyStore("daily");
+      dailyReset = true;
     }
 
-    const today = todayKey();
+    if (!state.weekly || typeof state.weekly !== "object") {
+      state.weekly = emptyStore("weekly");
+      weeklyReset = true;
+    } else if (state.weekly.week !== weekKey()) {
+      state.weekly = emptyStore("weekly");
+      weeklyReset = true;
+    }
 
-    if (state.quests.date === today) return false;
-
-    state.quests = { date: today, progress: {}, claimed: {}, announced: {} };
-    return true;
+    return { dailyReset, weeklyReset };
   }
 
-  function progressOf(id) {
+  function ensureToday() {
+    return ensurePeriods().dailyReset;
+  }
+
+  function storeFor(period) {
     const state = getState();
-    const value = Number(state.quests.progress[id]);
+    return period === "weekly" ? state.weekly : state.quests;
+  }
+
+  function infoFor(period) {
+    return PERIODS[period] || PERIODS.daily;
+  }
+
+  function progressOf(id, period = "daily") {
+    ensurePeriods();
+
+    const store = storeFor(period);
+    const value = Number(store.progress[id]);
     return Number.isFinite(value) ? value : 0;
   }
 
-  function isClaimed(id) {
-    return Boolean(getState().quests.claimed[id]);
+  function isClaimed(id, period = "daily") {
+    return Boolean(storeFor(period).claimed[id]);
   }
 
-  function isComplete(id) {
-    const quest = questById(id);
+  function isComplete(id, period = "daily") {
+    const quest = infoFor(period).byId(id);
     if (!quest) return false;
-    return progressOf(id) >= quest.target;
+    return progressOf(id, period) >= quest.target;
   }
 
-  function isClaimable(id) {
-    return isComplete(id) && !isClaimed(id);
+  function isClaimable(id, period = "daily") {
+    return isComplete(id, period) && !isClaimed(id, period);
   }
 
   function readyCount() {
-    ensureToday();
-    return QUESTS.filter((quest) => isClaimable(quest.id)).length;
+    ensurePeriods();
+
+    let total = 0;
+
+    for (const period of Object.keys(PERIODS)) {
+      for (const quest of infoFor(period).defs) {
+        if (isClaimable(quest.id, period)) total += 1;
+      }
+    }
+
+    return total;
   }
 
   function add(id, amount) {
-    ensureToday();
-
-    const quest = questById(id);
-    if (!quest) return 0;
-
-    const state = getState();
-
-    if (state.quests.claimed[id]) return 0;
-
-    const before = progressOf(id);
-    if (before >= quest.target) return 0;
+    ensurePeriods();
 
     const step = Math.max(1, Math.floor(Number(amount) || 1));
-    const next = Math.min(quest.target, before + step);
-    state.quests.progress[id] = next;
+    let added = 0;
+    let completed = false;
 
-    if (next >= quest.target && !state.quests.announced[id]) {
-      state.quests.announced[id] = true;
-      if (sfx) sfx("quest");
-      if (toast) toast(t("quest.ready"));
+    for (const period of Object.keys(PERIODS)) {
+      const info = infoFor(period);
+      const quest = info.byId(id);
+
+      if (!quest) continue;
+
+      const store = storeFor(period);
+
+      if (store.claimed[id]) continue;
+
+      const before = progressOf(id, period);
+      if (before >= quest.target) continue;
+
+      const next = Math.min(quest.target, before + step);
+      store.progress[id] = next;
+      added += next - before;
+
+      if (next >= quest.target && !store.announced[id]) {
+        store.announced[id] = true;
+        completed = true;
+      }
     }
 
-    render();
-    if (save) save();
+    if (added > 0) {
+      if (completed) {
+        if (sfx) sfx("quest");
+        if (toast) toast(t("quest.ready"));
+      }
 
-    return next - before;
+      render();
+      if (save) save();
+    }
+
+    return added;
   }
 
-  function claim(id) {
-    ensureToday();
+  function claim(id, period = "daily") {
+    ensurePeriods();
 
-    const quest = questById(id);
-    if (!quest || !isClaimable(id)) return null;
+    const info = infoFor(period);
+    const quest = info.byId(id);
 
-    const state = getState();
-    state.quests.claimed[id] = true;
+    if (!quest || !isClaimable(id, period)) return null;
 
-    if (onReward) onReward(quest.coins, quest.xp);
+    const store = storeFor(period);
+    store.claimed[id] = true;
+
+    if (onReward) onReward(quest.coins, quest.xp, period, quest);
 
     render();
     if (save) save();
@@ -96,18 +168,19 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
     return t("quest.reward", { coins: quest.coins, xp: quest.xp });
   }
 
-  function render() {
-    if (!els.questList) return;
+  function renderList(list, defs, period) {
+    if (!list) return;
 
-    ensureToday();
+    const store = storeFor(period);
+    const namePrefix = period === "weekly" ? "quest.weekly." : "quest.name.";
+    const descPrefix = period === "weekly" ? "quest.weekly.desc." : "quest.desc.";
+    list.textContent = "";
 
-    const state = getState();
-    els.questList.textContent = "";
-
-    for (const quest of QUESTS) {
-      const progress = Math.min(quest.target, progressOf(quest.id));
-      const claimed = Boolean(state.quests.claimed[quest.id]);
+    for (const quest of defs) {
+      const progress = Math.min(quest.target, progressOf(quest.id, period));
+      const claimed = Boolean(store.claimed[quest.id]);
       const claimable = !claimed && progress >= quest.target;
+      const questName = t(namePrefix + quest.id);
 
       const item = doc.createElement("li");
       item.className = "quest-item" + (claimed ? " is-claimed" : claimable ? " is-claimable" : "");
@@ -122,6 +195,16 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
         badge.alt = "";
         badge.width = 34;
         badge.height = 34;
+        badge.decoding = "async";
+        badge.addEventListener(
+          "error",
+          () => {
+            // Jangan tinggalkan ikon rusak kalau file badge gagal dimuat.
+            badge.remove();
+            icon.textContent = quest.icon;
+          },
+          { once: true },
+        );
         icon.appendChild(badge);
       } else {
         icon.textContent = quest.icon;
@@ -132,11 +215,11 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
 
       const name = doc.createElement("p");
       name.className = "quest-name";
-      name.textContent = t("quest.name." + quest.id);
+      name.textContent = questName;
 
       const desc = doc.createElement("p");
       desc.className = "quest-desc";
-      desc.textContent = t("quest.desc." + quest.id);
+      desc.textContent = t(descPrefix + quest.id);
 
       const barWrap = doc.createElement("div");
       barWrap.className = "quest-bar";
@@ -144,7 +227,7 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
       barWrap.setAttribute("aria-valuemin", "0");
       barWrap.setAttribute("aria-valuemax", String(quest.target));
       barWrap.setAttribute("aria-valuenow", String(progress));
-      barWrap.setAttribute("aria-label", t("quest.name." + quest.id));
+      barWrap.setAttribute("aria-label", questName);
 
       const bar = doc.createElement("i");
       bar.style.width = ((progress / quest.target) * 100).toFixed(1) + "%";
@@ -172,10 +255,8 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
         button.type = "button";
         button.className = "gbtn gbtn--primary gbtn--small quest-claim";
         button.setAttribute("data-claim", quest.id);
-        button.setAttribute(
-          "aria-label",
-          t("quest.claimAria", { name: t("quest.name." + quest.id) }),
-        );
+        button.setAttribute("data-period", period);
+        button.setAttribute("aria-label", t("quest.claimAria", { name: questName }));
         button.textContent = t("quest.claim");
         side.appendChild(button);
       } else {
@@ -188,8 +269,15 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
       item.appendChild(icon);
       item.appendChild(body);
       item.appendChild(side);
-      els.questList.appendChild(item);
+      list.appendChild(item);
     }
+  }
+
+  function render() {
+    ensurePeriods();
+
+    renderList(els.questList, QUESTS, "daily");
+    renderList(els.weeklyList, WEEKLY_QUESTS, "weekly");
 
     const ready = readyCount();
 
@@ -206,32 +294,65 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
     updateClock();
   }
 
-  function updateClock() {
-    if (!els.questReset) return;
+  function formatLeft(ms) {
+    const totalMinutes = Math.max(0, Math.ceil(ms / 60_000));
 
-    const state = getState();
-
-    if (QUESTS.every((quest) => state.quests.claimed[quest.id])) {
-      els.questReset.textContent = t("quest.done");
-      return;
+    if (totalMinutes >= 1440) {
+      return t("quest.timeDays", {
+        d: Math.floor(totalMinutes / 1440),
+        h: Math.floor((totalMinutes % 1440) / 60),
+      });
     }
 
+    if (totalMinutes >= 60) {
+      return t("quest.timeHours", {
+        h: Math.floor(totalMinutes / 60),
+        m: totalMinutes % 60,
+      });
+    }
+
+    return formatClock(ms);
+  }
+
+  function allClaimed(period) {
+    const store = storeFor(period);
+    return infoFor(period).defs.every((quest) => store.claimed[quest.id]);
+  }
+
+  function updateClock() {
     const now = new Date();
-    const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
-    const left = next.getTime() - now.getTime();
 
-    const hours = Math.floor(left / 3_600_000);
-    const minutes = Math.floor((left % 3_600_000) / 60_000);
+    if (els.questReset) {
+      if (allClaimed("daily")) {
+        els.questReset.textContent = t("quest.done");
+      } else {
+        const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+        els.questReset.textContent = t("quest.reset", {
+          time: formatLeft(next.getTime() - now.getTime()),
+        });
+      }
+    }
 
-    els.questReset.textContent = t("quest.reset", {
-      time: hours > 0 ? `${hours}j ${String(minutes).padStart(2, "0")}m` : formatClock(left),
-    });
+    if (els.weeklyReset) {
+      if (allClaimed("weekly")) {
+        els.weeklyReset.textContent = t("quest.weeklyDone");
+      } else {
+        const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+        const day = (next.getDay() + 6) % 7;
+        next.setDate(next.getDate() - day + 7);
+
+        els.weeklyReset.textContent = t("quest.weeklyReset", {
+          time: formatLeft(next.getTime() - now.getTime()),
+        });
+      }
+    }
   }
 
   function tick() {
-    const reset = ensureToday();
+    const reset = ensurePeriods();
     updateClock();
-    if (reset) render();
+
+    if (reset.dailyReset || reset.weeklyReset) render();
   }
 
   return {
@@ -240,6 +361,7 @@ export function createQuests({ doc, els, getState, t, save, onReward, sfx, toast
     render,
     tick,
     ensureToday,
+    ensurePeriods,
     readyCount,
     progressOf,
     isClaimed,

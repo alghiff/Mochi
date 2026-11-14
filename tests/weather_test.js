@@ -5,7 +5,14 @@
  * mengganti atribut href pada <use>, bukan mengisi ulang span.
  */
 
+import { WEATHER_DURATION_MS } from "../src/data/weather.js";
 import { createWeather } from "../src/systems/weather.js";
+
+Deno.test("satu siklus cuaca berlangsung 5 menit", () => {
+  if (WEATHER_DURATION_MS !== 5 * 60 * 1000) {
+    throw new Error(`Durasi cuaca salah: ${WEATHER_DURATION_MS}`);
+  }
+});
 
 function createHarness() {
   const state = {
@@ -54,16 +61,18 @@ function createHarness() {
     querySelector: () => null,
   };
 
+  const changes = [];
+
   const weather = createWeather({
     doc,
     els,
     getState: () => state,
     t: (key) => key,
-    onChange: () => {},
+    onChange: (id, previous, meta) => changes.push({ id, previous, meta }),
     isReducedMotion: () => true,
   });
 
-  return { weather, state, use, icon, els };
+  return { weather, state, use, icon, els, changes };
 }
 
 Deno.test("ikon cuaca diganti lewat atribut href", () => {
@@ -93,5 +102,19 @@ Deno.test("label cuaca ikut berubah", () => {
 
   if (els.weatherLabel.textContent !== "weather.hot") {
     throw new Error(`Label salah: ${els.weatherLabel.textContent}`);
+  }
+});
+
+Deno.test("refresh melaporkan siklus cuaca yang terlewat", () => {
+  const { weather, state, changes } = createHarness();
+
+  state.weather.nextAt = Date.now() - WEATHER_DURATION_MS * 2;
+
+  const cycles = weather.refresh({ notify: true });
+
+  if (cycles !== 3) throw new Error(`Siklus salah: ${cycles}`);
+  if (changes.length !== 1) throw new Error(`Notifikasi salah: ${changes.length}`);
+  if (!changes[0].meta.cycle || changes[0].meta.cycles !== 3) {
+    throw new Error("Metadata siklus tidak lengkap");
   }
 });

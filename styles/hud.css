@@ -185,8 +185,8 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 8px 10px;
-  border-radius: 15px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 999px;
   background: rgba(20, 13, 28, .32);
   border: 1px solid rgba(255, 247, 239, .09);
   -webkit-backdrop-filter: blur(12px);
@@ -197,10 +197,10 @@
 .stat-icon {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   flex: none;
-  border-radius: 9px;
+  border-radius: 50%;
   background: rgba(255, 247, 239, .08);
 }
 

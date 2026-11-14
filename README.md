@@ -7,13 +7,14 @@ atau bareng teman lewat multiplayer online. Visual, animasi, dan efek suara
 dibuat dengan HTML, CSS, SVG, dan Web Audio API; lagu latar memakai file MP3 di
 `assets/`. Tidak ada framework atau dependensi runtime eksternal.
 
-- **Toko & progres** — koin, level, XP, 8 warna bulu, 19 aksesori.
+- **Toko & progres** — koin, level (maksimal 199), XP, 8 warna bulu, 30 aksesori.
+- **Hadiah level** — +10 koin tiap level, bonus tiap kelipatan 10, dan aksesori acak tiap kelipatan 25.
 - **Musik latar** — lagu piano dari `assets/`, dengan toggle dan slider volume.
-- **Cuaca hidup** — 5 cuaca bergilir, partikel di taman, jendela ikut berubah.
-- **Misi harian** — 6 misi dengan hadiah koin/XP, reset tiap hari.
-- **Multiplayer** — satu room sampai 6 pemain (bisa diatur), satu kucing per pemain.
+- **Cuaca hidup** — 5 cuaca bergilir tiap 5 menit, +3 koin tiap pergantian, partikel di taman.
+- **Misi harian & mingguan** — 6 misi harian dan 7 misi mingguan dengan hadiah koin/XP.
+- **Multiplayer** — satu room sampai 6 pemain (bisa diatur), chat teks, emoji, dan voice chat.
 - **Cloud save** — pindah perangkat dengan kode rahasia 12 karakter.
-- **Responsif** — ponsel, tablet, dan desktop. Bahasa Indonesia, Jepang, Korea.
+- **Responsif** — ponsel, tablet, dan desktop. Bahasa Indonesia, Jepang, Korea, Inggris.
 
 ## Jalankan
 
@@ -112,17 +113,24 @@ http://localhost:8000/?scene=outside&lang=ja
 
 ## Cuaca, misi, dan toko musiman
 
-Cuaca berganti otomatis setiap **4 menit** dengan urutan:
+Cuaca berganti otomatis setiap **5 menit** dengan urutan:
 
 ```
 spring (🌸) → hot (☀️) → autumn (🍂) → rain (🌧️) → snow (❄️) → ...
 ```
 
-Cuaca hanya memengaruhi **taman**. Di dalam rumah, jendela menampilkan cuaca
-yang sama (hujan di luar juga terlihat di jendela), tapi kucing tetap nyaman.
-Hujan, salju, daun, dan kelopak bunga dirender sebagai partikel CSS.
+Setiap pergantian cuaca memberi **+3 koin**. Kalau tab ditutup cukup lama,
+semua siklus yang terlewat dihitung sekaligus (dengan batas aman) saat game
+dibuka lagi. Cuaca hanya memengaruhi **taman**. Di dalam rumah, jendela
+menampilkan cuaca yang sama (hujan di luar juga terlihat di jendela), tapi
+kucing tetap nyaman. Hujan, salju, daun, dan kelopak bunga dirender sebagai
+partikel CSS.
 
-Misi harian direset berdasarkan tanggal lokal perangkat. Hadiah misi:
+Misi harian direset berdasarkan tanggal lokal perangkat. Misi mingguan
+direset setiap **Senin** pukul 00.00 waktu lokal. Satu aksi (mis. memberi
+makan) menambah progres misi harian dan mingguan sekaligus.
+
+Hadiah misi harian:
 
 | Misi | Target | Koin | XP |
 | --- | --- | --- | --- |
@@ -133,14 +141,32 @@ Misi harian direset berdasarkan tanggal lokal perangkat. Hadiah misi:
 | Tangkap kupu-kupu | 5× | 18 | 10 |
 | Kirim emoji di multiplayer | 1× | 15 | 8 |
 
+Hadiah misi mingguan:
+
+| Misi | Target | Koin | XP |
+| --- | --- | --- | --- |
+| Makan | 15× | 80 | 40 |
+| Mandi | 5× | 60 | 30 |
+| Main tangkap ikan | 5× | 90 | 50 |
+| Elus | 60× | 70 | 35 |
+| Tangkap kupu-kupu | 20× | 80 | 40 |
+| Kirim emoji di multiplayer | 5× | 60 | 30 |
+| Kirim pesan chat | 10× | 50 | 25 |
+
 Lima aksesori musiman hanya bisa dibeli saat cuacanya sedang aktif:
 `flowercrown` (spring), `sunhat` (hot), `leafcrown` (autumn), `raincoat` (rain),
 dan `earmuffs` (snow). Setelah dibeli, item tetap dimiliki selamanya.
 
-Sebelas aksesori digambar langsung sebagai vektor di dalam SVG kucing
+Dua puluh satu aksesori digambar langsung sebagai vektor di dalam SVG kucing
 (`beanie`, `scarf`, `glasses`, `bow`, `flowercrown`, `sunhat`, `earmuffs`,
-`leafcrown`, `crown`, `partyhat`, `bell`, `medal`, `raincoat`, `backpack`), jadi
-tampilannya konsisten di semua ukuran layar. Sisanya masih memakai emoji.
+`leafcrown`, `crown`, `partyhat`, `bell`, `medal`, `raincoat`, `backpack`,
+`santa`, `beret`, `starclip`, `eyepatch`, `bandana`, `cape`, `halo`), jadi
+tampilannya konsisten di semua ukuran layar. Sisanya memakai emoji.
+
+Level maksimal adalah **199**. Tiap naik level mendapat +10 koin. Level
+kelipatan 10 mendapat bonus +50 koin. Level kelipatan 25 mendapat aksesori
+acak; kalau aksesori itu sudah dimiliki atau semua aksesori sudah lengkap,
+hadiahnya dikonversi menjadi +100 koin.
 
 ## Aset visual
 
@@ -231,12 +257,12 @@ src/
   data/
     foods.js            Menu makanan
     furs.js             8 warna bulu
-    accessories.js      19 aksesori (termasuk musiman)
-    weather.js          5 cuaca + durasi
-    quests.js           6 misi harian
+    accessories.js      30 aksesori (termasuk musiman)
+    weather.js          5 cuaca + durasi 5 menit
+    quests.js           6 misi harian + 7 misi mingguan
     music.js            Path lagu latar dari assets/
     langs.js            Daftar bahasa yang didukung
-    i18n/               id, ja, ko + penerjemah
+    i18n/               id, ja, ko, en + penerjemah
   game/
     minigame.js         Tangkap ikan
   systems/
@@ -288,12 +314,20 @@ Multiplayer memakai **WebSocket** di `/ws` dan **room in-memory** di server.
 3. Setiap klien mengirim state **publik** secara berkala:
    nama, level, warna bulu, aksesori, mood, status tidur, dan scene.
 4. Server mem-broadcast state itu ke pemain lain. Klien menggambar satu kucing
-   remote per pemain, lengkap dengan nama dan aksesorinya.
+   remote per pemain dalam satu baris horizontal; ukurannya mengecil otomatis
+   saat pemain bertambah dan kembali normal saat room sepi.
 5. Emoji diteruskan sebagai pesan `emote`. Mengelus kucing teman mengirim
    `pet` dengan target id pemain tersebut.
+6. Chat teks dikirim sebagai pesan `chat` dan ditampilkan di panel room,
+   lengkap dengan pemilih emoji. Voice chat memakai **WebRTC mesh**: server
+   hanya meneruskan sinyal `voice` dan `rtc` (offer/answer/ICE), sedangkan
+   audio mengalir langsung antar browser. Pemain dengan ID lebih kecil menjadi
+   pihak yang membuat offer supaya tidak terjadi tabrakan.
 
-Yang **tidak** dikirim: koin, XP, stat, misi, atau isi `localStorage`. Progres
-lengkap tetap di browser masing-masing.
+Yang **tidak** dikirim ke server: koin, XP, stat, misi, atau isi
+`localStorage`. Progres lengkap tetap di browser masing-masing. Audio voice
+chat tidak direkam dan tidak disimpan server; audio hanya mengalir langsung ke
+pemain di room yang sama.
 
 Batas default adalah **6 pemain per room**. Ubah dengan `MAX_PLAYERS`
 (rentang 2–12):
@@ -326,14 +360,18 @@ Klien mengirim JSON:
 { "type": "join", "room": "K7M2Q" }
 { "type": "state", "state": { "name": "Mochi", "level": 3, "fur": "cream", "acc": "bow", "mood": "happy", "sleeping": false, "scene": "outside" } }
 { "type": "emote", "emote": "❤️" }
+{ "type": "chat", "text": "Halo!" }
+{ "type": "voice", "on": true }
+{ "type": "rtc", "to": "<id teman>", "data": { "kind": "offer", "sdp": { "...": "..." } } }
 { "type": "pet", "target": "<id teman>" }
 { "type": "ping" }
 { "type": "leave" }
 ```
 
-Server memvalidasi ukuran pesan (maks 4 KB), rate limit (45 pesan/10 detik),
-format kode room, serta isi state publik (whitelist id bulu, aksesori, mood,
-scene). Pesan tak dikenal diabaikan.
+Server memvalidasi ukuran pesan (maks 8 KB), rate limit (90 pesan/10 detik per
+socket dan 300 pesan/10 detik per IP), format kode room, isi chat (maks 160
+karakter), payload WebRTC, serta isi state publik (whitelist id bulu, aksesori,
+mood, scene, dan level 1–199). Pesan tak dikenal diabaikan.
 
 ## Cloud save dan "database"
 
@@ -485,7 +523,7 @@ ExecStart=/usr/local/bin/deno run --allow-net --allow-read --allow-write --allow
 Restart=always
 Environment=PORT=8000
 Environment=KV_PATH=/srv/mochi/data/kv.sqlite3
-Environment=PUBLIC_ORIGIN=https://extion.site
+Environment=PUBLIC_ORIGIN=https://mochi.example.com
 
 [Install]
 WantedBy=multi-user.target
@@ -599,13 +637,13 @@ penyimpanan room terpusat.
 | `HOST` | `0.0.0.0` | Alamat bind |
 | `MAX_PLAYERS` | `6` | Maks pemain per room (2–12) |
 | `KV_PATH` | `data/kv.sqlite3` | Path file Deno KV. Kosong hanya di Deno Deploy (pakai KV platform) |
-| `PUBLIC_ORIGIN` | kosong | Origin publik, mis. `https://extion.site`. Kalau diisi, CSP dan cek Origin memakai nilai ini (bukan Host header) dan Host lain dibalas 421 |
+| `PUBLIC_ORIGIN` | kosong | Origin publik, mis. `https://mochi.example.com`. Kalau diisi, CSP dan cek Origin memakai nilai ini (bukan Host header) dan Host lain dibalas 421 |
 | `TRUSTED_PROXIES` | `127.0.0.1,::1` (Compose: `127.0.0.1,::1,172.16.0.0/12`) | Alamat/CIDR proxy yang dipercaya. Header `X-Forwarded-For`/`CF-Connecting-IP` hanya dipakai kalau koneksi datang dari daftar ini. `none` = tidak percaya proxy apa pun |
 | `MAX_ROOMS` | `100` | Maks room multiplayer aktif |
 | `ROOM_IDLE_MS` | `600000` | Room tanpa aktivitas dibuang setelah durasi ini |
 | `MAX_CONNECTIONS` | `200` | Maks koneksi WebSocket aktif |
 | `MAX_CONNECTIONS_PER_IP` | `10` | Maks koneksi WebSocket dari satu alamat IP |
-| `WS_IP_RATE_LIMIT` | `120` | Maks pesan WebSocket per IP per 10 detik |
+| `WS_IP_RATE_LIMIT` | `300` | Maks pesan WebSocket per IP per 10 detik |
 | `CLOUD_MAX_RECORDS` | `50000` | Maks jumlah record cloud save |
 | `CLOUD_CREATE_WINDOW_MS` | `600000` | Jendela rate limit pembuatan kode cloud |
 
@@ -613,7 +651,7 @@ Contoh produksi (Docker Compose):
 
 ```bash
 cat > .env <<'EOF'
-PUBLIC_ORIGIN=https://extion.site
+PUBLIC_ORIGIN=https://mochi.example.com
 EOF
 ```
 
@@ -655,9 +693,10 @@ server memakai mode pengembangan dan menampilkan peringatan saat start.
   maupun server produksi. Permukaan serangan kecil dan mudah diaudit.
 - **Tanpa cookie, pelacak, iklan, atau resource pihak ketiga.**
 
-Mikrofon dianalisis lokal lewat Web Audio API untuk mendeteksi suara; audio tidak
-direkam dan tidak dikirim ke server. Multiplayer hanya membagikan data publik
-yang tercantum di atas.
+Mikrofon dianalisis lokal lewat Web Audio API untuk mendeteksi suara. Saat
+voice chat aktif di room multiplayer, audio dikirim langsung ke pemain lain
+lewat WebRTC; audio tidak direkam dan tidak disimpan di server. Multiplayer
+hanya membagikan data publik yang tercantum di atas.
 
 ## Privasi
 

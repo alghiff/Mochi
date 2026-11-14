@@ -65,7 +65,7 @@ export const MAX_CONNECTIONS = numberFromEnv("MAX_CONNECTIONS", 200, 10, 5000);
 export const MAX_CONNECTIONS_PER_IP = numberFromEnv("MAX_CONNECTIONS_PER_IP", 10, 1, 200);
 
 /* Batas jumlah pesan WebSocket per IP (semua koneksi dari IP itu). */
-export const WS_IP_RATE_LIMIT = numberFromEnv("WS_IP_RATE_LIMIT", 120, 20, 2000);
+export const WS_IP_RATE_LIMIT = numberFromEnv("WS_IP_RATE_LIMIT", 300, 20, 2000);
 
 /*
  * Proxy yang dipercaya.
@@ -77,7 +77,7 @@ export const WS_IP_RATE_LIMIT = numberFromEnv("WS_IP_RATE_LIMIT", 120, 20, 2000)
 export const TRUSTED_PROXIES = listFromEnv("TRUSTED_PROXIES", ["127.0.0.1", "::1"]);
 
 /*
- * Origin publik (mis. "https://extion.site").
+ * Origin publik (mis. "https://mochi.example.com").
  *
  * Kalau diisi, CSP dan pemeriksaan Origin memakai nilai ini, bukan Host header
  * yang datang dari permintaan. Ini menutup celah host-header injection dan
@@ -102,12 +102,13 @@ function originFromEnv(name) {
 
 export const PUBLIC_ORIGIN = originFromEnv("PUBLIC_ORIGIN");
 
-export const MAX_MESSAGE_BYTES = 4096;
+/* SDP WebRTC bisa beberapa kilobyte; chat tetap dibatasi terpisah. */
+export const MAX_MESSAGE_BYTES = 8192;
 export const MAX_CLOUD_BYTES = 32 * 1024;
 export const MAX_CLOUD_STATE_BYTES = 24 * 1024;
 
 export const WS_RATE_WINDOW_MS = 10_000;
-export const WS_RATE_LIMIT = 45;
+export const WS_RATE_LIMIT = 90;
 export const CLOUD_RATE_WINDOW_MS = 60_000;
 export const CLOUD_RATE_LIMIT = 40;
 export const CLOUD_CREATE_LIMIT = 5;

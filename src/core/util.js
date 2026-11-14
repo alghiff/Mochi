@@ -36,6 +36,22 @@ export function todayKey(date) {
   return `${year}-${month}-${day}`;
 }
 
+/*
+ * Kunci minggu dimulai hari Senin.
+ *
+ * Dipakai misi mingguan supaya reset terjadi tepat saat awal minggu, bukan
+ * setiap tujuh hari sejak pemain pertama kali membuka game.
+ */
+export function weekKey(date) {
+  const value = date ? new Date(date) : new Date();
+  const day = (value.getDay() + 6) % 7;
+
+  value.setHours(0, 0, 0, 0);
+  value.setDate(value.getDate() - day);
+
+  return todayKey(value);
+}
+
 export function formatClock(ms) {
   const total = Math.max(0, Math.ceil(ms / 1000));
   const minutes = Math.floor(total / 60);

@@ -413,14 +413,6 @@
     width: min(44%, 180px);
   }
 
-  .stage.has-friends .cat-wrap {
-    width: min(40%, 170px);
-  }
-
-  .remote-cats .remote-cat {
-    width: min(22%, 96px);
-  }
-
   .hud {
     padding-top: 8px;
   }

@@ -1113,17 +1113,20 @@
 
 /* ---------- Kucing teman (multiplayer) ---------- */
 
-.stage.has-friend .cat-wrap {
-  width: min(58%, 240px);
-  transform: translateX(-6%);
+.stage.has-friends {
+  justify-content: flex-start;
+  padding-left: 3%;
+}
+
+.stage.has-friends .cat-wrap {
+  width: var(--main-w, min(40%, 200px));
+  transform: none;
 }
 
 .remote-cat {
-  position: absolute;
-  right: 2%;
-  bottom: 7%;
+  position: relative;
   z-index: 2;
-  width: min(34%, 148px);
+  width: var(--remote-w, 132px);
   cursor: pointer;
   touch-action: manipulation;
   filter: drop-shadow(0 14px 16px rgba(0, 0, 0, .28));
@@ -1200,7 +1203,7 @@
 
 .lang-switch {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 5px;
   margin-top: 10px;
   padding: 4px;
@@ -1347,6 +1350,171 @@
   transform: scale(.94);
 }
 
+/* ---------- Voice chat & chat teks ---------- */
+
+.mp-voice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(43, 30, 51, .035);
+}
+
+.mp-voice .settings-desc {
+  margin-top: 2px;
+}
+
+.mp-audio {
+  display: none;
+}
+
+.mp-chat {
+  display: grid;
+  gap: 8px;
+}
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  height: 150px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(43, 30, 51, .045);
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: 88%;
+  margin: 0;
+}
+
+.chat-msg b {
+  padding-left: 7px;
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--ink-soft);
+  font-size: .58rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-msg span {
+  padding: 6px 10px;
+  border-radius: 4px 13px 13px 13px;
+  background: #fff;
+  color: var(--ink);
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  box-shadow: 0 3px 8px -5px rgba(43, 30, 51, .4);
+}
+
+.chat-msg.is-mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.chat-msg.is-mine b {
+  padding-left: 0;
+  padding-right: 7px;
+}
+
+.chat-msg.is-mine span {
+  border-radius: 13px 4px 13px 13px;
+  background: linear-gradient(135deg, var(--accent), #ff9d6b);
+  color: #fff;
+}
+
+.chat-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-emoji-btn {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #fff;
+  font-size: 1.15rem;
+  transition: background .2s ease, transform .2s var(--spring);
+}
+
+.chat-emoji-btn:hover {
+  background: rgba(255, 209, 102, .18);
+}
+
+.chat-emoji-btn:active {
+  transform: scale(.94);
+}
+
+.chat-input {
+  height: 42px;
+  padding: 0 13px;
+  font-size: .8rem;
+}
+
+.chat-form .gbtn {
+  height: 42px;
+  flex: none;
+}
+
+.chat-form :disabled,
+.mp-voice :disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 28px -20px rgba(43, 30, 51, .7);
+}
+
+.emoji-picker[hidden] {
+  display: none;
+}
+
+.emoji-choice {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 1.15rem;
+  transition: background .15s ease, transform .15s var(--spring);
+}
+
+.emoji-choice:hover {
+  background: rgba(255, 209, 102, .22);
+  transform: scale(1.08);
+}
+
 .mp-leave {
   margin-top: 6px;
 }
@@ -1475,16 +1643,6 @@
     font-size: 1.2rem;
     letter-spacing: .18em;
   }
-
-  .remote-cat {
-    width: min(38%, 128px);
-    right: 0;
-  }
-
-  .stage.has-friend .cat-wrap {
-    width: min(54%, 200px);
-    transform: translateX(-8%);
-  }
 }
 
 /* Kontras tambahan saat berada di taman */
@@ -1538,7 +1696,22 @@
    Tambahan v3: misi, cloud, konfirmasi, musiman, multiplayer
    ============================================================ */
 
-/* ---------- Misi harian ---------- */
+/* ---------- Misi harian & mingguan ---------- */
+
+.quest-section + .quest-section {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line);
+}
+
+.quest-section-title {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
 
 .quest-list {
   display: grid;
@@ -1792,27 +1965,32 @@
 
 .remote-cats {
   position: absolute;
-  inset: 0;
+  left: calc(var(--main-w, 0px) + 3%);
+  right: 2%;
+  bottom: 7%;
   z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--remote-gap, 8px);
   pointer-events: none;
 }
 
 .remote-cats .remote-cat {
-  position: absolute;
-  left: 50%;
-  bottom: 7%;
+  position: relative;
+  left: auto;
   right: auto;
-  width: min(27%, 132px);
-  transform: translateX(calc(-50% + var(--rx, 0px))) translateY(var(--ry, 0px)) scale(var(--rscale,
-    .92));
+  bottom: auto;
+  width: var(--remote-w, 132px);
+  flex: 0 0 auto;
+  transform: none;
   transform-origin: 50% 100%;
   pointer-events: auto;
-  transition: transform .4s var(--spring), opacity .3s ease;
+  transition: transform .3s var(--spring), opacity .3s ease;
 }
 
 .remote-cats .remote-cat:hover {
-  transform: translateX(calc(-50% + var(--rx, 0px))) translateY(calc(var(--ry, 0px) - 4px))
-    scale(calc(var(--rscale, .92) + .04));
+  transform: translateY(-4px);
 }
 
 .remote-cats .remote-cat.is-elsewhere {
@@ -1821,11 +1999,6 @@
 
 .remote-cats .remote-cat.is-elsewhere .remote-cat-name::after {
   content: " ·";
-}
-
-.stage.has-friends .cat-wrap {
-  width: min(58%, 230px);
-  transform: translateX(-2%) scale(.96);
 }
 
 .stage.has-friends .stage-hint {
@@ -1843,6 +2016,12 @@
   font-size: 1.2rem;
 }
 
+/* Saat kucing teman sangat kecil, nama tetap terbaca tanpa menutupi SVG. */
+.remote-cats.is-tiny .remote-cat-name {
+  bottom: -10px;
+  padding: 2px 6px;
+}
+
 /* ---------- Layar sedang: tablet ---------- */
 
 @media (max-width: 700px) {
@@ -1852,15 +2031,6 @@
 
   .weather-pill {
     padding: 0 10px;
-  }
-
-  .stage.has-friends .cat-wrap {
-    width: min(52%, 210px);
-    transform: translateX(-4%) scale(.94);
-  }
-
-  .remote-cats .remote-cat {
-    width: min(30%, 120px);
   }
 }
 
@@ -1891,13 +2061,11 @@
     padding: 18px;
   }
 
-  .stage.has-friends .cat-wrap {
-    width: min(50%, 190px);
-    transform: translateX(-5%) scale(.92);
+  .lang-switch {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .remote-cats .remote-cat {
-    width: min(33%, 108px);
-    bottom: 6%;
+  .chat-log {
+    height: 128px;
   }
 }

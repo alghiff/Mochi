@@ -1,7 +1,7 @@
-import { clamp, sanitizeName, todayKey, validId, xpNeeded } from "./util.js";
+import { clamp, sanitizeName, todayKey, validId, weekKey, xpNeeded } from "./util.js";
 import { FURS } from "../data/furs.js";
 import { ACCS } from "../data/accessories.js";
-import { QUEST_IDS, questById } from "../data/quests.js";
+import { QUEST_IDS, questById, WEEKLY_IDS, weeklyById } from "../data/quests.js";
 import { isWeatherId, WEATHER_DURATION_MS, weatherById } from "../data/weather.js";
 import { LANGS } from "../data/langs.js";
 
@@ -10,6 +10,13 @@ export const CLOUD_KEY = "mochi.cloud.code.v1";
 export const SAVE_VERSION = 3;
 export const MAX_OFFLINE_SECONDS = 12 * 60 * 60;
 export const STAT_KEYS = ["hunger", "clean", "energy", "happy"];
+
+/* Level tertinggi. Setelah ini XP tetap bisa terkumpul, tapi tidak naik lagi. */
+export const MAX_LEVEL = 199;
+
+/* Hadiah tambahan saat level tertentu. */
+export const LEVEL_COIN_REWARD = 50;
+export const LEVEL_ACC_COIN_REWARD = 100;
 
 export const DECAY = {
   hunger: 0.045,
@@ -22,6 +29,10 @@ export const SLEEP_REGEN = 0.4;
 
 export function emptyQuests() {
   return { date: todayKey(), progress: {}, claimed: {}, announced: {} };
+}
+
+export function emptyWeekly() {
+  return { week: weekKey(), progress: {}, claimed: {}, announced: {} };
 }
 
 export function freshState() {
@@ -44,6 +55,7 @@ export function freshState() {
     sleeping: false,
     weather: { id: "spring", nextAt: Date.now() + WEATHER_DURATION_MS },
     quests: emptyQuests(),
+    weekly: emptyWeekly(),
     lastSeen: Date.now(),
   };
 }
@@ -59,6 +71,29 @@ function sanitizeQuests(raw) {
 
   for (const id of QUEST_IDS) {
     const quest = questById(id);
+    const target = quest ? quest.target : 1;
+    const progress = Number(raw.progress && raw.progress[id]);
+    const announced = Boolean(raw.announced && raw.announced[id]);
+
+    clean.progress[id] = Number.isFinite(progress) ? clamp(Math.floor(progress), 0, target) : 0;
+    clean.claimed[id] = Boolean(raw.claimed && raw.claimed[id]);
+    clean.announced[id] = announced;
+  }
+
+  return clean;
+}
+
+function sanitizeWeekly(raw) {
+  const clean = emptyWeekly();
+
+  if (!raw || typeof raw !== "object") return clean;
+
+  if (typeof raw.week === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw.week)) {
+    clean.week = raw.week;
+  }
+
+  for (const id of WEEKLY_IDS) {
+    const quest = weeklyById(id);
     const target = quest ? quest.target : 1;
     const progress = Number(raw.progress && raw.progress[id]);
     const announced = Boolean(raw.announced && raw.announced[id]);
@@ -93,8 +128,12 @@ export function sanitizeState(raw) {
 
   if (typeof raw.name === "string") clean.name = sanitizeName(raw.name);
 
-  clean.level = clamp(Math.floor(Number(raw.level) || 1), 1, 99);
-  clean.xp = clamp(Math.floor(Number(raw.xp) || 0), 0, 1000000);
+  clean.level = clamp(Math.floor(Number(raw.level) || 1), 1, MAX_LEVEL);
+  clean.xp = clamp(
+    Math.floor(Number(raw.xp) || 0),
+    0,
+    clean.level >= MAX_LEVEL ? xpNeeded(MAX_LEVEL) - 1 : 1000000,
+  );
   clean.coins = clamp(Math.floor(Number(raw.coins) || 0), 0, 999999);
 
   if (raw.stats && typeof raw.stats === "object") {
@@ -134,6 +173,7 @@ export function sanitizeState(raw) {
 
   clean.weather = sanitizeWeather(raw.weather, base);
   clean.quests = sanitizeQuests(raw.quests);
+  clean.weekly = sanitizeWeekly(raw.weekly);
 
   return clean;
 }
@@ -221,23 +261,75 @@ export function applyOfflineProgress(state, now) {
   return seconds;
 }
 
-export function addXpToState(state, amount) {
+/*
+ * Hadiah per level.
+ *
+ * - Setiap naik level tetap dapat 10 koin.
+ * - Kelipatan 10 dapat bonus koin.
+ * - Kelipatan 25 dapat aksesori acak. Kalau aksesorinya sudah dimiliki,
+ *   atau semua aksesori sudah lengkap, hadiahnya dikonversi menjadi koin.
+ */
+function grantLevelRewards(state, level, rewards, random) {
+  state.coins = Math.min(999999, state.coins + 10);
+
+  if (level % 10 === 0) {
+    state.coins = Math.min(999999, state.coins + LEVEL_COIN_REWARD);
+    rewards.push({ type: "coins", level, amount: LEVEL_COIN_REWARD });
+  }
+
+  if (level % 25 !== 0) return;
+
+  const allOwned = ACCS.every((item) => state.ownedAcc.includes(item.id));
+
+  if (allOwned) {
+    state.coins = Math.min(999999, state.coins + LEVEL_ACC_COIN_REWARD);
+    rewards.push({
+      type: "coins",
+      level,
+      amount: LEVEL_ACC_COIN_REWARD,
+      allOwned: true,
+    });
+    return;
+  }
+
+  const pool = ACCS;
+  const picked = pool[Math.floor(random() * pool.length)] || pool[0];
+
+  if (state.ownedAcc.includes(picked.id)) {
+    state.coins = Math.min(999999, state.coins + LEVEL_ACC_COIN_REWARD);
+    rewards.push({
+      type: "coins",
+      level,
+      amount: LEVEL_ACC_COIN_REWARD,
+      acc: picked.id,
+      duplicate: true,
+    });
+    return;
+  }
+
+  state.ownedAcc.push(picked.id);
+  rewards.push({ type: "accessory", level, acc: picked.id });
+}
+
+export function addXpToState(state, amount, random = Math.random) {
   const gain = Math.max(0, Math.round(amount));
-  if (!gain) return 0;
+  const rewards = [];
+
+  if (!gain) return { levels: 0, rewards };
 
   state.xp += gain;
   let levels = 0;
 
-  while (state.level < 99 && state.xp >= xpNeeded(state.level) && levels < 50) {
+  while (state.level < MAX_LEVEL && state.xp >= xpNeeded(state.level) && levels < 50) {
     state.xp -= xpNeeded(state.level);
     state.level += 1;
-    state.coins = Math.min(999999, state.coins + 10);
+    grantLevelRewards(state, state.level, rewards, random);
     levels += 1;
   }
 
-  if (state.level >= 99) {
-    state.xp = Math.min(state.xp, xpNeeded(99) - 1);
+  if (state.level >= MAX_LEVEL) {
+    state.xp = Math.min(state.xp, xpNeeded(MAX_LEVEL) - 1);
   }
 
-  return levels;
+  return { levels, rewards };
 }

@@ -447,13 +447,8 @@
 }
 
 .room.is-night .lamp::after {
-  opacity: 1;
-  background: radial-gradient(
-    ellipse at 50% 0%,
-    rgba(255, 209, 102, .4),
-    rgba(255, 196, 110, .12) 42%,
-    transparent 72%
-  );
+  /* Bentuk bayangan tetap sama seperti siang; hanya intensitasnya naik. */
+  opacity: .9;
 }
 
 /* ============================================================
@@ -666,7 +661,14 @@
 .cat[data-acc="bell"] .acc-bell,
 .cat[data-acc="medal"] .acc-medal,
 .cat[data-acc="raincoat"] .acc-raincoat,
-.cat[data-acc="backpack"] .acc-backpack {
+.cat[data-acc="backpack"] .acc-backpack,
+.cat[data-acc="santa"] .acc-santa,
+.cat[data-acc="beret"] .acc-beret,
+.cat[data-acc="starclip"] .acc-starclip,
+.cat[data-acc="eyepatch"] .acc-eyepatch,
+.cat[data-acc="bandana"] .acc-bandana,
+.cat[data-acc="cape"] .acc-cape,
+.cat[data-acc="halo"] .acc-halo {
   display: inline;
 }
 
@@ -705,35 +707,52 @@
   animation: blink 6.4s ease-in-out infinite;
 }
 
+/*
+ * Indikator tidur.
+ *
+ * Sengaja berupa gelembung kecil di dekat kepala, bukan teks di balon
+ * ucapan, supaya tidak ada dua "Zzz" yang muncul bersamaan. Ukurannya
+ * tetap kecil agar tidak menutupi wajah Mochi.
+ */
 .zzz {
   position: absolute;
-  top: 4%;
-  right: 4%;
+  top: 7%;
+  right: 3%;
   z-index: 6;
   display: flex;
   align-items: flex-end;
-  gap: 2px;
+  gap: 1px;
+  padding: 4px 9px 5px;
+  border: 1px solid rgba(207, 216, 255, .28);
+  border-radius: 999px;
+  background: rgba(24, 18, 40, .55);
+  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, .8);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   opacity: 0;
-  transition: opacity .4s ease;
+  transform: rotate(-6deg) translateY(4px) scale(.9);
+  transition: opacity .4s ease, transform .4s var(--spring);
   pointer-events: none;
 }
 
 .zzz span {
-  font-size: .9rem;
+  font-size: .78rem;
   font-weight: 800;
-  color: #cfd8ff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+  line-height: 1;
+  color: #dbe3ff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .45);
 }
 
 .zzz span:nth-child(2) {
-  font-size: 1.15rem;
+  font-size: 1rem;
 }
 .zzz span:nth-child(3) {
-  font-size: 1.45rem;
+  font-size: 1.22rem;
 }
 
 .cat-wrap.is-sleeping .zzz {
   opacity: 1;
+  transform: rotate(-6deg) translateY(0) scale(1);
 }
 
 .cat-wrap.is-sleeping .zzz span {
@@ -1089,6 +1108,7 @@
 .out-flower {
   position: absolute;
   bottom: 15%;
+  display: none;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -1136,6 +1156,36 @@
   right: 38%;
   bottom: 11%;
   animation-delay: 2.1s;
+}
+.out-flower--7 {
+  left: 5%;
+  bottom: 10%;
+  animation-delay: .45s;
+}
+.out-flower--8 {
+  left: 33%;
+  bottom: 14%;
+  animation-delay: 1.35s;
+}
+.out-flower--9 {
+  left: 58%;
+  bottom: 10%;
+  animation-delay: 1.8s;
+}
+.out-flower--10 {
+  right: 5%;
+  bottom: 12%;
+  animation-delay: .7s;
+}
+.out-flower--11 {
+  right: 29%;
+  bottom: 18%;
+  animation-delay: 2.4s;
+}
+.out-flower--12 {
+  left: 18%;
+  bottom: 18%;
+  animation-delay: 1.6s;
 }
 
 .out-firefly {
@@ -1407,6 +1457,11 @@
   border-radius: 2px;
   background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .45) 0 5px, transparent 5px
     10px);
+}
+
+/* Bantal hanya ada di dalam rumah. Di taman Mochi duduk di rumput. */
+.room[data-scene="outside"] .cushion {
+  display: none;
 }
 
 /* Meja kecil + cangkir + tumpukan buku. */
@@ -1891,6 +1946,7 @@
 }
 
 .room[data-weather="spring"] .out-flower {
+  display: block;
   box-shadow: 0 0 10px rgba(255, 180, 210, .45);
 }
 

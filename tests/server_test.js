@@ -362,6 +362,78 @@ Deno.test("simpan tanpa state tidak menghapus savean", async () => {
  * fetch() tidak bisa mengubah header Host, jadi untuk menguji validasi Host
  * dipakai koneksi TCP langsung.
  */
+/*
+ * Klien WebSocket kecil dengan antrean pesan.
+ *
+ * Pesan bisa datang sebelum wait() dipanggil (mis. room + joined), jadi
+ * pesan disimpan dulu lalu dicocokkan berdasarkan tipe.
+ */
+async function wsClient(url) {
+  const ws = new WebSocket(url);
+  const queue = [];
+  const waiters = [];
+
+  ws.addEventListener("message", (event) => {
+    let message;
+
+    try {
+      message = JSON.parse(event.data);
+    } catch {
+      return;
+    }
+
+    const index = waiters.findIndex((waiter) => waiter.type === message.type);
+
+    if (index >= 0) {
+      const [waiter] = waiters.splice(index, 1);
+      clearTimeout(waiter.timer);
+      waiter.resolve(message);
+      return;
+    }
+
+    queue.push(message);
+  });
+
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("WebSocket tidak terbuka")), 5_000);
+
+    ws.addEventListener("open", () => {
+      clearTimeout(timer);
+      resolve();
+    }, { once: true });
+    ws.addEventListener("error", () => {
+      clearTimeout(timer);
+      reject(new Error("WebSocket gagal dibuka"));
+    }, { once: true });
+  });
+
+  return {
+    send(payload) {
+      ws.send(JSON.stringify(payload));
+    },
+    wait(type, timeoutMs = 5_000) {
+      const index = queue.findIndex((message) => message.type === type);
+
+      if (index >= 0) return Promise.resolve(queue.splice(index, 1)[0]);
+
+      return new Promise((resolve, reject) => {
+        const waiter = { type, resolve, timer: 0 };
+
+        waiter.timer = setTimeout(() => {
+          const at = waiters.indexOf(waiter);
+          if (at >= 0) waiters.splice(at, 1);
+          reject(new Error(`Tidak menerima pesan ${type}`));
+        }, timeoutMs);
+
+        waiters.push(waiter);
+      });
+    },
+    close() {
+      ws.close();
+    },
+  };
+}
+
 async function rawGet(port, path, host) {
   const conn = await Deno.connect({ hostname: "127.0.0.1", port });
   const encoder = new TextEncoder();
@@ -388,17 +460,54 @@ async function rawGet(port, path, host) {
   return { status, raw };
 }
 
+Deno.test("WebSocket meneruskan chat, voice, dan sinyal rtc", async () => {
+  const server = await startServer();
+  const a = await wsClient(`ws://127.0.0.1:${server.port}/ws`);
+  const b = await wsClient(`ws://127.0.0.1:${server.port}/ws`);
+
+  try {
+    a.send({ type: "create" });
+    const roomA = await a.wait("room");
+
+    b.send({ type: "join", room: roomA.room });
+    const roomB = await b.wait("room");
+    await a.wait("joined");
+
+    b.send({ type: "chat", text: "  Halo <b>  " });
+    const chat = await a.wait("chat");
+    assertEquals(chat.text, "Halo <b>", "chat harus dirapikan");
+    assertEquals(chat.id, roomB.selfId, "id pengirim chat harus benar");
+
+    b.send({ type: "voice", on: true });
+    const voice = await a.wait("voice");
+    assertEquals(voice.on, true, "status voice harus diteruskan");
+
+    b.send({
+      type: "rtc",
+      to: roomA.selfId,
+      data: { kind: "offer", sdp: { type: "offer", sdp: "v=0" } },
+    });
+    const rtc = await a.wait("rtc");
+    assertEquals(rtc.from, roomB.selfId, "pengirim rtc harus benar");
+    assertEquals(rtc.data.kind, "offer", "kind rtc harus diteruskan");
+  } finally {
+    a.close();
+    b.close();
+    await server.stop();
+  }
+});
+
 Deno.test("PUBLIC_ORIGIN menolak host lain", async () => {
-  const server = await startServer({ PUBLIC_ORIGIN: "https://extion.site" });
+  const server = await startServer({ PUBLIC_ORIGIN: "https://mochi.example.com" });
 
   try {
     const salah = await rawGet(server.port, "/", "evil.example");
     assertEquals(salah.status, 421, "host lain harus 421");
 
-    const benar = await rawGet(server.port, "/", "extion.site");
+    const benar = await rawGet(server.port, "/", "mochi.example.com");
     assertEquals(benar.status, 200, "host yang cocok harus 200");
     assert(
-      benar.raw.includes("wss://extion.site"),
+      benar.raw.includes("wss://mochi.example.com"),
       "CSP harus memakai host publik",
     );
     assert(!benar.raw.includes("evil.example"), "CSP tidak boleh memakai host request");
@@ -408,13 +517,13 @@ Deno.test("PUBLIC_ORIGIN menolak host lain", async () => {
 });
 
 Deno.test("PUBLIC_ORIGIN dinormalisasi ke origin", async () => {
-  const server = await startServer({ PUBLIC_ORIGIN: "https://extion.site/a/b?x=1" });
+  const server = await startServer({ PUBLIC_ORIGIN: "https://mochi.example.com/a/b?x=1" });
 
   try {
-    const benar = await rawGet(server.port, "/", "extion.site");
+    const benar = await rawGet(server.port, "/", "mochi.example.com");
     assertEquals(benar.status, 200, "path pada PUBLIC_ORIGIN harus diabaikan");
     assert(
-      benar.raw.includes("wss://extion.site"),
+      benar.raw.includes("wss://mochi.example.com"),
       "CSP harus memakai origin tanpa path",
     );
   } finally {

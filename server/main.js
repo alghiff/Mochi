@@ -94,7 +94,7 @@ Deno.serve(
         console.warn(
           "PERINGATAN: PUBLIC_ORIGIN kosong atau tidak valid. Pemeriksaan " +
             "Host/Origin memakai header permintaan (mode pengembangan). " +
-            "Isi PUBLIC_ORIGIN dengan origin lengkap, mis. https://extion.site.",
+            "Isi PUBLIC_ORIGIN dengan origin lengkap, mis. https://mochi.example.com.",
         );
       }
 

@@ -16,7 +16,7 @@ import { clamp, sanitizeName, xpNeeded } from "./core/util.js";
 import { LANG_LABELS, LANGS, translate } from "./data/i18n/index.js";
 import { FOODS } from "./data/foods.js";
 import { accById } from "./data/accessories.js";
-import { weatherById } from "./data/weather.js";
+import { WEATHER_CYCLE_REWARD, weatherById } from "./data/weather.js";
 import { createFeedback } from "./ui/feedback.js";
 import { createOverlays } from "./ui/overlay.js";
 import { createAudio } from "./systems/audio.js";
@@ -78,13 +78,33 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
   }
 
   function addXp(amount) {
-    const levels = addXpToState(state, amount);
+    const { levels, rewards } = addXpToState(state, amount);
 
     if (levels > 0) {
       if (audio) audio.sfx("level");
       if (feedback) {
         feedback.toast(t("speech.level", { level: state.level }));
         feedback.spawnFx("★", 5, "fx-star");
+      }
+    }
+
+    if (rewards.length > 0 && feedback) {
+      for (const reward of rewards) {
+        const acc = reward.acc ? accById(reward.acc) : null;
+        const name = acc ? t(acc.nameKey) : "";
+
+        if (reward.type === "accessory") {
+          feedback.toast(t("level.acc", { level: reward.level, name }));
+          feedback.spawnFx(acc && acc.icon ? acc.icon : "🎁", 5);
+        } else if (reward.allOwned) {
+          feedback.toast(t("level.all", { level: reward.level, n: reward.amount }));
+        } else if (reward.duplicate) {
+          feedback.toast(
+            t("level.duplicate", { level: reward.level, name, n: reward.amount }),
+          );
+        } else {
+          feedback.toast(t("level.coins", { level: reward.level, n: reward.amount }));
+        }
       }
     }
 
@@ -463,6 +483,14 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
   }
 
   function sleepToggle() {
+    // Tidur saat energi sudah penuh tidak berguna: cegah supaya pemain
+    // tidak mengunci Mochi di pose tidur tanpa alasan.
+    if (!state.sleeping && state.stats.energy >= 99.9) {
+      if (feedback) feedback.toast(t("toast.energyFull"));
+      if (audio) audio.sfx("error");
+      return;
+    }
+
     state.sleeping = !state.sleeping;
     moodOverride = null;
     win.clearTimeout(moodTimer);
@@ -794,6 +822,18 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     if (els.micSwitch) els.micSwitch.setAttribute("aria-pressed", isActive ? "true" : "false");
     if (els.micStatus) els.micStatus.textContent = t(statusKey);
     if (els.micBadge) els.micBadge.hidden = !isActive;
+
+    if (els.mpVoiceSwitch) {
+      els.mpVoiceSwitch.setAttribute("aria-pressed", isActive ? "true" : "false");
+    }
+
+    if (els.mpVoiceStatus) {
+      els.mpVoiceStatus.textContent = t(isActive ? "mp.voiceOn" : "mp.voiceOff");
+    }
+
+    // Modul multiplayer perlu tahu kapan stream mic tersedia supaya bisa
+    // membuat koneksi suara ke pemain lain.
+    if (mp) mp.setMicActive(isActive);
   }
 
   function toggleMic() {
@@ -802,8 +842,9 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     mic.toggle().then((result) => {
       if (!feedback) return;
 
-      if (result.ok) feedback.toast(t("toast.micOn"));
-      else if (result.reason === "denied" || result.reason === "unsupported") {
+      if (result.ok) {
+        feedback.toast(t(mp && mp.isInRoom() ? "toast.micOnRoom" : "toast.micOn"));
+      } else if (result.reason === "denied" || result.reason === "unsupported") {
         feedback.toast(t("toast.micDenied"));
       } else {
         feedback.toast(t("toast.micOff"));
@@ -1064,6 +1105,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     }
 
     if (els.micSwitch) els.micSwitch.addEventListener("click", toggleMic);
+    if (els.mpVoiceSwitch) els.mpVoiceSwitch.addEventListener("click", toggleMic);
     if (els.settingsBtn) els.settingsBtn.addEventListener("click", openSettings);
     if (els.multiplayerBtn) els.multiplayerBtn.addEventListener("click", openMp);
     if (els.openMp) els.openMp.addEventListener("click", openMp);
@@ -1124,17 +1166,22 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       }
     }
 
-    if (els.questList) {
-      els.questList.addEventListener("click", (event) => {
+    function bindQuestList(list, period) {
+      if (!list) return;
+
+      list.addEventListener("click", (event) => {
         const target = event.target;
         if (!target || typeof target.closest !== "function") return;
 
         const button = target.closest("[data-claim]");
         if (!button) return;
 
-        if (quests) quests.claim(button.getAttribute("data-claim"));
+        if (quests) quests.claim(button.getAttribute("data-claim"), period);
       });
     }
+
+    bindQuestList(els.questList, "daily");
+    bindQuestList(els.weeklyList, "weekly");
 
     if (els.mgStart) els.mgStart.addEventListener("click", () => minigame.start());
     if (els.mgAgain) els.mgAgain.addEventListener("click", () => minigame.start());
@@ -1242,13 +1289,24 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     t,
     save,
     isReducedMotion: () => feedback.isReducedMotion(),
-    onChange: (id) => {
+    onChange: (id, _previous, meta) => {
       const name = t(weatherById(id).nameKey);
+      const cycles = meta && meta.cycle ? Math.max(1, Number(meta.cycles) || 1) : 0;
 
-      if (feedback) feedback.toast(t("weather.changed", { name }));
+      if (cycles > 0) {
+        // Setiap pergantian cuaca memberi koin kecil supaya pemain yang
+        // menunggu tetap dapat progres.
+        const reward = WEATHER_CYCLE_REWARD * cycles;
+        state.coins = Math.min(999999, state.coins + reward);
+        if (feedback) feedback.toast(t("weather.reward", { name, n: reward }));
+      } else if (feedback) {
+        feedback.toast(t("weather.changed", { name }));
+      }
+
       if (audio) audio.sfx("weather");
       if (shop) shop.render();
 
+      render();
       save();
     },
   });
@@ -1305,6 +1363,11 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     onEmote: () => {
       if (quests) quests.add("mpEmote");
     },
+    onChat: () => {
+      if (quests) quests.add("chat");
+    },
+    getMicStream: () => (mic ? mic.getStream() : null),
+    isMicActive: () => Boolean(mic && mic.isActive()),
     onConnectionChange: () => updateHint(),
   });
 
@@ -1368,7 +1431,7 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     bindEvents();
     render();
     save();
-    weather.refresh({ notify: false });
+    weather.refresh({ notify: true });
 
     if (state.scene === "outside" && !state.sleeping) {
       makeButterfly();
@@ -1389,8 +1452,9 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
     }
 
     win.setTimeout(() => {
-      if (state.sleeping) feedback.say(t("speech.sleeping"), 2200);
-      else feedback.say(t("speech.greet", { name: state.name }));
+      // Saat tidur, indikator "zzz" di dekat kepala sudah cukup; balon
+      // ucapan tidak dipakai supaya tidak ada dua "Zzz" sekaligus.
+      if (!state.sleeping) feedback.say(t("speech.greet", { name: state.name }));
     }, 800);
   }
 
@@ -1434,6 +1498,8 @@ export function createApp({ win = globalThis.window, doc = globalThis.document }
       joinRoom: () => mp.joinRoom(),
       leaveRoom: () => mp.leaveRoom(),
       sendEmote: (emoji) => mp.sendEmote(emoji),
+      sendChat: (text) => mp.sendChat(text),
+      toggleVoice: toggleMic,
       setWeather: (id) => weather.setWeather(id),
       claimQuest: (id) => quests.claim(id),
       addQuest: (id, n) => quests.add(id, n),
